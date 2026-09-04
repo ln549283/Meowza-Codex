@@ -1,20 +1,7 @@
 import Phaser from 'phaser';
 import { SaveService } from '../../services/SaveService';
-import { button,fadeIn,imageContain } from '../ui';
-import { C } from '../theme';
+import { button,cozyBackground,fadeIn,imageContain,imageCover,roundButton } from '../ui';
 export class HomeScene extends Phaser.Scene {
   constructor(){super('Home');}
-  create(){
-    fadeIn(this);this.cameras.main.setBackgroundColor(C.cream);
-    this.add.image(540,960,'home').setDisplaySize(1080,1920).setAlpha(.88);
-    this.add.rectangle(540,960,1080,1920,0xfff4e8,.15).setBlendMode(Phaser.BlendModes.SCREEN);
-    imageContain(this.add.image(540,345,'logo'),720,330);
-    const grey=imageContain(this.add.image(360,970,'grey-cat'),310,390);
-    const orange=imageContain(this.add.image(720,970,'orange-cat'),310,390);
-    this.tweens.add({targets:[grey,orange],y:'-=18',duration:1700,yoyo:true,repeat:-1,ease:'Sine.InOut',delay:220});
-    button(this,540,1390,560,'🐾  Jouer',()=>{if(!SaveService.data.tutorialCompleted)this.scene.start('Rules',{first:true});else this.scene.start('LevelSelect');});
-    button(this,390,1525,300,'⚙ Paramètres',()=>this.scene.start('Settings'),0xd99c6d);
-    button(this,690,1525,240,'?  Règles',()=>this.scene.start('Rules'),0x28a9c7);
-    this.add.text(540,1810,'Un puzzle doux pour les esprits affûtés',{fontFamily:'Arial',fontSize:'26px',color:'#6f5a62'}).setOrigin(.5);
-  }
+  create(){fadeIn(this);cozyBackground(this);const art=imageCover(this.add.image(540,910,'home'),760,980);art.setAlpha(.95);const veil=this.add.graphics();veil.fillStyle(0xfff7ed,.18).fillRoundedRect(150,360,780,1120,75).lineStyle(7,0xffffff,.75).strokeRoundedRect(150,360,780,1120,75);imageContain(this.add.image(540,330,'logo'),700,300);const grey=imageContain(this.add.image(365,1020,'grey-cat'),275,330),orange=imageContain(this.add.image(700,1020,'orange-cat'),275,330);this.tweens.add({targets:grey,y:'-=14',duration:1700,yoyo:true,repeat:-1,ease:'Sine.InOut'});this.tweens.add({targets:orange,y:'-=14',duration:1700,yoyo:true,repeat:-1,ease:'Sine.InOut',delay:240});this.add.text(365,1210,'Nimbus',{fontFamily:'Arial Rounded MT Bold',fontSize:'28px',fontStyle:'bold',color:'#536875',stroke:'#fff',strokeThickness:5}).setOrigin(.5);this.add.text(700,1210,'Moka',{fontFamily:'Arial Rounded MT Bold',fontSize:'28px',fontStyle:'bold',color:'#c56b36',stroke:'#fff',strokeThickness:5}).setOrigin(.5);button(this,540,1400,560,'🐾  Jouer',()=>{if(!SaveService.data.tutorialCompleted)this.scene.start('Rules',{first:true});else this.scene.start('LevelSelect');});roundButton(this,390,1545,'⚙',()=>this.scene.start('Settings'));roundButton(this,690,1545,'?',()=>this.scene.start('Rules'),0x94d7dc);this.add.text(540,1660,'Paramètres                 Règles',{fontFamily:'Arial Rounded MT Bold',fontSize:'25px',color:'#705a61'}).setOrigin(.5);}
 }
