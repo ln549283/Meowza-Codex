@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.idea/
+.vscode/
+.DS_Store
+*.log
+.env*
+!.env.example
+*.keystore
+*.jks
+android/.gradle/
+android/local.properties
+android/app/build/
+android/app/src/main/assets/public/

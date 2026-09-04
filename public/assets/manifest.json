@@ -1,0 +1,158 @@
+{
+  "version": "1.0",
+  "notes": "Assets cropped from the approved Meowza art direction sheet. UI structure, board grid, buttons, toggles, shadows and responsive layout should remain HTML/CSS/JS; use raster assets for illustrated identity and decorative richness.",
+  "assets": {
+    "branding/meowza-logo.png": [
+      438,
+      201
+    ],
+    "cats/grey-board.png": [
+      133,
+      164
+    ],
+    "cats/orange-board.png": [
+      137,
+      158
+    ],
+    "cats/grey-alt.png": [
+      145,
+      160
+    ],
+    "cats/grey-small.png": [
+      132,
+      142
+    ],
+    "cats/orange-small.png": [
+      135,
+      145
+    ],
+    "cats/grey-sleep.png": [
+      137,
+      145
+    ],
+    "board/board-frame-blue.png": [
+      329,
+      332
+    ],
+    "board/board-frame-pink.png": [
+      249,
+      258
+    ],
+    "board/board-frame-green.png": [
+      243,
+      255
+    ],
+    "board/tile-empty.png": [
+      168,
+      85
+    ],
+    "board/tile-selected.png": [
+      84,
+      86
+    ],
+    "board/tile-hint.png": [
+      84,
+      86
+    ],
+    "board/tile-locked.png": [
+      82,
+      85
+    ],
+    "rules/same-heart.png": [
+      66,
+      62
+    ],
+    "rules/same-heart-alt.png": [
+      69,
+      63
+    ],
+    "rules/same-circle.png": [
+      68,
+      66
+    ],
+    "rules/different-circle.png": [
+      67,
+      67
+    ],
+    "decor/yarn-pink.png": [
+      67,
+      68
+    ],
+    "decor/yarn-orange.png": [
+      73,
+      72
+    ],
+    "decor/leaves.png": [
+      98,
+      93
+    ],
+    "decor/feather-blue.png": [
+      93,
+      64
+    ],
+    "decor/feather-red.png": [
+      65,
+      107
+    ],
+    "decor/pillow-blue.png": [
+      98,
+      67
+    ],
+    "decor/pillow-paw.png": [
+      67,
+      62
+    ],
+    "decor/plant-small.png": [
+      50,
+      57
+    ],
+    "decor/plant-medium.png": [
+      76,
+      111
+    ],
+    "decor/paw-rug.png": [
+      110,
+      113
+    ],
+    "decor/cat-tree.png": [
+      346,
+      251
+    ],
+    "ui/badge-easy.png": [
+      263,
+      272
+    ],
+    "ui/badge-medium.png": [
+      124,
+      104
+    ],
+    "ui/badge-hard.png": [
+      121,
+      105
+    ],
+    "ui/victory-panel.png": [
+      164,
+      55
+    ],
+    "ui/error-panel.png": [
+      164,
+      54
+    ],
+    "backgrounds/home-cozy.png": [
+      277,
+      353
+    ],
+    "fx/celebration-fx.png": [
+      590,
+      210
+    ]
+  },
+  "recommended_usage": {
+    "board": "Use board-frame-blue.png as a proportional square background/frame and overlay a CSS Grid (4x4, 5x5, 6x6). Never bake cells into the frame.",
+    "tiles": "Prefer CSS tiles for dynamic states; tile PNGs are visual reference/optional overlays.",
+    "cats": "Use grey-board/orange-board for 4x4 and 5x5; use small variants on 6x6 if needed.",
+    "rules": "Use same-circle.png for SAME and different-circle.png for DIFFERENT markers.",
+    "buttons": "Implement button shells in CSS and use raster art only where needed. Avoid stretching text baked into PNG buttons.",
+    "home": "home-cozy.png can be used as hero/background artwork on the main menu."
+  }
+}

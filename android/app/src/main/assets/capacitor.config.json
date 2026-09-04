@@ -1,0 +1,9 @@
+{
+	"appId": "re.meowza.game",
+	"appName": "Meowza",
+	"webDir": "dist",
+	"backgroundColor": "#fff6ec",
+	"android": {
+		"allowMixedContent": false
+	}
+}

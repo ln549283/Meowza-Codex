@@ -1,0 +1,3 @@
+import { SaveService } from './SaveService';
+class AudioServiceImpl {private context?:AudioContext;play(kind:'button'|'place'|'invalid'|'hint'|'victory'){if(!SaveService.data.settings.sounds)return;try{this.context??=new AudioContext();const o=this.context.createOscillator(),g=this.context.createGain();const f={button:520,place:660,invalid:180,hint:880,victory:1040}[kind];o.frequency.value=f;o.type=kind==='invalid'?'sawtooth':'sine';g.gain.setValueAtTime(.035,this.context.currentTime);g.gain.exponentialRampToValueAtTime(.001,this.context.currentTime+.12);o.connect(g).connect(this.context.destination);o.start();o.stop(this.context.currentTime+.13);}catch{/* Audio placeholder is intentionally non-blocking. */}}}
+export const AudioService=new AudioServiceImpl();
