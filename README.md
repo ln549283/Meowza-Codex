@@ -1,5 +1,7 @@
 # Meowza — l’arbre des petits bonheurs
 
+Version biomes et croquettes : [règles, économie, migration et graphismes](docs/release-v3.md). Ce document remplace les descriptions de refuges et d’indices de la version précédente.
+
 Puzzle félin Phaser / TypeScript, embarqué sur iOS et Android avec Capacitor. Deux familles de chats : autant de gris que de roux dans chaque ligne et colonne, jamais trois identiques consécutifs, liens cœur (identiques) et griffes (différents).
 
 ## Jouer

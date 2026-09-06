@@ -1,23 +1,26 @@
 import Phaser from 'phaser';
 import type { HumanStep } from '../../core/humanSolver';
+import { hintCost } from '../../core/economy';
+import { SaveService } from '../../services/SaveService';
 import { button,cozyBackground,imageContain,label,panel,title } from '../ui';
 import { C } from '../theme';
-function proofPages(step:HumanStep):string[]{
- if(step.rule!=='contradiction')return[step.explanation];
- const pos=`L${step.position[0]+1} · C${step.position[1]+1}`;
- return[`Testons temporairement un chat ${step.assumption===1?'gris':'roux'} en ${pos}.\nLa grille réelle ne change pas.`,...(step.consequences??[]).flatMap(proofPages),`${step.contradiction}\nL’hypothèse est impossible.`,step.explanation];
-}
+function proofPages(s:HumanStep):string[]{return s.rule==='contradiction'?[`Imagine un chat ${s.assumption===1?'gris':'roux'} en L${s.position[0]+1} · C${s.position[1]+1}. Ce test reste dans notre tête.`,...(s.consequences??[]).map(x=>x.explanation),s.contradiction!,s.explanation]:[s.explanation];}
 export class HintScene extends Phaser.Scene {
  constructor(){super('Hint');}
- create({step,apply}:{step:HumanStep;apply:()=>void}){
-  cozyBackground(this);title(this,'Un petit coup de patte',235,56);panel(this,540,930,940,1120);
-  imageContain(this.add.image(540,570,step.value===1?'grey-cat':'orange-cat'),220,220);
-  label(this,540,735,`Ligne ${step.position[0]+1} · Colonne ${step.position[1]+1}`,37);
-  const pages=proofPages(step);let index=0;const text=label(this,540,980,pages[0]!,38).setWordWrapWidth(770);const counter=label(this,540,1290,'',28);let previous:Phaser.GameObjects.Container,next:Phaser.GameObjects.Container;
-  const refresh=()=>{text.setText(pages[index]!);counter.setText(pages.length>1?`Le raisonnement · ${index+1} / ${pages.length}`:'Une déduction directe, sans deviner.');previous?.setVisible(index>0);next?.setVisible(index<pages.length-1);};
-  previous=button(this,320,1430,370,'Précédent',()=>{index--;refresh();},C.teal);next=button(this,760,1430,370,'Suite',()=>{index++;refresh();},C.pink);refresh();
+ create({step,levelId,apply,open=false}:{step:HumanStep|null;levelId:string;apply:()=>void;open?:boolean}){
+  cozyBackground(this);title(this,'Un petit coup de patte',235,56);panel(this,540,940,940,1120);
   const close=()=>{this.scene.stop();this.scene.resume('Game');};
-  button(this,540,1620,720,'Je place le chat moi-même',close,C.teal);
-  button(this,540,1780,720,'Placer ce chat pour moi',()=>{close();apply();},C.pink);
+  const owned=step&&(SaveService.data.purchasedHints[levelId]??[]).some(s=>s.position[0]===step.position[0]&&s.position[1]===step.position[1]);
+  if(!open){label(this,540,540,'Un rappel gratuit',42);label(this,540,820,'Autant de gris que de roux.\nJamais trois identiques à la suite.\nCœur : identiques. Griffes : opposés.\n\nCherche d’abord une ligne presque remplie.',35).setWordWrapWidth(780);label(this,540,1120,`${SaveService.data.kibble} croquettes disponibles`,34);
+   const cost=owned?0:hintCost(SaveService.data.attemptPurchases);const free=!owned&&SaveService.data.kibble<cost;
+   label(this,540,1280,free?'Solde insuffisant : cette aide est offerte.':'Les indices achetés restent accessibles\naprès un échec sur cette grille.',30);
+   button(this,540,1470,790,!step?'Grille terminée':owned?'Relire cet indice · gratuit':free?'Recevoir une aide de secours':`Expliquer une case · ${cost} croquettes`,()=>{if(!step)return;if(free){const saved=SaveService.data.purchasedHints[levelId]??=[];saved.push(step);void SaveService.persist();}else if(!SaveService.buyHint(levelId,step))return;this.scene.restart({step,levelId,apply,open:true});},C.pink);
+   button(this,540,1700,720,'Je continue à réfléchir',close,C.teal);return;
+  }
+  if(!step){close();return;}imageContain(this.add.image(540,535,step.value===1?'grey-cat':'orange-cat'),190,190);label(this,540,700,`Ligne ${step.position[0]+1} · Colonne ${step.position[1]+1}`,36);
+  const pages=proofPages(step);let i=0;const text=label(this,540,975,pages[0]!,36).setWordWrapWidth(780),counter=label(this,540,1260,'',28);
+  const prev=button(this,310,1430,370,'Précédent',()=>{i--;refresh();}),next=button(this,770,1430,370,'Suite',()=>{i++;refresh();},C.pink);
+  const refresh=()=>{text.setText(pages[i]!);counter.setText(`${i+1} / ${pages.length}`);prev.setVisible(i>0);next.setVisible(i<pages.length-1);};refresh();
+  button(this,540,1620,750,'Je place le chat moi-même',close);button(this,540,1790,750,'Placer ce chat · sans supplément',()=>{close();apply();},C.pink);
  }
 }

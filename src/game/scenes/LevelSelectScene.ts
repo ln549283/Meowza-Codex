@@ -1,8 +1,9 @@
+import { biomeFor } from '../../core/economy';
 import Phaser from 'phaser';
 import levelsData from '../../data/levels.json';
 import type { Level } from '../../core/model';
 import { chapters } from '../../core/progression';
-import { challengeId,journeyId,journeySpec,nextSummit,refugeNames } from '../../core/journey';
+import { journeyId,journeySpec,nextSummit } from '../../core/journey';
 import { loadSummit } from '../../services/JourneyService';
 import { SaveService } from '../../services/SaveService';
 import { GameRegistry } from '../registry';
@@ -17,32 +18,28 @@ export class LevelSelectScene extends Phaser.Scene {
   const current=nextSummit(SaveService.data.progress),start=this.page*24+1,end=Math.min(start+23,current+5),count=end-start+1;
   const height=count*290+1700,base=height-750;
   this.cameras.main.setBounds(0,0,1080,height);
-  this.add.image(540,960,'tree-bg').setDisplaySize(1080,1920).setScrollFactor(0);
+  this.add.image(540,960,biomeFor(Math.min(current,end)).key).setDisplaySize(1080,1920).setScrollFactor(0);
   this.add.rectangle(540,960,1080,1920,0xfaf0ff,.12).setScrollFactor(0);
-  const trunk=this.add.graphics();trunk.fillStyle(0xd6ad8e,.95).fillRoundedRect(485,400,110,base-260,45);
-  trunk.lineStyle(5,0xf8e5d3,.8);for(let y=450;y<base+110;y+=27)trunk.lineBetween(490,y,590,y-20);
+  const xAt=(n:number)=>260+((Math.imul(n,2654435761)>>>8)%560);
   const status=label(this,540,1730,'Glisse pour grimper • à ton rythme',28).setScrollFactor(0).setDepth(102);
-  const play=async(n:number,bonus=false)=>{if(this.busy)return;this.busy=true;status.setText('Les chats préparent ta grille…');try{const level=await loadSummit(n,bonus);if(!this.scene.isActive())return;GameRegistry.selected=level;this.scene.start('Game');}catch{if(this.scene.isActive()){status.setText('Préparation interrompue. Retouche le niveau.');this.busy=false;}}};
+  const play=async(n:number,bonus=false)=>{if(this.busy)return;this.busy=true;status.setText('Les chats préparent ta grille…');try{const level=await loadSummit(n,bonus);if(!this.scene.isActive())return;if(SaveService.data.session?.id!==level.id||SaveService.data.session.errors>=3)SaveService.restartAttempt();GameRegistry.selected=level;this.scene.start('Game');}catch{if(this.scene.isActive()){status.setText('Préparation interrompue. Retouche le niveau.');this.busy=false;}}};
   for(let n=start;n<=end;n++){
-   const i=n-start,x=540+Math.sin(i*1.45)*185,y=base-i*290,progress=SaveService.data.progress[journeyId(n)],config=chapters.find(c=>c.id===journeySpec(n).difficulty)!;
+   const i=n-start,x=xAt(n),y=base-i*290,progress=SaveService.data.progress[journeyId(n)],config=chapters.find(c=>c.id===journeySpec(n).difficulty)!;
    if(n>current){cloud(this,x,y,340);continue;}
-   const shelf=this.add.graphics();shelf.lineStyle(18,0xc59b83).lineBetween(540,y+85,x,y+85);shelf.fillStyle(0xa478ac).fillRoundedRect(x-140,y+66,280,47,24);shelf.fillStyle(0xffb8d9).fillRoundedRect(x-143,y+49,286,40,22);shelf.lineStyle(4,0xfff4f8).strokeRoundedRect(x-143,y+49,286,40,22);
-   const c=this.add.container(x,y-12),g=this.add.graphics();g.fillStyle(0x765685).fillCircle(0,10,72);g.fillStyle(progress?.completed?0xfff3cb:config.color).lineStyle(5,0xffffff).fillCircle(0,0,70).strokeCircle(0,0,70);g.fillStyle(0xffffff,.3).fillEllipse(0,-30,95,35);c.add([g,label(this,0,-4,String(n),43,progress?.completed?C.ink:'#ffffff')]);press(this,c,150,160,()=>{void play(n);});
+   const shelf=this.add.graphics();if(n>start){shelf.lineStyle(22,0xb7855b).lineBetween(xAt(n-1),y+290,x,y);shelf.lineStyle(7,0xf1d4a6).lineBetween(xAt(n-1),y+290,x,y);}
+   imageContain(this.add.image(x,y+80,'atlas-v3',['platform','house','hammock','platform'][n%4]!),350,240);
+   const c=this.add.container(x,y-12),g=this.add.graphics();g.fillStyle(0xfff5db).fillRoundedRect(-52,27,104,55,22);const face=imageContain(this.add.image(0,-28,'atlas-v3',config.id),145,135);c.add([face,g,label(this,0,53,String(n),35,C.ink,0)]);press(this,c,150,160,()=>{void play(n);});
    label(this,x,y+131,config.name,24,C.ink,0);
-   if(progress?.completed)label(this,x,y+36,'★'.repeat(progress.stars),23,'#986018',0);
+   if(progress?.completed)label(this,x,y+170,'★'.repeat(progress.stars),23,'#986018',0);
    if(n===current){const cat=imageContain(this.add.image(x-120,y-77,'grey-cat'),110,110);float(this,cat,8);if(this.reveal){const mist=cloud(this,x,y,350);if(SaveService.data.settings.reducedMotion)mist.destroy();else this.tweens.add({targets:mist,x:x+170,alpha:0,duration:1000,onComplete:()=>mist.destroy()});sparkles(this,x,y);}}
-   if(n%6===0&&progress?.completed){
-    const refuge=n/6,rx=x>540?200:875,choice=SaveService.data.refuges[refuge];
-    const home=this.add.container(rx,y-10),bg=this.add.graphics();bg.fillStyle(0xffefd2).lineStyle(4,0xffffff).fillRoundedRect(-110,-83,220,150,34).strokeRoundedRect(-110,-83,220,150,34);home.add([bg,label(this,rx-rx,-38,choice==='hamac'?'⌣':choice==='cabane'?'⌂':'✿',62,C.ink,0),label(this,0,34,choice?'Mon refuge':'Aménager',23,C.ink,0)]);press(this,home,225,170,()=>this.scene.start('Refuge',{n:refuge}));
-    const bonus=SaveService.data.progress[challengeId(refuge)];button(this,rx,y+139,265,bonus?.completed?'★ Défi réussi':'✦ Défi bonus',()=>{void play(refuge,true);},C.pink).setScale(.8);
-   }
+   if(n%6===0&&progress?.completed){const bonus=n/6;button(this,x<540?860:210,y-30,260,'Défi Extrême',()=>{void play(bonus,true);},C.pink).setScale(.8);}
   }
   label(this,540,base+235,start===1?'Un arbre, mille petits bonheurs':`La suite de ton arbre · ${start} à ${end}`,32);
   panel(this,540,145,1040,280,0xfff9f4,.98).setScrollFactor(0).setDepth(100);
   roundButton(this,95,98,'‹',()=>this.scene.start('Home')).setScrollFactor(0).setDepth(101);
   label(this,540,87,'L’arbre des petits bonheurs',42).setScrollFactor(0).setDepth(101);
-  label(this,540,153,`${current-1} sommets · prochain refuge au niveau ${Math.ceil(current/6)*6}`,27).setScrollFactor(0).setDepth(101);
-  const name=refugeNames[Math.floor((current-1)/6)%refugeNames.length]!;label(this,540,225,name,29).setScrollFactor(0).setDepth(101);
+  label(this,540,153,`${current-1} sommets · ${SaveService.data.kibble} croquettes`,27).setScrollFactor(0).setDepth(101);
+  const biome=biomeFor(Math.min(current,end));const name=`${biome.name} · ${biome.start}–${biome.end}`;label(this,540,225,name,29).setScrollFactor(0).setDepth(101);
   panel(this,540,1800,1040,245,0xfff9f4,.98).setScrollFactor(0).setDepth(100);
   button(this,540,1830,570,'Mon prochain sommet',()=>{if(Math.floor((current-1)/24)!==this.page)this.scene.restart({});else this.focus(base-(current-start)*290);},C.teal).setScrollFactor(0).setDepth(101);
   if(this.page>0)roundButton(this,130,1830,'↓',()=>this.scene.restart({page:this.page-1})).setScrollFactor(0).setDepth(101);

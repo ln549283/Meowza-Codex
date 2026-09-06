@@ -14,9 +14,9 @@ export function panel(scene:Phaser.Scene,x:number,y:number,w:number,h:number,fil
 }
 export function press(scene:Phaser.Scene,c:Phaser.GameObjects.Container,w:number,h:number,onClick:()=>void){
  c.setSize(w,h).setInteractive({useHandCursor:true});
- c.on('pointerdown',()=>{if(!SaveService.data.settings.reducedMotion)c.setScale(.96);});
- c.on('pointerout',()=>c.setScale(1));
- c.on('pointerup',(p:Phaser.Input.Pointer)=>{c.setScale(1);if(!SaveService.data.settings.reducedMotion)scene.tweens.add({targets:c,scaleX:1.035,scaleY:.98,duration:90,yoyo:true,ease:'Sine.Out'});if(p.getDistance()>20||scene.registry.get('mapDragging'))return;AudioService.play('button');onClick();});return c;
+ const sx=c.scaleX,sy=c.scaleY; c.on('pointerdown',()=>c.setAlpha(.88));
+ c.on('pointerout',()=>c.setAlpha(1));
+ c.on('pointerup',(p:Phaser.Input.Pointer)=>{c.setAlpha(1);c.setScale(sx,sy);if(p.getDistance()>32||scene.registry.get('mapDragging'))return;AudioService.play('button');onClick();});return c;
 }
 export function button(scene:Phaser.Scene,x:number,y:number,w:number,text:string,onClick:()=>void,color=C.teal){
  const c=scene.add.container(x,y),g=scene.add.graphics();g.fillStyle(0x55405e,.28).fillRoundedRect(-w/2,-42,w,115,38);g.fillStyle(color).fillRoundedRect(-w/2,-56,w,108,38);g.lineStyle(3,0xffffff,.65).strokeRoundedRect(-w/2,-56,w,108,38);g.fillStyle(0xffffff,.32).fillRoundedRect(-w/2+10,-48,w-20,42,26);g.lineStyle(4,0xffffff,.75).lineBetween(-w/2+38,-39,w/2-38,-39);c.add([g,label(scene,0,-2,text,34,'#ffffff')]);return press(scene,c,w,116,onClick);
@@ -27,7 +27,7 @@ export function catBadge(scene:Phaser.Scene,x:number,y:number,w:number,text:stri
 export function imageContain(image:Phaser.GameObjects.Image,maxW:number,maxH:number){return image.setScale(Math.min(maxW/image.width,maxH/image.height));}
 export function imageCover(image:Phaser.GameObjects.Image,w:number,h:number){return image.setScale(Math.max(w/image.width,h/image.height));}
 export function fadeIn(scene:Phaser.Scene){if(!SaveService.data.settings.reducedMotion)scene.cameras.main.fadeIn(220,255,246,238);}
-export function float(scene:Phaser.Scene,target:Phaser.GameObjects.Image|Phaser.GameObjects.Container,amount=12){if(!SaveService.data.settings.reducedMotion)scene.tweens.add({targets:target,y:`-=${amount}`,duration:1600,yoyo:true,repeat:-1,ease:'Sine.InOut'});}
+export function float(scene:Phaser.Scene,target:Phaser.GameObjects.Image|Phaser.GameObjects.Container,amount=12){if(!SaveService.data.settings.reducedMotion)scene.tweens.add({targets:target,y:`-=${amount}`,duration:1600,yoyo:true,repeat:1,ease:'Sine.InOut'});}
 export function sparkles(scene:Phaser.Scene,x:number,y:number,count=12){if(SaveService.data.settings.reducedMotion)return;for(let i=0;i<count;i++){const a=i/count*Math.PI*2;const p=scene.add.star(x,y,4,4,11,[C.gold,C.pink,C.teal][i%3]!).setDepth(50);scene.tweens.add({targets:p,x:x+Math.cos(a)*160,y:y+Math.sin(a)*160,alpha:0,scale:.25,angle:90,duration:650,onComplete:()=>p.destroy()});}}
 export function cloud(scene:Phaser.Scene,x:number,y:number,w:number){const c=scene.add.container(x,y),g=scene.add.graphics();g.fillStyle(0xd6cbe9,.7).fillRoundedRect(-w/2,-15,w,105,52);g.fillStyle(0xf5efff).fillRoundedRect(-w/2,-30,w,105,52);g.fillCircle(-w*.23,-25,60).fillCircle(w*.04,-46,76).fillCircle(w*.29,-13,50);c.add(g);return c;}
 /** Code-drawn symbols stay crisp at every board size, without font/emoji dependencies. */

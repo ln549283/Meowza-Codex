@@ -25,12 +25,13 @@ function contradictionText(grid:Grid,constraints:readonly Constraint[]):string|n
  return 'La grille contient une contradiction.';
 }
 export interface HumanResult { grid:Grid; steps:HumanStep[]; status:'solved'|'stuck'|'contradiction'|'budget'; contradiction?:string; }
-interface Budget { left:number }
-function propagate(initial:Grid,constraints:readonly Constraint[],depth:number,budget:Budget):HumanResult {
+interface Budget { left:number; maxChain?:number }
+function propagate(initial:Grid,constraints:readonly Constraint[],depth:number,budget:Budget,maxSteps=Infinity):HumanResult {
  const grid=cloneGrid(initial),steps:HumanStep[]=[];
  while(budget.left-->0){
   const invalid=contradictionText(grid,constraints);if(invalid)return{grid,steps,status:'contradiction',contradiction:invalid};
   if(grid.every(row=>row.every(Boolean)))return{grid,steps,status:'solved'};
+  if(steps.length>=maxSteps)return{grid,steps,status:'stuck'};
   let step=directHint(grid,constraints);
   if(!step&&depth>0)step=failedAssumption(grid,constraints,depth,budget);
   if(!step)return{grid,steps,status:budget.left<=0?'budget':'stuck'};
@@ -42,15 +43,15 @@ function failedAssumption(grid:Grid,constraints:readonly Constraint[],depth:numb
  for(let r=0;r<grid.length;r++)for(let c=0;c<grid.length;c++)if(grid[r]![c]===0)for(const value of [1,2] as const){
   if(budget.left<=0)return null;
   const trial=cloneGrid(grid);trial[r]![c]=value;
-  const result=propagate(trial,constraints,depth-1,budget);
-  if(result.status==='contradiction')return{position:[r,c],value:otherValue(value),rule:'contradiction',sources:[],assumption:value,consequences:result.steps,contradiction:result.contradiction!,explanation:`Si ${cell([r,c])} était ${cat(value)}, ${result.steps.length} déduction${result.steps.length>1?'s':''} mènerai${result.steps.length>1?'ent':'t'} à une contradiction. Cette case est donc forcément ${cat(otherValue(value))}.`};
+  const result=propagate(trial,constraints,depth-1,budget,budget.maxChain);
+  if(result.status==='contradiction'&&result.steps.length<=(budget.maxChain??Infinity))return{position:[r,c],value:otherValue(value),rule:'contradiction',sources:[],assumption:value,consequences:result.steps,contradiction:result.contradiction!,explanation:`Si ${cell([r,c])} était ${cat(value)}, ${result.steps.length} déduction${result.steps.length>1?'s':''} mènerai${result.steps.length>1?'ent':'t'} à une contradiction. Cette case est donc forcément ${cat(otherValue(value))}.`};
  }
  return null;
 }
-export function humanSolve(grid:Grid,constraints:readonly Constraint[]=[],maxDepth=1,maxWork=30000):HumanResult{return propagate(grid,constraints,maxDepth,{left:maxWork});}
+export function humanSolve(grid:Grid,constraints:readonly Constraint[]=[],maxDepth=1,maxWork=30000,maxChain=5):HumanResult{return propagate(grid,constraints,maxDepth,{left:maxWork,maxChain});}
 export function humanHint(grid:Grid,constraints:readonly Constraint[]=[],maxDepth=1):HumanStep|null {
  if(contradictionText(grid,constraints))return null;
- return directHint(grid,constraints)??(maxDepth>0?failedAssumption(grid,constraints,maxDepth,{left:30000}):null);
+ return directHint(grid,constraints)??(maxDepth>0?failedAssumption(grid,constraints,maxDepth,{left:30000,maxChain:5}):null);
 }
 export function humanMetrics(grid:Grid,constraints:readonly Constraint[],depth=1){
  const result=humanSolve(grid,constraints,depth); const assumptions=result.steps.filter(s=>s.rule==='contradiction');
