@@ -14,7 +14,7 @@ export class LevelSelectScene extends Phaser.Scene {
   cozyBackground(this);this.registry.set('mapDragging',false);
   const current=nextSummit(SaveService.data.progress),start=this.page*8+1,end=Math.min(start+7,current);
   const wood=cosmetics.find(c=>c.id===SaveService.data.equipped.wood)!.color,cushion=cosmetics.find(c=>c.id===SaveService.data.equipped.cushion)!.color;
-  const count=end-start+1,height=Math.max(1920,count*350+1050),base=height-500;
+  const count=end-start+1,height=Math.max(1920,count*350+1530),base=height-740;
   this.children.list.forEach(o=>(o as Phaser.GameObjects.Graphics).setScrollFactor?.(0));
   this.cameras.main.setBounds(0,0,1080,height);
   const xs=[380,700,420,650,350,680,450,650];
@@ -30,6 +30,11 @@ export class LevelSelectScene extends Phaser.Scene {
    g.fillStyle(0x735344,.13).fillRoundedRect(x-155,y+59,310,38,18);
    g.fillStyle(wood).fillRoundedRect(x-165,y+35,330,40,18);
    g.fillStyle(cushion).fillRoundedRect(x-140,y+7,280,35,18);
+   g.fillStyle(0xffffff,.2).fillRoundedRect(x-128,y+9,256,14,7);
+   g.lineStyle(3,0xffffff,.25).lineBetween(x-145,y+44,x+145,y+44);
+   g.fillStyle(0x76533e,.28).fillCircle(x-138,y+57,5).fillCircle(x+138,y+57,5);
+   if(n%4===1){g.lineStyle(5,wood).lineBetween(x+128,y+72,x+128,y+172);g.fillStyle(cushion).fillCircle(x+128,y+190,22);g.lineStyle(2,0xffffff,.5).strokeCircle(x+128,y+190,16);}
+   if(n%4===2){g.lineStyle(7,wood).lineBetween(x-140,y+75,x-140,y+190).lineBetween(x+140,y+75,x+140,y+190);g.fillStyle(cushion,.8).fillEllipse(x,y+190,280,75);} 
    g.lineStyle(3,0xffffff,.5).lineBetween(x-110,y+16,x+110,y+16);
    if(n%3===0){g.fillStyle(wood).fillRoundedRect(x-113,y-160,226,177,58);g.fillStyle(0x655158).fillEllipse(x,y-70,112,130);}
    const node=this.add.container(x,y-68),bg=this.add.graphics();
@@ -43,7 +48,7 @@ export class LevelSelectScene extends Phaser.Scene {
   if(end===current){const top=base-(count-1)*350-300;cloud(this,450,top,500);cloud(this,780,top-35,360);}
   panel(this,540,130,1020,225).setScrollFactor(0).setDepth(100);
   label(this,540,80,'Mon arbre à chats',49).setScrollFactor(0).setDepth(101);
-  label(this,540,156,`${current-1} niveaux réussis   ·   ${SaveService.data.kibble} croquettes`,27,C.ink,0).setScrollFactor(0).setDepth(101);
+  label(this,540,156,`${current-1} niveau${current>2?'x':''} réussi${current>2?'s':''}   ·   ${SaveService.data.kibble} croquettes`,27,C.ink,0).setScrollFactor(0).setDepth(101);
   roundButton(this,100,100,'‹',()=>this.scene.start('Home')).setScrollFactor(0).setDepth(101);
   panel(this,540,1755,1020,310).setScrollFactor(0).setDepth(100);
   const cta=button(this,540,1700,580,`Jouer · niveau ${current}`,()=>{void play(current);},C.teal).setScrollFactor(0).setDepth(101);

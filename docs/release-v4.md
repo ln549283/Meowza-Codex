@@ -16,3 +16,9 @@ Soldes, victoires et niveaux déjà achetés ou en cours conservés. Les grilles
 
 ## Limites explicites
 Publicités récompensées et paiements ne sont pas activés : ils restent une phase ultérieure, avec une seule continuation volontaire par tentative. Aucun faux bouton de publicité. La boutique reste préparée, masquée tant qu'aucun pack n'est disponible. Cette première collection gratuite ne couvre pas encore un parcours infini en récompenses. Pas de validation thermique ou native sur téléphone réel dans cet environnement.
+
+## Illustration dédiée
+Asset : `public/assets/home-mascots-v4.webp` (850 × 850, transparence, 138 Ko). Génération intégrée, puis réduction WebP pour le jeu. Aucun recours à une maquette complète comme écran.
+
+Prompt :
+> Use case: stylized-concept. Production asset for Meowza mobile cat logic puzzle game: a single isolated cheerful mascot composition on genuinely transparent background, no scenery, no interface, no lettering. Two adorable chibi kittens, one silver grey tabby with lavender-grey stripes and pink ears, one ginger tabby with cream muzzle and pink ears, full bodies with big heads and small rounded paws, cuddled together on one plump warm peach cushion with ivory piping atop a small rounded honey wooden cat-tree shelf. Silver kitten smiling with eyes closed, ginger kitten bright large amber eyes. One tiny teal ball of yarn at their paws. Premium polished casual mobile game illustration, sculpted candy-like soft volume, glossy highlights, clean rounded contours, warm gentle light, richly rendered but not photorealistic. Tight centered composition, clear silhouette at small sizes, square canvas, full object within frame with 8 percent clear margins. Transparent alpha outside the two cats and cushion/shelf. No logo, no text, no floating confetti, no background.
