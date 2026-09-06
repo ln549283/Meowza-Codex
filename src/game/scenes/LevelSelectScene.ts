@@ -1,57 +1,75 @@
-import { biomeFor } from '../../core/economy';
 import Phaser from 'phaser';
-import levelsData from '../../data/levels.json';
-import type { Level } from '../../core/model';
-import { chapters } from '../../core/progression';
 import { journeyId,journeySpec,nextSummit } from '../../core/journey';
+import { cosmetics } from '../../core/cosmetics';
 import { loadSummit } from '../../services/JourneyService';
 import { SaveService } from '../../services/SaveService';
 import { GameRegistry } from '../registry';
-import { button,cloud,fadeIn,float,imageContain,label,panel,press,roundButton,sparkles } from '../ui';
+import { button,cloud,cozyBackground,imageContain,label,panel,press,roundButton } from '../ui';
 import { C } from '../theme';
 export class LevelSelectScene extends Phaser.Scene {
- private page=0;private reveal=false;private busy=false;
+ private page=0;private busy=false;private decorating=false;private slot=0;
  constructor(){super('LevelSelect');}
- init(data:{page?:number;reveal?:boolean}={}){this.page=data.page??Math.floor((nextSummit(SaveService.data.progress)-1)/24);this.reveal=data.reveal??false;this.busy=false;}
+ init(data:{page?:number;decorating?:boolean;slot?:number}={}){this.page=data.page??Math.floor((nextSummit(SaveService.data.progress)-1)/8);this.busy=false;this.decorating=!!data.decorating;this.slot=data.slot??0;}
  create(){
-  fadeIn(this);this.registry.set('mapDragging',false);
-  const current=nextSummit(SaveService.data.progress),start=this.page*24+1,end=Math.min(start+23,current+5),count=end-start+1;
-  const height=count*290+1700,base=height-750;
+  cozyBackground(this);this.registry.set('mapDragging',false);
+  const current=nextSummit(SaveService.data.progress),start=this.page*8+1,end=Math.min(start+7,current);
+  const wood=cosmetics.find(c=>c.id===SaveService.data.equipped.wood)!.color,cushion=cosmetics.find(c=>c.id===SaveService.data.equipped.cushion)!.color;
+  const count=end-start+1,height=Math.max(1920,count*350+1050),base=height-500;
+  this.children.list.forEach(o=>(o as Phaser.GameObjects.Graphics).setScrollFactor?.(0));
   this.cameras.main.setBounds(0,0,1080,height);
-  this.add.image(540,960,biomeFor(Math.min(current,end)).key).setDisplaySize(1080,1920).setScrollFactor(0);
-  this.add.rectangle(540,960,1080,1920,0xfaf0ff,.12).setScrollFactor(0);
-  const xAt=(n:number)=>260+((Math.imul(n,2654435761)>>>8)%560);
-  const status=label(this,540,1730,'Glisse pour grimper • à ton rythme',28).setScrollFactor(0).setDepth(102);
-  const play=async(n:number,bonus=false)=>{if(this.busy)return;this.busy=true;status.setText('Les chats préparent ta grille…');try{const level=await loadSummit(n,bonus);if(!this.scene.isActive())return;if(SaveService.data.session?.id!==level.id||SaveService.data.session.errors>=3)SaveService.restartAttempt();GameRegistry.selected=level;this.scene.start('Game');}catch{if(this.scene.isActive()){status.setText('Préparation interrompue. Retouche le niveau.');this.busy=false;}}};
+  const xs=[380,700,420,650,350,680,450,650];
+  const play=async(n:number)=>{if(this.busy)return;this.busy=true;ctaLabel.setText('Préparation…');try{const l=await loadSummit(n);if(!this.scene.isActive())return;if(SaveService.data.session?.id!==l.id||SaveService.data.session.failed||SaveService.data.session.errors>=3)SaveService.restartAttempt();GameRegistry.selected=l;this.scene.start('Game');}catch{if(this.scene.isActive()){ctaLabel.setText('Réessayer');this.busy=false;}}};
+  const g=this.add.graphics();
+  g.fillStyle(0x735344,.13).fillRoundedRect(260,base+144,560,58,25);
+  g.fillStyle(wood).fillRoundedRect(240,base+120,600,60,24);
+  g.fillStyle(wood).fillRoundedRect(510,base-(count-1)*350-160,60,(count-1)*350+300,22);
+  g.lineStyle(3,0xfff5dc,.45);for(let y=base-(count-1)*350-135;y<base+120;y+=18)g.lineBetween(513,y,567,y+12);
   for(let n=start;n<=end;n++){
-   const i=n-start,x=xAt(n),y=base-i*290,progress=SaveService.data.progress[journeyId(n)],config=chapters.find(c=>c.id===journeySpec(n).difficulty)!;
-   if(n>current){cloud(this,x,y,340);continue;}
-   const shelf=this.add.graphics();if(n>start){shelf.lineStyle(22,0xb7855b).lineBetween(xAt(n-1),y+290,x,y);shelf.lineStyle(7,0xf1d4a6).lineBetween(xAt(n-1),y+290,x,y);}
-   imageContain(this.add.image(x,y+80,'atlas-v3',['platform','house','hammock','platform'][n%4]!),350,240);
-   const c=this.add.container(x,y-12),g=this.add.graphics();g.fillStyle(0xfff5db).fillRoundedRect(-52,27,104,55,22);const face=imageContain(this.add.image(0,-28,'atlas-v3',config.id),145,135);c.add([face,g,label(this,0,53,String(n),35,C.ink,0)]);press(this,c,150,160,()=>{void play(n);});
-   label(this,x,y+131,config.name,24,C.ink,0);
-   if(progress?.completed)label(this,x,y+170,'★'.repeat(progress.stars),23,'#986018',0);
-   if(n===current){const cat=imageContain(this.add.image(x-120,y-77,'grey-cat'),110,110);float(this,cat,8);if(this.reveal){const mist=cloud(this,x,y,350);if(SaveService.data.settings.reducedMotion)mist.destroy();else this.tweens.add({targets:mist,x:x+170,alpha:0,duration:1000,onComplete:()=>mist.destroy()});sparkles(this,x,y);}}
-   if(n%6===0&&progress?.completed){const bonus=n/6;button(this,x<540?860:210,y-30,260,'Défi Extrême',()=>{void play(bonus,true);},C.pink).setScale(.8);}
+   const i=n-start,x=xs[(n-1)%8]!,y=base-i*350,done=!!SaveService.data.progress[journeyId(n)]?.completed,spec=journeySpec(n);
+   g.lineStyle(24,wood).lineBetween(540,y+105,x,y+20);
+   g.fillStyle(0x735344,.13).fillRoundedRect(x-155,y+59,310,38,18);
+   g.fillStyle(wood).fillRoundedRect(x-165,y+35,330,40,18);
+   g.fillStyle(cushion).fillRoundedRect(x-140,y+7,280,35,18);
+   g.lineStyle(3,0xffffff,.5).lineBetween(x-110,y+16,x+110,y+16);
+   if(n%3===0){g.fillStyle(wood).fillRoundedRect(x-113,y-160,226,177,58);g.fillStyle(0x655158).fillEllipse(x,y-70,112,130);}
+   const node=this.add.container(x,y-68),bg=this.add.graphics();
+   bg.fillStyle(done?0xfffcf5:0xffffff).fillCircle(0,0,84);bg.lineStyle(n===current?8:3,n===current?C.teal:0xe4d2bd).strokeCircle(0,0,84);
+   node.add([bg,imageContain(this.add.image(0,-14,'atlas-v3',spec.difficulty),110,105),label(this,0,51,String(n),30,C.ink,0)]);
+   press(this,node,174,174,()=>{void play(n);});
+   if(done)label(this,x+119,y-84,'✓',38,'#348e84');
+   if(spec.timed)label(this,x-121,y-94,'◷',46,'#7658a3');
+   if(n===current)label(this,x,y+116,'À toi de jouer',28,'#327c79',0);
   }
-  label(this,540,base+235,start===1?'Un arbre, mille petits bonheurs':`La suite de ton arbre · ${start} à ${end}`,32);
-  panel(this,540,145,1040,280,0xfff9f4,.98).setScrollFactor(0).setDepth(100);
-  roundButton(this,95,98,'‹',()=>this.scene.start('Home')).setScrollFactor(0).setDepth(101);
-  label(this,540,87,'L’arbre des petits bonheurs',42).setScrollFactor(0).setDepth(101);
-  label(this,540,153,`${current-1} sommets · ${SaveService.data.kibble} croquettes`,27).setScrollFactor(0).setDepth(101);
-  const biome=biomeFor(Math.min(current,end));const name=`${biome.name} · ${biome.start}–${biome.end}`;label(this,540,225,name,29).setScrollFactor(0).setDepth(101);
-  panel(this,540,1800,1040,245,0xfff9f4,.98).setScrollFactor(0).setDepth(100);
-  button(this,540,1830,570,'Mon prochain sommet',()=>{if(Math.floor((current-1)/24)!==this.page)this.scene.restart({});else this.focus(base-(current-start)*290);},C.teal).setScrollFactor(0).setDepth(101);
-  if(this.page>0)roundButton(this,130,1830,'↓',()=>this.scene.restart({page:this.page-1})).setScrollFactor(0).setDepth(101);
-  if(end<current)roundButton(this,950,1830,'↑',()=>this.scene.restart({page:this.page+1})).setScrollFactor(0).setDepth(101);
-  const legacy=(levelsData as unknown as Level[]).filter(l=>SaveService.data.progress[l.id]?.completed);
-  if(legacy.length)button(this,540,350,680,'Mes anciens sommets',()=>{this.scene.start('Archive');},C.orange).setScrollFactor(0).setDepth(101).setScale(.8);
-  this.focus(base-(Math.min(current,end)-start)*290);
+  if(end===current){const top=base-(count-1)*350-300;cloud(this,450,top,500);cloud(this,780,top-35,360);}
+  panel(this,540,130,1020,225).setScrollFactor(0).setDepth(100);
+  label(this,540,80,'Mon arbre à chats',49).setScrollFactor(0).setDepth(101);
+  label(this,540,156,`${current-1} niveaux réussis   ·   ${SaveService.data.kibble} croquettes`,27,C.ink,0).setScrollFactor(0).setDepth(101);
+  roundButton(this,100,100,'‹',()=>this.scene.start('Home')).setScrollFactor(0).setDepth(101);
+  panel(this,540,1755,1020,310).setScrollFactor(0).setDepth(100);
+  const cta=button(this,540,1700,580,`Jouer · niveau ${current}`,()=>{void play(current);},C.teal).setScrollFactor(0).setDepth(101);
+  const ctaLabel=cta.list.find(o=>o.type==='Text') as Phaser.GameObjects.Text;
+  button(this,540,1830,410,'Décorer',()=>this.scene.restart({page:this.page,decorating:true}),0xb77ca0).setScrollFactor(0).setDepth(101);
+  if(this.page>0)roundButton(this,130,1755,'↓',()=>this.scene.restart({page:this.page-1})).setScrollFactor(0).setDepth(101);
+  if(end<current)roundButton(this,950,1755,'↑',()=>this.scene.restart({page:this.page+1})).setScrollFactor(0).setDepth(101);
+  if(this.decorating){
+   panel(this,540,1620,1060,595).setScrollFactor(0).setDepth(110);
+   label(this,540,1375,'Personnaliser mon arbre',38).setScrollFactor(0).setDepth(111);
+   const slots=['background','cushion','wood'] as const,slot=slots[this.slot]!;
+   ['Ambiance','Coussins','Bois'].forEach((name,i)=>button(this,210+i*330,1470,300,name,()=>this.scene.restart({page:this.page,decorating:true,slot:i}),i===this.slot?C.teal:0xb398a5).setScrollFactor(0).setDepth(111));
+   cosmetics.filter(c=>c.slot===slot).forEach((item,j)=>{
+    const owned=SaveService.data.ownedCosmetics.includes(item.id),equipped=SaveService.data.equipped[slot]===item.id;
+    const b=button(this,210+j*330,1610,300,equipped?'✓':owned?'Choisir':'Verrouillé',()=>{if(!owned)return;SaveService.data.equipped[slot]=item.id;void SaveService.persist();this.scene.restart({page:this.page,decorating:true,slot:this.slot});},item.color).setScrollFactor(0).setDepth(111);
+    (b.list.find(o=>o.type==='Text') as Phaser.GameObjects.Text).setColor('#493d48');
+    if(!owned)b.setAlpha(.55);label(this,210+j*330,1684,item.name,23,C.ink,0).setScrollFactor(0).setDepth(111);
+   });
+   label(this,540,1740,'Un décor surprise tous les 10 nouveaux niveaux.',25,C.ink,0).setScrollFactor(0).setDepth(111);
+   button(this,540,1835,500,'Terminé',()=>this.scene.restart({page:this.page})).setScrollFactor(0).setDepth(111);
+  }
+  this.cameras.main.scrollY=Phaser.Math.Clamp(base-(count-1)*350-(this.decorating?1000:1080),0,height-1920);
   let previous=0,dragging=false;
-  this.input.on('pointerdown',(p:Phaser.Input.Pointer)=>{this.registry.set('mapDragging',false);previous=p.y;dragging=p.y>410&&p.y<1660;});
+  this.input.on('pointerdown',(p:Phaser.Input.Pointer)=>{this.registry.set('mapDragging',false);previous=p.y;dragging=p.y>270&&p.y<(this.decorating?1290:1580);});
   this.input.on('pointermove',(p:Phaser.Input.Pointer)=>{if(!p.isDown||!dragging)return;if(p.getDistance()>18)this.registry.set('mapDragging',true);this.cameras.main.scrollY=Phaser.Math.Clamp(this.cameras.main.scrollY+previous-p.y,0,height-1920);previous=p.y;});
   this.input.on('wheel',(_p:unknown,_o:unknown,_x:number,dy:number)=>{this.cameras.main.scrollY=Phaser.Math.Clamp(this.cameras.main.scrollY+dy,0,height-1920);});
   this.events.once('shutdown',()=>{this.input.removeAllListeners();this.registry.set('mapDragging',false);});
  }
- private focus(y:number){this.cameras.main.scrollY=Phaser.Math.Clamp(y-1120,0,this.cameras.main.getBounds().height-1920);}
 }

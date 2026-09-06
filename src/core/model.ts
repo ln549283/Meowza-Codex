@@ -8,7 +8,7 @@ export type Position = readonly [row: number, col: number];
 export type ConstraintType = 'same' | 'different';
 export interface Constraint { a: Position; b: Position; type: ConstraintType }
 export type Difficulty = 'easy' | 'medium' | 'hard' | 'extreme';
-export interface Level { id: string; difficulty: Difficulty; size: 4|6|8; initial: Grid; solution: Grid; constraints: Constraint[] }
+export interface Level { id: string; difficulty: Difficulty; size: 4|6|8; initial: Grid; solution: Grid; constraints: Constraint[]; timed?:boolean; timeLimit?:number }
 export interface ValidationResult { valid: boolean; complete: boolean; errors: Position[]; reasons: string[] }
 export const cloneGrid = (grid: Grid): Grid => grid.map(row => [...row]);
 export const otherValue = (value: FilledValue): FilledValue => value === GREY ? ORANGE : GREY;

@@ -2,7 +2,7 @@ import { challengeId,journeyId,JOURNEY_VERSION } from '../core/journey';
 import type { Level } from '../core/model';
 import { SaveService } from './SaveService';
 export async function loadSummit(n:number,bonus=false):Promise<Level>{
- if(SaveService.data.logicVersion!==JOURNEY_VERSION){for(const [key,level] of Object.entries(SaveService.data.journeyLevels))if((level.difficulty==='extreme'||level.difficulty==='hard')&&!SaveService.data.progress[key]?.completed){delete SaveService.data.journeyLevels[key];if(SaveService.data.session?.id===key)SaveService.data.session=null;}SaveService.data.logicVersion=JOURNEY_VERSION;}
+ if(SaveService.data.logicVersion!==JOURNEY_VERSION){for(const key of Object.keys(SaveService.data.journeyLevels))if(!SaveService.data.progress[key]?.completed&&SaveService.data.session?.id!==key&&!SaveService.data.purchasedHints[key]?.length){delete SaveService.data.journeyLevels[key];if(SaveService.data.session?.id===key)SaveService.data.session=null;}SaveService.data.logicVersion=JOURNEY_VERSION;}
  const id=bonus?challengeId(n):journeyId(n),saved=SaveService.data.journeyLevels[id];if(saved)return saved;
  const worker=new Worker(new URL('./level.worker.ts',import.meta.url),{type:'module'});
  return new Promise((resolve,reject)=>{

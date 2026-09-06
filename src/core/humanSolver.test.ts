@@ -21,7 +21,7 @@ test('journey samples are unique, deterministic, human-solvable and calibrated',
  for(const n of [1,3,5,13,17,20,23,38,41,73,1001]){
   const level=generateJourneyLevel(n),spec=journeySpec(n),result=humanSolve(level.initial,level.constraints,spec.depth);
   assert.equal(result.status,'solved',`summit ${n}`);assert.deepEqual(result.grid,level.solution);assert.equal(countSolutions(level.initial,level.constraints),1);assert.deepEqual(generateJourneyLevel(n),level);
-  if(spec.difficulty!=='hard')assert.ok(result.steps.every(s=>s.rule!=='contradiction'));
+  if(spec.depth===0)assert.ok(result.steps.every(s=>s.rule!=='contradiction'));
  }
  const bonus=generateJourneyLevel(1,true);assert.equal(humanSolve(bonus.initial,bonus.constraints,1).status,'solved');assert.equal(humanSolve(bonus.initial,bonus.constraints,0).status,'stuck');assert.equal(countSolutions(bonus.initial,bonus.constraints),1);
  assert.equal(journeySpec(3).size,4);assert.equal(journeySpec(20).size,6);assert.equal(nextSummit({'trail-1':{completed:true},'bonus-1':{completed:true}}),2);

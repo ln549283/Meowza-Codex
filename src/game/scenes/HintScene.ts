@@ -13,8 +13,8 @@ export class HintScene extends Phaser.Scene {
   const owned=step&&(SaveService.data.purchasedHints[levelId]??[]).some(s=>s.position[0]===step.position[0]&&s.position[1]===step.position[1]);
   if(!open){label(this,540,540,'Un rappel gratuit',42);label(this,540,820,'Autant de gris que de roux.\nJamais trois identiques à la suite.\nCœur : identiques. Griffes : opposés.\n\nCherche d’abord une ligne presque remplie.',35).setWordWrapWidth(780);label(this,540,1120,`${SaveService.data.kibble} croquettes disponibles`,34);
    const cost=owned?0:hintCost(SaveService.data.attemptPurchases);const free=!owned&&SaveService.data.kibble<cost;
-   label(this,540,1280,free?'Solde insuffisant : cette aide est offerte.':'Les indices achetés restent accessibles\naprès un échec sur cette grille.',30);
-   button(this,540,1470,790,!step?'Grille terminée':owned?'Relire cet indice · gratuit':free?'Recevoir une aide de secours':`Expliquer une case · ${cost} croquettes`,()=>{if(!step)return;if(free){const saved=SaveService.data.purchasedHints[levelId]??=[];saved.push(step);void SaveService.persist();}else if(!SaveService.buyHint(levelId,step))return;this.scene.restart({step,levelId,apply,open:true});},C.pink);
+   label(this,540,1280,free?'Solde insuffisant. Le rappel reste gratuit.':'Les indices achetés restent accessibles\naprès un échec sur cette grille.',30);
+   button(this,540,1470,790,!step?'Grille terminée':owned?'Relire cet indice · gratuit':free?`${cost} croquettes nécessaires`:`Expliquer une case · ${cost} croquettes`,()=>{if(!step||free)return;if(!SaveService.buyHint(levelId,step))return;this.scene.restart({step,levelId,apply,open:true});},C.pink);
    button(this,540,1700,720,'Je continue à réfléchir',close,C.teal);return;
   }
   if(!step){close();return;}imageContain(this.add.image(540,535,step.value===1?'grey-cat':'orange-cat'),190,190);label(this,540,700,`Ligne ${step.position[0]+1} · Colonne ${step.position[1]+1}`,36);
