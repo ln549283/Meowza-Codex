@@ -1,53 +1,60 @@
 import Phaser from 'phaser';
 import levelsData from '../../data/levels.json';
-import type { Difficulty,Level } from '../../core/model';
+import type { Level } from '../../core/model';
 import { chapters } from '../../core/progression';
+import { challengeId,journeyId,journeySpec,nextSummit,refugeNames } from '../../core/journey';
+import { loadSummit } from '../../services/JourneyService';
 import { SaveService } from '../../services/SaveService';
 import { GameRegistry } from '../registry';
 import { button,cloud,fadeIn,float,imageContain,label,panel,press,roundButton,sparkles } from '../ui';
 import { C } from '../theme';
-const levels=levelsData as unknown as Level[];
 export class LevelSelectScene extends Phaser.Scene {
- private chapter:Difficulty='easy'; private reveal=false;
+ private page=0;private reveal=false;private busy=false;
  constructor(){super('LevelSelect');}
- init(data:{chapter?:Difficulty;reveal?:boolean}={}){this.chapter=data.chapter??GameRegistry.selected?.difficulty??(SaveService.data.session?.id.split('-')[0] as Difficulty|undefined)??'easy';this.reveal=data.reveal??false;}
+ init(data:{page?:number;reveal?:boolean}={}){this.page=data.page??Math.floor((nextSummit(SaveService.data.progress)-1)/24);this.reveal=data.reveal??false;this.busy=false;}
  create(){
   fadeIn(this);this.registry.set('mapDragging',false);
-  const config=chapters.find(c=>c.id===this.chapter)!;
-  const group=levels.filter(l=>l.difficulty===this.chapter);
-  const current=group.find(l=>SaveService.isUnlocked(l.id)&&!SaveService.data.progress[l.id]?.completed)??group[group.length-1]!;
-  const height=group.length*250+1650,base=height-690;
+  const current=nextSummit(SaveService.data.progress),start=this.page*24+1,end=Math.min(start+23,current+5),count=end-start+1;
+  const height=count*290+1700,base=height-750;
   this.cameras.main.setBounds(0,0,1080,height);
   this.add.image(540,960,'tree-bg').setDisplaySize(1080,1920).setScrollFactor(0);
-  this.add.rectangle(540,960,1080,1920,0xfaf0ff,.23).setScrollFactor(0);
-  const trunk=this.add.graphics();trunk.fillStyle(0xe4c4b1,.88).fillRoundedRect(485,650,110,base-510,45);
-  trunk.lineStyle(5,0xf8e5d3,.8);for(let y=690;y<base+100;y+=27)trunk.lineBetween(490,y,590,y-20);
-  group.forEach((level,i)=>{
-   const x=540+Math.sin(i*1.45)*235,y=base-i*250,unlocked=SaveService.isUnlocked(level.id),progress=SaveService.data.progress[level.id];
-   if(!unlocked){cloud(this,x,y,360);return;}
-   const shelf=this.add.graphics();shelf.lineStyle(18,0xd1ad99).lineBetween(540,y+85,x,y+85);shelf.fillStyle(0xb392b7,.65).fillRoundedRect(x-150,y+66,300,47,24);shelf.fillStyle(0xf8dae5).fillRoundedRect(x-153,y+49,306,40,22);shelf.lineStyle(4,0xfff4f8).strokeRoundedRect(x-153,y+49,306,40,22);
-   const c=this.add.container(x,y-12),g=this.add.graphics();g.fillStyle(config.color).fillCircle(0,8,72);g.fillStyle(progress?.completed?0xfff9ed:config.color).lineStyle(5,0xffffff).fillCircle(0,0,70).strokeCircle(0,0,70);c.add([g,label(this,0,-4,String(i+1),49,progress?.completed?C.ink:'#ffffff')]);press(this,c,150,160,()=>{GameRegistry.selected=level;this.scene.start('Game');});
-   if(progress?.completed)label(this,x,y+38,'★'.repeat(progress.stars),25,'#ac7439');
-   if(level.id===current.id&&!progress?.completed){const cat=imageContain(this.add.image(x-116,y-80,'grey-cat'),110,110);float(this,cat,8);label(this,x+140,y-75,'À toi !',27);if(this.reveal){const mist=cloud(this,x,y,370);if(SaveService.data.settings.reducedMotion)mist.destroy();else this.tweens.add({targets:mist,x:x+170,alpha:0,duration:1100,onComplete:()=>mist.destroy()});sparkles(this,x,y);}}
-  });
-  label(this,540,base+195,config.subtitle,34);
-  // Fixed HUD leaves the climb itself free to scroll.
-  panel(this,540,130,1040,245,0xfff9f4,.97).setScrollFactor(0).setDepth(100);
-  roundButton(this,95,102,'‹',()=>this.scene.start('Home')).setScrollFactor(0).setDepth(101);
-  label(this,540,90,'L’arbre des petits bonheurs',44).setScrollFactor(0).setDepth(101);
-  label(this,540,157,`${SaveService.completedCount(this.chapter)} / ${group.length}  ·  ${config.subtitle}`,27).setScrollFactor(0).setDepth(101);
-  chapters.forEach((ch,i)=>button(this,150+i*260,284,242,ch.name,()=>this.scene.restart({chapter:ch.id}),ch.id===this.chapter?ch.color:0x9b8ca8).setScale(.92).setScrollFactor(0).setDepth(101));
-  panel(this,540,1800,1040,245,0xfff9f4,.97).setScrollFactor(0).setDepth(100);
-  const available=group.some(l=>SaveService.isUnlocked(l.id));
-  const unlockText=this.chapter==='medium'?'Termine 10 niveaux Facile pour accéder aux cabanes.':this.chapter==='hard'?'Termine 15 niveaux Moyen pour atteindre les perchoirs.':'Termine les 30 niveaux Difficile pour percer les nuages.';
-  label(this,540,1727,available?'Fais glisser pour explorer l’arbre':unlockText,available?28:25).setScrollFactor(0).setDepth(101);
-  button(this,540,1830,620,available?'Revenir à mon perchoir':'Retour à mon parcours',()=>{if(available)this.focus(base-group.indexOf(current)*250);else this.scene.restart({chapter:chapters[Math.max(0,chapters.indexOf(config)-1)]!.id});},config.color).setScrollFactor(0).setDepth(101);
-  this.focus(base-group.indexOf(current)*250);
+  this.add.rectangle(540,960,1080,1920,0xfaf0ff,.12).setScrollFactor(0);
+  const trunk=this.add.graphics();trunk.fillStyle(0xd6ad8e,.95).fillRoundedRect(485,400,110,base-260,45);
+  trunk.lineStyle(5,0xf8e5d3,.8);for(let y=450;y<base+110;y+=27)trunk.lineBetween(490,y,590,y-20);
+  const status=label(this,540,1730,'Glisse pour grimper • à ton rythme',28).setScrollFactor(0).setDepth(102);
+  const play=async(n:number,bonus=false)=>{if(this.busy)return;this.busy=true;status.setText('Les chats préparent ta grille…');try{const level=await loadSummit(n,bonus);if(!this.scene.isActive())return;GameRegistry.selected=level;this.scene.start('Game');}catch{if(this.scene.isActive()){status.setText('Préparation interrompue. Retouche le niveau.');this.busy=false;}}};
+  for(let n=start;n<=end;n++){
+   const i=n-start,x=540+Math.sin(i*1.45)*185,y=base-i*290,progress=SaveService.data.progress[journeyId(n)],config=chapters.find(c=>c.id===journeySpec(n).difficulty)!;
+   if(n>current){cloud(this,x,y,340);continue;}
+   const shelf=this.add.graphics();shelf.lineStyle(18,0xc59b83).lineBetween(540,y+85,x,y+85);shelf.fillStyle(0xa478ac).fillRoundedRect(x-140,y+66,280,47,24);shelf.fillStyle(0xffb8d9).fillRoundedRect(x-143,y+49,286,40,22);shelf.lineStyle(4,0xfff4f8).strokeRoundedRect(x-143,y+49,286,40,22);
+   const c=this.add.container(x,y-12),g=this.add.graphics();g.fillStyle(0x765685).fillCircle(0,10,72);g.fillStyle(progress?.completed?0xfff3cb:config.color).lineStyle(5,0xffffff).fillCircle(0,0,70).strokeCircle(0,0,70);g.fillStyle(0xffffff,.3).fillEllipse(0,-30,95,35);c.add([g,label(this,0,-4,String(n),43,progress?.completed?C.ink:'#ffffff')]);press(this,c,150,160,()=>{void play(n);});
+   label(this,x,y+131,config.name,24,C.ink,0);
+   if(progress?.completed)label(this,x,y+36,'★'.repeat(progress.stars),23,'#986018',0);
+   if(n===current){const cat=imageContain(this.add.image(x-120,y-77,'grey-cat'),110,110);float(this,cat,8);if(this.reveal){const mist=cloud(this,x,y,350);if(SaveService.data.settings.reducedMotion)mist.destroy();else this.tweens.add({targets:mist,x:x+170,alpha:0,duration:1000,onComplete:()=>mist.destroy()});sparkles(this,x,y);}}
+   if(n%6===0&&progress?.completed){
+    const refuge=n/6,rx=x>540?200:875,choice=SaveService.data.refuges[refuge];
+    const home=this.add.container(rx,y-10),bg=this.add.graphics();bg.fillStyle(0xffefd2).lineStyle(4,0xffffff).fillRoundedRect(-110,-83,220,150,34).strokeRoundedRect(-110,-83,220,150,34);home.add([bg,label(this,rx-rx,-38,choice==='hamac'?'⌣':choice==='cabane'?'⌂':'✿',62,C.ink,0),label(this,0,34,choice?'Mon refuge':'Aménager',23,C.ink,0)]);press(this,home,225,170,()=>this.scene.start('Refuge',{n:refuge}));
+    const bonus=SaveService.data.progress[challengeId(refuge)];button(this,rx,y+139,265,bonus?.completed?'★ Défi réussi':'✦ Défi bonus',()=>{void play(refuge,true);},C.pink).setScale(.8);
+   }
+  }
+  label(this,540,base+235,start===1?'Un arbre, mille petits bonheurs':`La suite de ton arbre · ${start} à ${end}`,32);
+  panel(this,540,145,1040,280,0xfff9f4,.98).setScrollFactor(0).setDepth(100);
+  roundButton(this,95,98,'‹',()=>this.scene.start('Home')).setScrollFactor(0).setDepth(101);
+  label(this,540,87,'L’arbre des petits bonheurs',42).setScrollFactor(0).setDepth(101);
+  label(this,540,153,`${current-1} sommets · prochain refuge au niveau ${Math.ceil(current/6)*6}`,27).setScrollFactor(0).setDepth(101);
+  const name=refugeNames[Math.floor((current-1)/6)%refugeNames.length]!;label(this,540,225,name,29).setScrollFactor(0).setDepth(101);
+  panel(this,540,1800,1040,245,0xfff9f4,.98).setScrollFactor(0).setDepth(100);
+  button(this,540,1830,570,'Mon prochain sommet',()=>{if(Math.floor((current-1)/24)!==this.page)this.scene.restart({});else this.focus(base-(current-start)*290);},C.teal).setScrollFactor(0).setDepth(101);
+  if(this.page>0)roundButton(this,130,1830,'↓',()=>this.scene.restart({page:this.page-1})).setScrollFactor(0).setDepth(101);
+  if(end<current)roundButton(this,950,1830,'↑',()=>this.scene.restart({page:this.page+1})).setScrollFactor(0).setDepth(101);
+  const legacy=(levelsData as unknown as Level[]).filter(l=>SaveService.data.progress[l.id]?.completed);
+  if(legacy.length)button(this,540,350,680,'Mes anciens sommets',()=>{this.scene.start('Archive');},C.orange).setScrollFactor(0).setDepth(101).setScale(.8);
+  this.focus(base-(Math.min(current,end)-start)*290);
   let previous=0,dragging=false;
-  this.input.on('pointerdown',(p:Phaser.Input.Pointer)=>{this.registry.set('mapDragging',false);previous=p.y;dragging=p.y>355&&p.y<1660;});
+  this.input.on('pointerdown',(p:Phaser.Input.Pointer)=>{this.registry.set('mapDragging',false);previous=p.y;dragging=p.y>410&&p.y<1660;});
   this.input.on('pointermove',(p:Phaser.Input.Pointer)=>{if(!p.isDown||!dragging)return;if(p.getDistance()>18)this.registry.set('mapDragging',true);this.cameras.main.scrollY=Phaser.Math.Clamp(this.cameras.main.scrollY+previous-p.y,0,height-1920);previous=p.y;});
   this.input.on('wheel',(_p:unknown,_o:unknown,_x:number,dy:number)=>{this.cameras.main.scrollY=Phaser.Math.Clamp(this.cameras.main.scrollY+dy,0,height-1920);});
   this.events.once('shutdown',()=>{this.input.removeAllListeners();this.registry.set('mapDragging',false);});
  }
- private focus(y:number){this.cameras.main.scrollY=Phaser.Math.Clamp(y-1160,0,this.cameras.main.getBounds().height-1920);}
+ private focus(y:number){this.cameras.main.scrollY=Phaser.Math.Clamp(y-1120,0,this.cameras.main.getBounds().height-1920);}
 }

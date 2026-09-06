@@ -1,11 +1,14 @@
+import { nextSummit } from './journey';
 import type { Difficulty } from './model';
 export const chapters: { id: Difficulty; name: string; subtitle: string; count: number; color: number }[] = [
-  { id: 'easy', name: 'Facile', subtitle: 'Le jardin des coussinets', count: 20, color: 0x639f94 },
-  { id: 'medium', name: 'Moyen', subtitle: 'Les cabanes moelleuses', count: 30, color: 0xd5905f },
-  { id: 'hard', name: 'Difficile', subtitle: 'Les perchoirs suspendus', count: 30, color: 0xb27dba },
-  { id: 'extreme', name: 'Extrême', subtitle: 'Au-dessus des nuages', count: 30, color: 0x7970b6 },
+  { id: 'easy', name: 'Facile', subtitle: 'Le jardin des coussinets', count: 20, color: 0x20b9ab },
+  { id: 'medium', name: 'Moyen', subtitle: 'Les cabanes moelleuses', count: 30, color: 0xf49a42 },
+  { id: 'hard', name: 'Difficile', subtitle: 'Les perchoirs suspendus', count: 30, color: 0xa15ae0 },
+  { id: 'extreme', name: 'Extrême', subtitle: 'Au-dessus des nuages', count: 30, color: 0x6254cf },
 ];
 export function isLevelUnlocked(id: string, progress: Record<string, { completed: boolean }>): boolean {
+  const trail=/^trail-([1-9]\d*)$/.exec(id);if(trail)return Number(trail[1])<=nextSummit(progress);
+  const bonus=/^bonus-([1-9]\d*)$/.exec(id);if(bonus)return Number(bonus[1])*6<nextSummit(progress);
   const match = /^(easy|medium|hard|extreme)-(\d{2})$/.exec(id);
   if (!match) return false;
   const difficulty = match[1] as Difficulty, n = Number(match[2]);

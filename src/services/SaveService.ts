@@ -1,11 +1,11 @@
 import { Preferences } from '@capacitor/preferences';
 import { isLevelUnlocked } from '../core/progression';
-import { cloneGrid, type Grid } from '../core/model';
+import { cloneGrid, type Grid, type Level } from '../core/model';
 export interface Settings { music:boolean; sounds:boolean; vibrations:boolean; reducedMotion:boolean }
 export interface LevelProgress { stars:number; completed:boolean; bestErrors:number; bestHints:number }
 export interface Session { id:string; grid:Grid; errors:number; hints:number }
-export interface SaveData { saveVersion:1; tutorialCompleted:boolean; settings:Settings; progress:Record<string,LevelProgress>; stats:{levelsCompleted:number;totalHints:number;totalErrors:number}; session:Session|null }
-const defaults=():SaveData=>({saveVersion:1,tutorialCompleted:false,settings:{music:false,sounds:true,vibrations:true,reducedMotion:typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches},progress:{},stats:{levelsCompleted:0,totalHints:0,totalErrors:0},session:null});
+export interface SaveData { saveVersion:1; tutorialCompleted:boolean; settings:Settings; progress:Record<string,LevelProgress>; stats:{levelsCompleted:number;totalHints:number;totalErrors:number}; session:Session|null; journeyLevels:Record<string,Level>; refuges:Record<string,string> }
+const defaults=():SaveData=>({saveVersion:1,tutorialCompleted:false,settings:{music:false,sounds:true,vibrations:true,reducedMotion:typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches},progress:{},stats:{levelsCompleted:0,totalHints:0,totalErrors:0},session:null,journeyLevels:{},refuges:{}});
 export class SaveServiceImpl {
   constructor(private storage: Pick<typeof Preferences, "get"|"set"> = Preferences) {}
   data:SaveData=defaults(); private key='meowza-save-v1'; private pending=Promise.resolve();

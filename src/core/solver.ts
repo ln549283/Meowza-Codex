@@ -1,4 +1,5 @@
-import { EMPTY, GREY, ORANGE, cloneGrid, type CellValue, type FilledValue, type Grid, type Level, type Position } from './model';
+import { humanHint } from './humanSolver';
+import { EMPTY, GREY, ORANGE, cloneGrid, type FilledValue, type Grid, type Level, type Position } from './model';
 import { validateGrid } from './validator';
 
 function candidates(grid:Grid,level:Pick<Level,'constraints'>,r:number,c:number):FilledValue[]{
@@ -19,8 +20,6 @@ export function countSolutions(initial:Grid,constraints:Level['constraints']=[],
   const grid=cloneGrid(initial);let total=0;
   const walk=()=>{if(total>=limit)return;const next=choose(grid,{constraints});if(!next){if(validateGrid(grid,constraints,true).valid)total++;return;}const [r,c]=next.pos;for(const v of next.values){grid[r]![c]=v;walk();}grid[r]![c]=EMPTY;};walk();return total;
 }
-export function findHint(grid:Grid,level:Level):{position:Position;value:CellValue}|null{
-  for(let r=0;r<grid.length;r++)for(let c=0;c<grid.length;c++)if(grid[r]![c]===EMPTY){const possible=candidates(grid,{constraints:level.constraints},r,c);if(possible.length===1)return{position:[r,c],value:possible[0]!};}
-  const solution=solveGrid(grid,level.constraints);if(!solution)return null;
-  for(let r=0;r<grid.length;r++)for(let c=0;c<grid.length;c++)if(grid[r]![c]===EMPTY)return{position:[r,c],value:solution[r]![c]!};return null;
-}
+// Compatibility export: hints now have a human-readable proof.
+export { humanHint as findHumanHint } from './humanSolver';
+export function findHint(grid:Grid,level:Level){return humanHint(grid,level.constraints,2);}

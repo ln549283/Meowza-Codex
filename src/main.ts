@@ -1,3 +1,6 @@
+import { HintScene } from './game/scenes/HintScene';
+import { RefugeScene } from './game/scenes/RefugeScene';
+import { ArchiveScene } from './game/scenes/ArchiveScene';
 import Phaser from 'phaser';
 import { App } from '@capacitor/app';
 import '@fontsource/nunito/latin-700.css';
@@ -17,11 +20,11 @@ import { SaveService } from './services/SaveService';
 async function start(){
  // A slow or failed font download must not prevent the game from starting.
  await Promise.race([Promise.all([document.fonts.load('700 32px Nunito'),document.fonts.load('800 32px Nunito')]).catch(()=>undefined),new Promise(resolve=>setTimeout(resolve,2000))]);
- const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#fff6ee',transparent:false,antialias:true,pixelArt:false,roundPixels:true,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[BootScene,PreloadScene,HomeScene,LevelSelectScene,GameScene,RulesScene,SettingsScene,VictoryScene],render:{powerPreference:'low-power'}});
+ const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#fff6ee',transparent:false,antialias:true,pixelArt:false,roundPixels:true,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[BootScene,PreloadScene,HomeScene,LevelSelectScene,GameScene,RulesScene,SettingsScene,VictoryScene,RefugeScene,ArchiveScene,HintScene],render:{powerPreference:'low-power'}});
  const visibility=(active:boolean)=>{if(active)AudioService.resume();else{AudioService.suspend();void SaveService.persist();}};
  document.addEventListener('visibilitychange',()=>visibility(!document.hidden));
  void App.addListener('appStateChange',({isActive})=>visibility(isActive));
- void App.addListener('backButton',()=>{const active=game.scene.getScenes(true).at(-1);if(!active)return;const key=active.scene.key;if(key==='Rules'&&game.registry.get('rulesFromGame')){active.scene.stop();game.scene.resume('Game');}else if(key==='Game')active.scene.start('LevelSelect');else if(key==='Home')void App.minimizeApp();else if(key!=='Boot'&&key!=='Preload')active.scene.start('Home');});
+ void App.addListener('backButton',()=>{const active=game.scene.getScenes(true).at(-1);if(!active)return;const key=active.scene.key;if(key==='Hint'||key==='Rules'&&game.registry.get('rulesFromGame')){active.scene.stop();game.scene.resume('Game');}else if(key==='Game')active.scene.start('LevelSelect');else if(key==='Home')void App.minimizeApp();else if(key!=='Boot'&&key!=='Preload')active.scene.start('Home');});
  // Expose only in development for interaction and regression checks.
  if(import.meta.env.DEV)Object.assign(window,{meowza:game});
 }

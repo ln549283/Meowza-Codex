@@ -1,6 +1,6 @@
 # Meowza — l’arbre des petits bonheurs
 
-Puzzle félin Phaser / TypeScript, embarqué sur iOS et Android avec Capacitor. Deux familles de chats : autant de gris que de roux dans chaque ligne et colonne, jamais trois identiques consécutifs, liens `=` (identiques) et `×` (différents).
+Puzzle félin Phaser / TypeScript, embarqué sur iOS et Android avec Capacitor. Deux familles de chats : autant de gris que de roux dans chaque ligne et colonne, jamais trois identiques consécutifs, liens cœur (identiques) et griffes (différents).
 
 ## Jouer
 
@@ -8,18 +8,9 @@ Choisir Nimbus ou Moka sous la grille, puis toucher une case. Retoucher un chat 
 
 ## Parcours
 
-110 niveaux fixes issus d’une génération reproductible, tous à solution unique :
+Un arbre continu avec des difficultés alternées, des respirations Facile et un refuge à aménager tous les six sommets. Les défis Extrême sont facultatifs. Les niveaux terminés restent rejouables ; les 110 niveaux de l’ancienne version sont conservés pour les sauvegardes existantes.
 
-| Chapitre | Taille | Niveaux | Accès |
-| --- | --- | --- | --- |
-| Facile | 4 × 4 | 20 | Dès le départ |
-| Moyen | 6 × 6 | 30 | Après 10 Facile |
-| Difficile | 8 × 8 | 30 | Après 15 Moyen |
-| Extrême | 8 × 8 | 30 | Après les 30 Difficile |
-
-Dans chaque chapitre, on grimpe dans un arbre à chat en faisant glisser la carte. Les nuages cachent les niveaux verrouillés. Les niveaux terminés restent rejouables. Les seuils Moyen/Difficile et les 80 premiers puzzles sont conservés pour assurer la compatibilité avec la version précédente.
-
-Les grilles Extrême sont sélectionnées parce que les seules déductions immédiates (règles locales, équilibre, relations adjacentes) ne suffisent pas à les terminer. Cette mesure ne remplace pas une calibration par des joueurs ; elle garantit une différence logique explicite, pas simplement une plus grande grille.
+Les nouvelles grilles sont générées à la demande et acceptées uniquement si le solveur humain peut les terminer. Les premiers Moyens restent en 4×4, puis les 6×6 commencent avec davantage de données. Voir [le rythme, la calibration et les preuves logiques](docs/journey-and-logic.md).
 
 ## Installation et validation
 
@@ -53,4 +44,4 @@ Nouveaux assets générés : décor de l’arbre, Nimbus, Moka, icône d’appli
 
 ## État de validation
 
-La compilation web, les tests automatisés et les contrôles des 110 niveaux ont été exécutés. La synchronisation native a été exécutée. La compilation signée, les tests sur appareil et le contrôle visuel interactif restent à réaliser : le navigateur distant ne peut pas accéder au serveur local de cet environnement. Cette version est une base de test, pas une soumission aux stores validée.
+La compilation web, les tests automatisés et les contrôles logiques ont été exécutés. Les tests sur appareils iOS/Android et la compilation signée restent nécessaires avant une soumission aux stores. Après chaque modification web, exécuter cap:sync avant de compiler les projets natifs.
