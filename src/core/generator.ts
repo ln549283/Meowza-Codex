@@ -1,3 +1,4 @@
+import { assessDifficulty } from './difficulty';
 import { EMPTY, GREY, ORANGE, cloneGrid, type Constraint, type Difficulty, type FilledValue, type Grid, type Level } from './model';
 import { countSolutions } from './solver';
 import { validateGrid } from './validator';
@@ -17,12 +18,15 @@ function makeConstraints(solution:Grid,rng:SeededRandom,count:number):Constraint
 }
 export function generateLevel(id:string,difficulty:Difficulty,size:4|6|8,seed:number):Level{
   const rng=new SeededRandom(seed);const solution=makeSolution(size,rng);const constraints=makeConstraints(solution,rng,Math.max(2,Math.floor(size*0.7)));const initial=cloneGrid(solution);
-  const cells=rng.shuffle(Array.from({length:size*size},(_,i)=>i));const minClues=Math.ceil(size*size*(difficulty==='easy'?.42:difficulty==='medium'?.34:.28));
+  const cells=rng.shuffle(Array.from({length:size*size},(_,i)=>i));const minClues=Math.ceil(size*size*(difficulty==='easy'?.42:difficulty==='medium'?.34:difficulty==='hard'?.28:.08));
   for(const cell of cells){if(initial.flat().filter(v=>v!==EMPTY).length<=minClues)break;const r=Math.floor(cell/size),c=cell%size,old=initial[r]![c]!;initial[r]![c]=EMPTY;if(countSolutions(initial,constraints,2)!==1)initial[r]![c]=old;}
   return{id,difficulty,size,initial,solution,constraints};
 }
 export function generateBank():Level[]{
   const specs:[Difficulty,4|6|8,number][]=[['easy',4,20],['medium',6,30],['hard',8,30]];const levels:Level[]=[];let seed=0x4d454f57;
   for(const [difficulty,size,count] of specs)for(let i=1;i<=count;i++){seed=(seed+0x9e3779b9)>>>0;levels.push(generateLevel(`${difficulty}-${String(i).padStart(2,'0')}`,difficulty,size,seed));}
+  seed=0x43415453;let attempts=0;
+  while(levels.length<110&&attempts++<3000){seed=(seed+0x9e3779b9)>>>0;const level=generateLevel(`extreme-${String(levels.length-79).padStart(2,'0')}`,'extreme',8,seed);if(assessDifficulty(level).requiresLookahead)levels.push(level);}
+  if(levels.length!==110)throw new Error('Unable to generate extreme chapter');
   return levels;
 }

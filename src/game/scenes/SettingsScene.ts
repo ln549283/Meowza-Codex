@@ -1,2 +1,13 @@
-import Phaser from 'phaser';import { SaveService,type Settings } from '../../services/SaveService';import { backButton,fadeIn,panel,title } from '../ui';import { C } from '../theme';
-export class SettingsScene extends Phaser.Scene{constructor(){super('Settings')}create(){fadeIn(this);this.cameras.main.setBackgroundColor(C.cream);backButton(this,()=>this.scene.start('Home'));title(this,'Paramètres',145,60);panel(this,540,830,850,950);const options:[keyof Settings,string,string][]=[['music','♫','Musique'],['sounds','🔊','Sons'],['vibrations','〰','Vibrations'],['reducedMotion','◌','Animations réduites']];options.forEach(([key,icon,label],i)=>{const y=480+i*190;this.add.text(240,y,icon,{fontSize:'45px',color:C.ink}).setOrigin(.5);this.add.text(320,y,label,{fontFamily:'Arial Rounded MT Bold',fontSize:'34px',color:C.ink}).setOrigin(0,.5);const track=this.add.graphics(),knob=this.add.circle(0,0,30,0xffffff).setStrokeStyle(3,0xd6b99f);const holder=this.add.container(790,y,[track,knob]).setSize(150,70).setInteractive({useHandCursor:true});const draw=()=>{const on=SaveService.data.settings[key];track.clear().fillStyle(on?C.teal:0xb5aaa6).fillRoundedRect(-75,-34,150,68,34);knob.x=on?39:-39;};draw();holder.on('pointerdown',()=>{SaveService.data.settings[key]=!SaveService.data.settings[key];draw();void SaveService.persist();});});this.add.text(540,1450,'Vos préférences sont sauvegardées automatiquement.',{fontSize:'26px',color:'#806b72'}).setOrigin(.5);}}
+import Phaser from 'phaser';
+import { SaveService,type Settings } from '../../services/SaveService';
+import { AudioService } from '../../services/AudioService';
+import { backButton,cozyBackground,fadeIn,label,panel,press,title } from '../ui';
+import { C } from '../theme';
+export class SettingsScene extends Phaser.Scene {
+ constructor(){super('Settings');}
+ create(){fadeIn(this);cozyBackground(this);backButton(this,()=>this.scene.start('Home'));title(this,'Ton petit cocon',155,58);panel(this,540,875,940,1130);
+ const options:[keyof Settings,string,string][]=[['music','Musique','Une mélodie douce, composée pour le jeu'],['sounds','Petits sons','Des notes à chaque interaction'],['vibrations','Vibrations','Un retour léger sous les doigts'],['reducedMotion','Animations réduites','Moins de mouvements et de particules']];
+ options.forEach(([key,name,description],i)=>{const y=470+i*240;label(this,145,y,name,38).setOrigin(0,.5);label(this,145,y+70,description,25).setOrigin(0,.5);const track=this.add.graphics(),knob=this.add.circle(0,0,32,0xffffff);const holder=this.add.container(850,y,[track,knob]);const draw=()=>{const on=SaveService.data.settings[key];track.clear().fillStyle(on?C.teal:0xbeb1c6).fillRoundedRect(-75,-40,150,80,40);knob.x=on?35:-35;};draw();press(this,holder,170,120,()=>{SaveService.data.settings[key]=!SaveService.data.settings[key];draw();void SaveService.persist();AudioService.syncMusic();});});
+ label(this,540,1590,'Ta progression reste sur cet appareil.',30);label(this,540,1660,'Aucun compte, aucune publicité, aucun suivi.',27);label(this,540,1780,'Meowza · 1.1',26);
+ }
+}

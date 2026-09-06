@@ -1,96 +1,56 @@
-# Meowza
+# Meowza — l’arbre des petits bonheurs
 
-Meowza est un puzzle game mobile cozy/kawaii inspiré des binary puzzles. Le joueur complète un tapis avec des chats gris et roux en respectant l’équilibre 50/50, la règle « jamais trois identiques », ainsi que des liens **Même** et **Différent**.
+Puzzle félin Phaser / TypeScript, embarqué sur iOS et Android avec Capacitor. Deux familles de chats : autant de gris que de roux dans chaque ligne et colonne, jamais trois identiques consécutifs, liens `=` (identiques) et `×` (différents).
 
-Le projet est une implémentation greenfield : moteur, solveur, générateur, banque de niveaux et interface ont été conçus depuis zéro.
+## Jouer
 
-## Fonctionnalités
+Choisir Nimbus ou Moka sous la grille, puis toucher une case. Retoucher un chat de la famille sélectionnée vide la case. Les petits cadenas signalent les cases fixes. Les commandes permettent d’annuler un coup, dévoiler un indice ou effacer la grille. Effacer/annuler ne supprime pas les erreurs et indices du parcours en cours.
 
-- 80 niveaux générés et validés : 20 faciles (4×4), 30 moyens (6×6), 30 corses (8×8)
-- solveur backtracking avec pruning et comptage de solutions
-- puzzles à solution unique et contraintes cohérentes
-- navigation Phaser complète : chargement, accueil, tutoriel, sélection, partie, paramètres, victoire
-- progression, étoiles, statistiques et préférences persistantes
-- indices logiques, erreurs non intrusives, animations et feedback haptique
-- rendu portrait 1080×1920 responsive avec safe areas
-- navigateur, Android Capacitor et architecture prête pour iOS
+## Parcours
 
-## Stack
+110 niveaux fixes issus d’une génération reproductible, tous à solution unique :
 
-- Vite + TypeScript strict
-- Phaser 3
-- Capacitor 7 (`Preferences`, `Haptics`)
-- tests natifs Node
+| Chapitre | Taille | Niveaux | Accès |
+| --- | --- | --- | --- |
+| Facile | 4 × 4 | 20 | Dès le départ |
+| Moyen | 6 × 6 | 30 | Après 10 Facile |
+| Difficile | 8 × 8 | 30 | Après 15 Moyen |
+| Extrême | 8 × 8 | 30 | Après les 30 Difficile |
 
-## Installation
+Dans chaque chapitre, on grimpe dans un arbre à chat en faisant glisser la carte. Les nuages cachent les niveaux verrouillés. Les niveaux terminés restent rejouables. Les seuils Moyen/Difficile et les 80 premiers puzzles sont conservés pour assurer la compatibilité avec la version précédente.
 
-Prérequis : Node.js 20+ et npm.
+Les grilles Extrême sont sélectionnées parce que les seules déductions immédiates (règles locales, équilibre, relations adjacentes) ne suffisent pas à les terminer. Cette mesure ne remplace pas une calibration par des joueurs ; elle garantit une différence logique explicite, pas simplement une plus grande grille.
 
-```bash
-npm install
+## Installation et validation
+
+Node 22 ou supérieur :
+
+```sh
+npm ci
 npm run dev
+npm run check
 ```
 
-## Commandes
+`check` exécute TypeScript, les tests, la validation des 110 puzzles et le build. `generate-levels` régénère la banque de façon déterministe. `extend-levels` préserve les 80 niveaux précédents et recrée seulement Extrême.
 
-```bash
-npm run typecheck        # vérification TypeScript stricte
-npm test                 # tests du moteur logique
-npm run generate-levels  # régénère les 80 niveaux depuis une graine déterministe
-npm run validate-levels  # vérifie format, règles, contraintes et unicité
-npm run build            # typecheck + build production
-npm run cap:sync         # build et synchronisation native
-npm run android          # ouvre le projet Android Studio
-```
+## Mobile
 
-## Architecture
-
-```text
-src/
-├── core/       moteur pur, règles, validation, solveur et générateur
-├── data/       banque de niveaux générée
-├── game/       scènes et composants Phaser
-├── services/   sauvegarde, audio et haptique
-└── main.ts     configuration Phaser
-scripts/        génération et validation offline
-public/assets/  assets PNG individuels de production
-android/        projet natif Capacitor
-```
-
-`src/core` ne dépend pas de Phaser. `BoardView` est dimensionné mathématiquement et prend en charge toutes les tailles sans logique spécifique à un niveau. Les marqueurs sont placés au milieu des cellules à partir de leurs coordonnées de grille.
-
-## Génération et unicité
-
-Le générateur construit d’abord une grille complète valide par recherche randomisée déterministe, ajoute des contraintes adjacentes cohérentes, puis retire des indices tant que le solveur confirme une solution unique. `validate-levels` échoue avec un code non nul dès qu’un niveau est invalide, insoluble, non unique ou mal dimensionné.
-
-## Progression
-
-- le niveau suivant se débloque après la réussite du précédent ;
-- Moyen se débloque après 10 niveaux Facile ;
-- Corse se débloque après 15 niveaux Moyen ;
-- 3 étoiles : aucune erreur, aucun indice ;
-- 2 étoiles : au plus 3 erreurs et 1 indice ;
-- 1 étoile : niveau terminé avec davantage d’assistance.
-
-## Assets et direction artistique
-
-Les grandes planches dans `public/assets/references` servent uniquement de références. Le runtime charge exclusivement les PNG individuels : logo, mascottes, cadre, marqueurs, décor et FX. Les cellules, boutons, panneaux et toggles restent des objets Phaser redimensionnables.
-
-## Audio
-
-Le pack ne contient pas de sons. `AudioService` fournit donc des feedbacks synthétiques légers, clairement isolés derrière un service remplaçable. La musique est préparée dans les préférences mais reste inactive jusqu’à l’ajout d’une piste licenciée.
-
-## Android
-
-Le projet `android/` est préconfiguré avec l’identifiant `re.meowza.game`. Après modification du web :
-
-```bash
+```sh
 npm run cap:sync
 npm run android
+npm run ios
 ```
 
-Ne jamais committer de keystore, credentials ou fichier `.env` secret.
+Le projet Android et le projet Xcode sont inclus. iOS nécessite macOS, Xcode et CocoaPods. Aucun certificat de signature n’est inclus. Voir [les vérifications natives et la livraison](docs/mobile-release.md).
 
-## Captures
+## Sauvegarde et confort
 
-Les captures de store pourront être ajoutées après validation sur appareils physiques (320×568 à 414×896 et Android réel).
+La clé `meowza-save-v1` est conservée. Progression, meilleurs scores, préférences et dernière partie sont sauvegardés via Capacitor Preferences. Les écritures sont sérialisées ; une erreur de stockage à la victoire permet de réessayer. Pas de compte, analytics, publicité ni appel réseau nécessaire au jeu. La musique synthétique est optionnelle et désactivée par défaut. Sons et vibrations sont configurables ; les animations réduites respectent la préférence système initiale.
+
+## Graphismes
+
+Nouveaux assets générés : décor de l’arbre, Nimbus, Moka, icône d’application. Les sprites sont transparents, les chats se distinguent aussi par leur expression. Les dérivés WebP limitent le poids embarqué. Plateformes, nuages, boutons, grille et particules sont des objets Phaser. Nunito est embarquée pour fonctionner hors ligne. Voir [la provenance des assets](docs/assets.md).
+
+## État de validation
+
+La compilation web, les tests automatisés et les contrôles des 110 niveaux ont été exécutés. La synchronisation native a été exécutée. La compilation signée, les tests sur appareil et le contrôle visuel interactif restent à réaliser : le navigateur distant ne peut pas accéder au serveur local de cet environnement. Cette version est une base de test, pas une soumission aux stores validée.

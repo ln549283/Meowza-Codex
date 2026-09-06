@@ -1,43 +1,32 @@
 import Phaser from 'phaser';
-import { C } from './theme';
+import { C,FONT } from './theme';
 import { AudioService } from '../services/AudioService';
-
+import { SaveService } from '../services/SaveService';
+export function label(scene:Phaser.Scene,x:number,y:number,text:string,size=32,color=C.ink,minimum=34){return scene.add.text(x,y,text,{fontFamily:FONT,fontSize:`${Math.max(minimum,size)}px`,fontStyle:'bold',color,align:'center',wordWrap:{width:980},lineSpacing:5}).setOrigin(.5);}
 export function cozyBackground(scene:Phaser.Scene){
-  scene.cameras.main.setBackgroundColor(C.cream);
-  const bands=[0xfff8ee,0xfff2e5,0xffeadc,0xffe2d3];
-  bands.forEach((color,i)=>scene.add.ellipse(540,300+i*520,1500,950,color,.48));
-  scene.add.image(100,1680,'plant').setScale(1.8).setAlpha(.62);
-  scene.add.image(980,1760,'pillow').setScale(1.5).setAngle(12).setAlpha(.65);
+ scene.cameras.main.setBackgroundColor(C.cream);
+ scene.add.image(540,960,'tree-bg').setDisplaySize(1080,1920).setAlpha(.28);
+ scene.add.rectangle(540,960,1080,1920,C.cream,.45);
 }
-export function title(scene:Phaser.Scene,text:string,y:number,size=64){
-  return scene.add.text(540,y,text,{fontFamily:'Arial Rounded MT Bold, sans-serif',fontSize:`${size}px`,fontStyle:'bold',color:C.ink,align:'center',stroke:'#fff8ef',strokeThickness:9,shadow:{offsetY:5,color:'#d59f8b',blur:3,fill:true}}).setOrigin(.5);
-}
+export function title(scene:Phaser.Scene,text:string,y:number,size=64){return label(scene,540,y,text,size);}
 export function panel(scene:Phaser.Scene,x:number,y:number,w:number,h:number,fill=C.panel,alpha=.97){
-  const g=scene.add.graphics();
-  g.fillStyle(0x734b51,.12).fillRoundedRect(x-w/2+8,y-h/2+14,w,h,48);
-  g.fillStyle(fill,alpha).lineStyle(5,0xf0c9a4,1).fillRoundedRect(x-w/2,y-h/2,w,h,48).strokeRoundedRect(x-w/2,y-h/2,w,h,48);
-  g.lineStyle(3,0xffffff,.72).strokeRoundedRect(x-w/2+10,y-h/2+10,w-20,h-20,39);
-  return g;
+ const g=scene.add.graphics();g.fillStyle(0x79618a,.12).fillRoundedRect(x-w/2,y-h/2+14,w,h,46);g.fillStyle(fill,alpha).fillRoundedRect(x-w/2,y-h/2,w,h,46);g.lineStyle(4,0xffffff,.8).strokeRoundedRect(x-w/2,y-h/2,w,h,46);return g;
 }
-export function button(scene:Phaser.Scene,x:number,y:number,w:number,label:string,onClick:()=>void,color=C.teal){
-  const c=scene.add.container(x,y),g=scene.add.graphics();
-  g.fillStyle(0x563845,.18).fillRoundedRect(-w/2+5,-43+12,w,86,32);
-  g.fillStyle(color,1).lineStyle(4,0xffffff,.55).fillRoundedRect(-w/2,-43,w,86,32).strokeRoundedRect(-w/2,-43,w,86,32);
-  g.fillStyle(0xffffff,.16).fillRoundedRect(-w/2+12,-34,w-24,28,18);
-  const t=scene.add.text(0,-2,label,{fontFamily:'Arial Rounded MT Bold, sans-serif',fontSize:'32px',fontStyle:'bold',color:'#ffffff',shadow:{offsetY:3,color:'#4a2d38',blur:1,fill:true}}).setOrigin(.5);
-  c.add([g,t]).setSize(w,92).setInteractive({useHandCursor:true}).on('pointerdown',()=>{AudioService.play('button');scene.tweens.add({targets:c,scale:.94,duration:70,yoyo:true,ease:'Sine.Out'});onClick();});return c;
+export function press(scene:Phaser.Scene,c:Phaser.GameObjects.Container,w:number,h:number,onClick:()=>void){
+ c.setSize(w,h).setInteractive({useHandCursor:true});
+ c.on('pointerdown',()=>{if(!SaveService.data.settings.reducedMotion)c.setScale(.96);});
+ c.on('pointerout',()=>c.setScale(1));
+ c.on('pointerup',(p:Phaser.Input.Pointer)=>{c.setScale(1);if(p.getDistance()>20||scene.registry.get('mapDragging'))return;AudioService.play('button');onClick();});return c;
 }
-export function roundButton(scene:Phaser.Scene,x:number,y:number,label:string,onClick:()=>void,color=0xffd9bb){
-  const c=scene.add.container(x,y),g=scene.add.graphics();g.fillStyle(0x563845,.15).fillCircle(4,7,49);g.fillStyle(color).lineStyle(4,0xffffff,.8).fillCircle(0,0,47).strokeCircle(0,0,47);
-  c.add([g,scene.add.text(0,-2,label,{fontFamily:'Arial Rounded MT Bold',fontSize:'42px',fontStyle:'bold',color:C.ink}).setOrigin(.5)]).setSize(100,100).setInteractive({useHandCursor:true}).on('pointerdown',()=>{AudioService.play('button');scene.tweens.add({targets:c,scale:.9,duration:70,yoyo:true});onClick();});return c;
+export function button(scene:Phaser.Scene,x:number,y:number,w:number,text:string,onClick:()=>void,color=C.teal){
+ const c=scene.add.container(x,y),g=scene.add.graphics();g.fillStyle(0x55405e,.15).fillRoundedRect(-w/2,-49,w,112,38);g.fillStyle(color).fillRoundedRect(-w/2,-56,w,108,38);g.lineStyle(3,0xffffff,.65).strokeRoundedRect(-w/2,-56,w,108,38);g.fillStyle(0xffffff,.15).fillRoundedRect(-w/2+12,-46,w-24,35,22);c.add([g,label(scene,0,-2,text,34,'#ffffff')]);return press(scene,c,w,116,onClick);
 }
-export function catBadge(scene:Phaser.Scene,x:number,y:number,w:number,label:string,color:number){
-  const c=scene.add.container(x,y),g=scene.add.graphics();g.fillStyle(color).fillTriangle(-w/2+28,-30,-w/2+58,-77,-w/2+84,-27).fillTriangle(w/2-84,-27,w/2-58,-77,w/2-28,-30);g.fillStyle(0x000000,.14).fillRoundedRect(-w/2+5,-29,w,68,30);g.fillStyle(color).lineStyle(4,0xffffff,.55).fillRoundedRect(-w/2,-36,w,68,30).strokeRoundedRect(-w/2,-36,w,68,30);c.add([g,scene.add.text(0,-3,label,{fontFamily:'Arial Rounded MT Bold',fontSize:'31px',fontStyle:'bold',color:'#fff'}).setOrigin(.5)]);return c;
-}
-export function levelTile(scene:Phaser.Scene,x:number,y:number,n:number,color:number,locked:boolean,stars:number,onClick:()=>void){
-  const c=scene.add.container(x,y),g=scene.add.graphics(),s=112;g.fillStyle(0x5a3b43,.13).fillRoundedRect(-s/2+4,-s/2+8,s,s,25);g.fillStyle(locked?0xc9bcb5:color).lineStyle(4,0xffffff,.55).fillRoundedRect(-s/2,-s/2,s,s,25).strokeRoundedRect(-s/2,-s/2,s,s,25);g.fillStyle(0xffffff,.15).fillRoundedRect(-s/2+9,-s/2+8,s-18,32,16);const label=scene.add.text(0,-7,locked?'🔒':String(n),{fontFamily:'Arial Rounded MT Bold',fontSize:locked?'33px':'40px',fontStyle:'bold',color:'#fff',shadow:{offsetY:3,color:'#6d3b43',fill:true}}).setOrigin(.5);const starText=scene.add.text(0,39,stars?'★'.repeat(stars):'· · ·',{fontSize:stars?'20px':'18px',color:stars?'#ffe273':'#ffffff',stroke:'#a8683a',strokeThickness:2}).setOrigin(.5);c.add([g,label,starText]);if(!locked)c.setSize(s,s).setInteractive({useHandCursor:true}).on('pointerdown',()=>{AudioService.play('button');scene.tweens.add({targets:c,scale:.9,duration:70,yoyo:true});onClick();});return c;
-}
-export function backButton(scene:Phaser.Scene,onClick:()=>void){return roundButton(scene,88,105,'‹',onClick);}
-export function imageContain(image:Phaser.GameObjects.Image,maxW:number,maxH:number){const scale=Math.min(maxW/image.width,maxH/image.height);return image.setScale(scale);}
-export function imageCover(image:Phaser.GameObjects.Image,w:number,h:number){const scale=Math.max(w/image.width,h/image.height);return image.setScale(scale);}
-export function fadeIn(scene:Phaser.Scene){scene.cameras.main.fadeIn(220,255,246,236);}
+export function roundButton(scene:Phaser.Scene,x:number,y:number,text:string,onClick:()=>void,color=0xfff9f2){const c=scene.add.container(x,y),g=scene.add.graphics();g.fillStyle(0x79618a,.12).fillCircle(0,7,56);g.fillStyle(color).fillCircle(0,0,56);g.lineStyle(3,0xffffff,.9).strokeCircle(0,0,56);c.add([g,label(scene,0,-3,text,46)]);return press(scene,c,120,120,onClick);}
+export function backButton(scene:Phaser.Scene,onClick:()=>void){return roundButton(scene,95,105,'‹',onClick);}
+export function catBadge(scene:Phaser.Scene,x:number,y:number,w:number,text:string,color:number){const c=scene.add.container(x,y);const g=scene.add.graphics().fillStyle(color,.14).fillRoundedRect(-w/2,-28,w,56,28);c.add([g,label(scene,0,0,text,29)]);return c;}
+export function imageContain(image:Phaser.GameObjects.Image,maxW:number,maxH:number){return image.setScale(Math.min(maxW/image.width,maxH/image.height));}
+export function imageCover(image:Phaser.GameObjects.Image,w:number,h:number){return image.setScale(Math.max(w/image.width,h/image.height));}
+export function fadeIn(scene:Phaser.Scene){if(!SaveService.data.settings.reducedMotion)scene.cameras.main.fadeIn(220,255,246,238);}
+export function float(scene:Phaser.Scene,target:Phaser.GameObjects.Image|Phaser.GameObjects.Container,amount=12){if(!SaveService.data.settings.reducedMotion)scene.tweens.add({targets:target,y:`-=${amount}`,duration:1600,yoyo:true,repeat:-1,ease:'Sine.InOut'});}
+export function sparkles(scene:Phaser.Scene,x:number,y:number,count=12){if(SaveService.data.settings.reducedMotion)return;for(let i=0;i<count;i++){const a=i/count*Math.PI*2;const p=scene.add.star(x,y,4,4,11,[C.gold,C.pink,C.teal][i%3]!).setDepth(50);scene.tweens.add({targets:p,x:x+Math.cos(a)*160,y:y+Math.sin(a)*160,alpha:0,scale:.25,angle:90,duration:650,onComplete:()=>p.destroy()});}}
+export function cloud(scene:Phaser.Scene,x:number,y:number,w:number){const c=scene.add.container(x,y),g=scene.add.graphics();g.fillStyle(0xd6cbe9,.7).fillRoundedRect(-w/2,-15,w,105,52);g.fillStyle(0xf5efff).fillRoundedRect(-w/2,-30,w,105,52);g.fillCircle(-w*.23,-25,60).fillCircle(w*.04,-46,76).fillCircle(w*.29,-13,50);c.add(g);return c;}
