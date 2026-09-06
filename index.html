@@ -1,1 +1,28 @@
-<!doctype html><html lang="fr"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/><meta name="theme-color" content="#fff6ec"/><title>Meowza</title></head><body><div id="game" role="application" aria-label="Meowza, puzzle félin. Placez autant de chats gris que roux sans aligner trois chats identiques."></div><noscript>JavaScript est nécessaire pour jouer à Meowza.</noscript><script type="module" src="/src/main.ts"></script></body></html>
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#fff6ee" />
+  <title>Meowza</title>
+  <style>
+    #startup{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:#fff6ee;color:#51425f;text-align:center;font-family:system-ui,sans-serif}
+    #startup h1{font-size:48px;margin:0 0 16px}#startup p{font-size:17px;line-height:1.5;max-width:340px}#startup button{padding:14px 24px;border:0;border-radius:20px;background:#9972ac;color:white;font-size:17px;margin-top:16px}
+  </style>
+</head>
+<body>
+  <div id="startup" role="status" aria-live="polite"><h1>meowza</h1><p id="startup-status">Les chats arrivent…<br>Chargement du jeu.</p><button id="startup-retry" type="button" hidden>Réessayer</button></div>
+  <div id="game" role="application" aria-label="Meowza, puzzle félin. Placez autant de chats gris que roux sans aligner trois chats identiques."></div>
+  <noscript>JavaScript est nécessaire pour jouer à Meowza.</noscript>
+  <script>
+    (()=>{
+      const retry=document.getElementById('startup-retry');
+      const show=(message)=>{const status=document.getElementById('startup-status');if(status){status.textContent=message;retry.hidden=false;}};
+      retry.addEventListener('click',()=>location.reload());
+      window.addEventListener('error',()=>show('Le jeu n’a pas pu démarrer. Vérifie ta connexion, puis réessaie.'));
+      setTimeout(()=>show('Le chargement prend un peu de temps. Tu peux patienter ou réessayer.'),20000);
+    })();
+  </script>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
