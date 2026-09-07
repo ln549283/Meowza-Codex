@@ -16,13 +16,24 @@ export class GameScene extends Phaser.Scene {
  create(){
   this.hints=0;this.won=false;
   this.registry.set('mapDragging',false);const level=GameRegistry.selected;if(!level||!SaveService.isUnlocked(level.id)){this.scene.start('LevelSelect');return;}
-  fadeIn(this);cozyBackground(this);backButton(this,()=>this.scene.start('LevelSelect'));roundButton(this,985,105,'?',()=>{this.scene.pause();this.scene.launch('Rules',{fromGame:true});});
+  fadeIn(this);cozyBackground(this);
   title(this,`${level.id.startsWith('bonus-')?'Défi bonus':'Petit sommet'} ${Number(level.id.split('-')[1])}`,103,47);
   label(this,540,290,level.id==='trail-1'?'Autant de gris que de roux.':level.id==='trail-2'?'Le cœur relie deux chats identiques.':level.id==='trail-3'?'Jamais trois chats identiques à la suite.':level.id==='trail-4'?'Les griffes relient deux chats différents.':level.id==='trail-5'?'À toi de combiner les règles !':'',28);
   const board=new BoardView(this,540,790,level,960);
   const saved=SaveService.data.session;if(saved?.id===level.id&&saved.failed){this.scene.start('Lost',{reason:saved.remaining===0?'time':'errors'});return;}if(saved?.id===level.id){board.restore(saved.grid,saved.errors);this.hints=Math.max(0,saved.hints);}
   let remaining=saved?.id===level.id?saved.remaining??level.timeLimit??360:level.timeLimit??360;
   let started=saved?.id===level.id?!!saved.started:false;
+  const quit=()=>{SaveService.restartAttempt();this.scene.start('LevelSelect');};
+  const confirmQuit=()=>{
+   if(!started){quit();return;}
+   const shade=this.add.rectangle(540,960,1080,1920,0x453c51,.72).setDepth(300).setInteractive();
+   const card=panel(this,540,930,900,620).setDepth(301);
+   const heading=label(this,540,730,'Quitter ce niveau ?',48).setDepth(302);
+   const detail=label(this,540,900,'Ta progression sur cette tentative sera perdue :\ngrille, erreurs, chrono et indices.',32).setDepth(302);
+   const stay=button(this,540,1080,690,'Continuer la partie',()=>{[shade,card,heading,detail,stay,leave].forEach(o=>o.destroy());},C.teal).setDepth(302);
+   const leave=button(this,540,1240,690,'Quitter et recommencer plus tard',quit,0xb398a5).setDepth(302);
+  };
+  backButton(this,confirmQuit);roundButton(this,985,105,'?',()=>{this.scene.pause();this.scene.launch('Rules',{fromGame:true});});
   const clock=label(this,540,198,'',38);board.onAttempt=()=>{started=true;};
   const lose=(reason:string)=>{board.locked=true;SaveService.data.failures[level.id]=(SaveService.data.failures[level.id]??0)+1;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,true);this.scene.start('Lost',{reason});};
   if(level.timed){
@@ -45,11 +56,12 @@ export class GameScene extends Phaser.Scene {
   };
   const drawHintQuota=()=>{hintQuota.clear();for(let i=0;i<MAX_HINTS_PER_ATTEMPT;i++){const used=i<SaveService.data.attemptPurchases;hintQuota.fillStyle(used?0xc9bcc7:0xffffff,used ? .55 : 1).fillCircle(505+i*35,1753,9);}};
 
-  const hint=button(this,540,1680,390,'Indice',()=>{if(this.won)return;const found=humanHint(board.grid,level.constraints,1);this.scene.pause();this.scene.launch('Hint',{step:found,levelId:level.id,onRead:()=>{const key=found?found.position.join(','):'';if(key&&!usedHints.has(key)){usedHints.add(key);this.hints++;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);}},apply:()=>{if(this.won||!found)return;board.reveal(found.position,found.value);AudioService.play('hint');}});},C.teal);
+  const hint=button(this,540,1680,390,'Indice',()=>{if(this.won||SaveService.data.attemptPurchases>=MAX_HINTS_PER_ATTEMPT)return;const found=humanHint(board.grid,level.constraints,1);this.scene.pause();this.scene.launch('Hint',{step:found,levelId:level.id,onPurchased:()=>{started=true;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);},onRead:()=>{const key=found?found.position.join(','):'';if(key&&!usedHints.has(key)){usedHints.add(key);this.hints++;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);}},apply:()=>{if(this.won||!found)return;board.reveal(found.position,found.value);AudioService.play('hint');}});},C.teal);
   const magnifier=this.add.graphics().lineStyle(6,0xffffff).strokeCircle(462,1674,18);magnifier.lineBetween(475,1687,493,1705);
+  const updateHintButton=()=>{const exhausted=SaveService.data.attemptPurchases>=MAX_HINTS_PER_ATTEMPT;if(exhausted){hint.disableInteractive().setAlpha(.42);magnifier.setAlpha(.42);}else{hint.setInteractive({useHandCursor:true}).setAlpha(1);magnifier.setAlpha(1);}};
 
   const changed=()=>{
-   status.setText('');info.setText(`${SaveService.data.kibble} croquettes`);drawHeart();drawHintQuota();
+   status.setText('');info.setText(`${SaveService.data.kibble} croquettes`);drawHeart();drawHintQuota();updateHintButton();
    if(board.errors>previousErrors&&!SaveService.data.settings.reducedMotion){this.tweens.add({targets:heart,scaleX:1.14,scaleY:1.14,duration:120,yoyo:true});}previousErrors=board.errors;
    if(!started&&board.grid.some((row,r)=>row.some((v,c)=>v!==level.initial[r]![c])))started=true;
    SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started);
