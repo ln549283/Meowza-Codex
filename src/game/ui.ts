@@ -13,10 +13,20 @@ export function panel(scene:Phaser.Scene,x:number,y:number,w:number,h:number,fil
  const g=scene.add.graphics();g.fillStyle(0x79618a,.12).fillRoundedRect(x-w/2,y-h/2+14,w,h,46);g.fillStyle(fill,alpha).fillRoundedRect(x-w/2,y-h/2,w,h,46);g.lineStyle(4,0xffffff,.8).strokeRoundedRect(x-w/2,y-h/2,w,h,46);return g;
 }
 export function press(scene:Phaser.Scene,c:Phaser.GameObjects.Container,w:number,h:number,onClick:()=>void){
+ let downX=0,downY=0,pressed=false;
  c.setSize(w,h).setInteractive({useHandCursor:true});
- c.on('pointerdown',()=>{if(!SaveService.data.settings.reducedMotion)c.setScale(.96);});
- c.on('pointerout',()=>c.setScale(1));
- c.on('pointerup',(p:Phaser.Input.Pointer)=>{c.setScale(1);if(p.getDistance()>20||scene.registry.get('mapDragging'))return;AudioService.play('button');onClick();});return c;
+ c.on('pointerdown',(p:Phaser.Input.Pointer)=>{pressed=true;downX=p.x;downY=p.y;if(!SaveService.data.settings.reducedMotion)c.setScale(.96);});
+ c.on('pointerout',()=>{pressed=false;c.setScale(1);});
+ c.on('pointerup',(p:Phaser.Input.Pointer)=>{
+  c.setScale(1);
+  if(!pressed)return;
+  pressed=false;
+  const moved=Math.hypot(p.x-downX,p.y-downY);
+  const isMap=scene.scene.key==='LevelSelect';
+  if(moved>28||(isMap&&scene.registry.get('mapDragging')===true))return;
+  AudioService.play('button');onClick();
+ });
+ return c;
 }
 export function button(scene:Phaser.Scene,x:number,y:number,w:number,text:string,onClick:()=>void,color=C.teal){
  const c=scene.add.container(x,y),g=scene.add.graphics();g.fillStyle(0x55405e,.15).fillRoundedRect(-w/2,-49,w,112,38);g.fillStyle(color).fillRoundedRect(-w/2,-56,w,108,38);g.lineStyle(3,0xffffff,.65).strokeRoundedRect(-w/2,-56,w,108,38);g.fillStyle(0xffffff,.15).fillRoundedRect(-w/2+12,-46,w-24,35,22);c.add([g,label(scene,0,-2,text,34,'#ffffff')]);return press(scene,c,w,116,onClick);
