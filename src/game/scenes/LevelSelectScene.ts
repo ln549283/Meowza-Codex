@@ -5,7 +5,7 @@ import { cosmetics } from '../../core/cosmetics';
 import { loadSummit } from '../../services/JourneyService';
 import { SaveService } from '../../services/SaveService';
 import { GameRegistry } from '../registry';
-import { button,cloud,cozyBackground,imageContain,label,panel,press,roundButton } from '../ui';
+import { button,cozyBackground,imageContain,label,panel,press,roundButton } from '../ui';
 import { C } from '../theme';
 export class LevelSelectScene extends Phaser.Scene {
  private busy=false;private decorating=false;private slot=0;private offset=0;private current=1;
@@ -17,7 +17,7 @@ export class LevelSelectScene extends Phaser.Scene {
   cozyBackground(this);this.registry.set('mapDragging',false);
   this.current=nextSummit(SaveService.data.progress);const current=this.current;
   this.offset=this.pendingOffset??treeFocus(current);
-  this.mist=this.add.container(0,0,[cloud(this,410,0,650),cloud(this,810,-25,470)]).setDepth(20);
+  this.mist=this.add.container(0,0,[imageContain(this.add.image(540,0,'cloud-v5'),1050,350)]).setDepth(20);
   this.refreshRows();
   const play=async(n:number)=>{if(this.busy||this.decorating)return;this.busy=true;ctaLabel.setText('Préparation…');try{const l=await loadSummit(n);if(!this.scene.isActive())return;if(SaveService.data.session?.id!==l.id||SaveService.data.session.failed||SaveService.data.session.errors>=3)SaveService.restartAttempt();GameRegistry.selected=l;this.scene.start('Game');}catch{if(this.scene.isActive()){ctaLabel.setText('Réessayer');this.busy=false;}}};
   this.events.on('play-level',play);
@@ -65,7 +65,7 @@ export class LevelSelectScene extends Phaser.Scene {
   const add=(o:Phaser.GameObjects.GameObject)=>{row.add(o);return o;};
   const wood=SaveService.data.equipped.wood,tint=wood==='walnut'?0xd6b6a2:wood==='birch'?0xfff1d9:0xffffff;
   if(n>1){const post=this.add.image(540,TREE_STEP/2+60,'tree-modules-v5','post').setDisplaySize(96,TREE_STEP+30).setTint(tint);add(post);}
-  else add(imageContain(this.add.image(540,225,'tree-modules-v5','base'),660,300).setTint(tint));
+  else {add(this.add.image(540,135,'tree-modules-v5','post').setDisplaySize(96,240).setTint(tint));add(imageContain(this.add.image(540,225,'tree-modules-v5','base'),660,300).setTint(tint));}
   const support=this.add.graphics().lineStyle(28,0xae784c).lineBetween(540,105,x,70).lineStyle(9,0xf5cf9b).lineBetween(540,97,x,62);add(support);
   const cushion=SaveService.data.equipped.cushion;
   add(imageContain(this.add.image(x,74,'tree-modules-v5',cushion==='teal'?'teal':'peach'),440,270).setTint(cushion==='rose'?0xffd2e4:tint));

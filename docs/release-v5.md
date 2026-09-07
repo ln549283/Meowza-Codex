@@ -29,3 +29,11 @@ Use case stylized-concept. Production game sprite atlas, transparent alpha backg
 
 ### Pièce
 Use case stylized-concept. Vertical background art for a premium cozy cat puzzle mobile game. Portrait 9:16 composition, full bleed softly illustrated warm sunlit room. Main central 70 percent from x15% to85% is EMPTY softly shaded pale warm cream wall, very low contrast, for placing a scrolling cat tree in front. At far left edge a narrow glimpse of large rounded window with sheer peach curtains, soft mint garden visible outside. At far right edge a narrow trailing leafy plant and the rounded edge of a wooden bookcase, kept peripheral and understated. Bottom 12 percent honey wood floor with a subtle oval cream rug. Top softly lit plaster. Charming high quality painterly 3D casual game style, tactile materials, warm peach and mint accents, gentle ambient occlusion, pleasant luminous light. Strong restraint: NO cat tree, NO cats, NO floating platforms, NO logo, NO text, NO interface, NO focal objects in center, NO busy wallpaper or tiny trinkets. The room supports an interactive foreground and never competes with it.
+
+### Nuages
+Asset : `public/assets/cloud-v5.webp`, génération intégrée, déclinaison WebP transparente.
+
+Use case stylized-concept. Single isolated wide cloud bank sprite for a premium cozy mobile cat puzzle game map, on truly transparent alpha background. A horizontal cluster of overlapping plush cloud lobes, soft ivory white top with very subtle lavender and warm pink shadow underneath, tactile soft 3D illustrated casual game style, rounded sculptural volume and gentle highlights, crisp clean silhouette at small size, no photoreal weather, no grey storm clouds. Wide 3:1 composition with generous transparent margins, full cloud silhouette uncropped. No text, no faces, no stars, no scenery, no sun, no objects. Designed to gently hide the next platforms above a honey wood cat tree. Not a flat vector icon.
+
+## Construction native vérifiée
+Sur le commit `6a9bfbeb6a9307b17eb9300f55f4d9b089d42f43`, les builds Android Debug et iOS Simulator ont réussi dans GitHub Actions (run 34075095305). Cela valide la construction, pas une installation de distribution ni un test thermique.
