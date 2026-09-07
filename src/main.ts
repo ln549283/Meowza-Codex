@@ -14,6 +14,16 @@ import { SettingsScene } from './game/scenes/SettingsScene';
 import { VictoryScene } from './game/scenes/VictoryScene';
 import { AudioService } from './services/AudioService';
 import { SaveService } from './services/SaveService';
+
+function showRuntimeError(message:string){
+ let box=document.getElementById('meowza-runtime-error');
+ if(!box){box=document.createElement('pre');box.id='meowza-runtime-error';Object.assign(box.style,{position:'fixed',left:'8px',right:'8px',bottom:'8px',zIndex:'999999',maxHeight:'40vh',overflow:'auto',margin:'0',padding:'12px',whiteSpace:'pre-wrap',font:'12px monospace',background:'rgba(80,0,20,.94)',color:'#fff',borderRadius:'8px'});document.body.appendChild(box);}
+ box.textContent=message;
+}
+
+window.addEventListener('error',e=>showRuntimeError(`Erreur runtime\n${e.message}\n${e.filename}:${e.lineno}:${e.colno}`));
+window.addEventListener('unhandledrejection',e=>showRuntimeError(`Promise rejetée\n${String(e.reason?.stack??e.reason)}`));
+
 async function start(){
  await document.fonts.load('700 32px Nunito');await document.fonts.load('800 32px Nunito');
  const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#fff6ee',transparent:false,antialias:true,pixelArt:false,roundPixels:true,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[BootScene,PreloadScene,HomeScene,LevelSelectScene,GameScene,RulesScene,SettingsScene,VictoryScene],render:{powerPreference:'low-power'}});
@@ -21,7 +31,6 @@ async function start(){
  document.addEventListener('visibilitychange',()=>visibility(!document.hidden));
  void App.addListener('appStateChange',({isActive})=>visibility(isActive));
  void App.addListener('backButton',()=>{const active=game.scene.getScenes(true).at(-1);if(!active)return;const key=active.scene.key;if(key==='Rules'&&game.registry.get('rulesFromGame')){active.scene.stop();game.scene.resume('Game');}else if(key==='Game')active.scene.start('LevelSelect');else if(key==='Home')void App.minimizeApp();else if(key!=='Boot'&&key!=='Preload')active.scene.start('Home');});
- // Expose only in development for interaction and regression checks.
  if(import.meta.env.DEV)Object.assign(window,{meowza:game});
 }
 void start();
