@@ -4,6 +4,7 @@ Version biomes et croquettes : [règles, économie, migration et graphismes](doc
 
 Puzzle félin Phaser / TypeScript, embarqué sur iOS et Android avec Capacitor. Deux familles de chats : autant de gris que de roux dans chaque ligne et colonne, jamais trois identiques consécutifs, liens cœur (identiques) et griffes (différents).
 
+
 ## Jouer
 
 Choisir Nimbus ou Moka sous la grille, puis toucher une case. Retoucher un chat de la famille sélectionnée vide la case. Les petits cadenas signalent les cases fixes. Les commandes permettent d’annuler un coup, dévoiler un indice ou effacer la grille. Effacer/annuler ne supprime pas les erreurs et indices du parcours en cours.
