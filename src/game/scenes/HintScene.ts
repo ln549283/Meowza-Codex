@@ -7,7 +7,7 @@ import { C } from '../theme';
 function proofPages(s:HumanStep):string[]{return s.rule==='contradiction'?[`Imagine un chat ${s.assumption===1?'gris':'roux'} en L${s.position[0]+1} · C${s.position[1]+1}. Ce test reste dans notre tête.`,...(s.consequences??[]).map(x=>x.explanation),s.contradiction!,s.explanation]:[s.explanation];}
 export class HintScene extends Phaser.Scene {
  constructor(){super('Hint');}
- create({step,levelId,apply,onRead,open=false}:{step:HumanStep|null;levelId:string;apply:()=>void;onRead:()=>void;open?:boolean}){
+ create({step,levelId,apply,onRead,onPurchased,open=false}:{step:HumanStep|null;levelId:string;apply:()=>void;onRead:()=>void;onPurchased?:()=>void;open?:boolean}){
   cozyBackground(this);title(this,'Un petit coup de patte',235,56);panel(this,540,940,940,1120);
   const close=()=>{this.scene.stop();this.scene.resume('Game');};
   const owned=step&&(SaveService.data.purchasedHints[levelId]??[]).some(s=>s.position[0]===step.position[0]&&s.position[1]===step.position[1]);
@@ -21,7 +21,7 @@ export class HintScene extends Phaser.Scene {
    label(this,540,1060,step&&!exhausted?'Une case expliquée, étape par étape.':'Tu peux consulter les règles ou continuer à réfléchir.',31);
    label(this,540,1180,`${SaveService.data.kibble} croquettes disponibles`,32);
    const text=!step||exhausted?'Revenir au jeu':affordable?`Voir l’indice · ${cost} croquettes`:`Il manque ${cost-SaveService.data.kibble} croquettes`;
-   const buy=button(this,540,1400,770,text,()=>{if(!step||exhausted){close();return;}if(!affordable||!SaveService.buyHint(levelId,step))return;this.scene.restart({step,levelId,apply,onRead,open:true});},C.teal);
+   const buy=button(this,540,1400,770,text,()=>{if(!step||exhausted){close();return;}if(!affordable||!SaveService.buyHint(levelId,step))return;onPurchased?.();this.scene.restart({step,levelId,apply,onRead,onPurchased,open:true});},C.teal);
    if(step&&!exhausted&&!affordable)buy.disableInteractive().setAlpha(.5);
    button(this,540,1590,640,'Continuer à réfléchir',close,0xb398a5);
    button(this,540,1760,540,'Consulter les règles',()=>{this.scene.stop();this.scene.start('Rules',{fromGame:true});},0xb99773);return;
