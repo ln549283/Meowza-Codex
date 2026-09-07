@@ -7,13 +7,23 @@ import { GameRegistry } from '../registry';
 import { button,cloud,fadeIn,float,imageContain,label,panel,press,roundButton,sparkles } from '../ui';
 import { C } from '../theme';
 const levels=levelsData as unknown as Level[];
+const isDifficulty=(value:unknown):value is Difficulty=>typeof value==='string'&&chapters.some(ch=>ch.id===value);
 export class LevelSelectScene extends Phaser.Scene {
  private chapter:Difficulty='easy'; private reveal=false;
  constructor(){super('LevelSelect');}
- init(data:{chapter?:Difficulty;reveal?:boolean}={}){this.chapter=data.chapter??GameRegistry.selected?.difficulty??(SaveService.data.session?.id.split('-')[0] as Difficulty|undefined)??'easy';this.reveal=data.reveal??false;}
+ init(data:{chapter?:Difficulty;reveal?:boolean}={}){
+  const sessionDifficulty=SaveService.data.session?.id.split('-')[0];
+  const candidate=data.chapter??GameRegistry.selected?.difficulty??sessionDifficulty;
+  this.chapter=isDifficulty(candidate)?candidate:'easy';
+  this.reveal=data.reveal??false;
+ }
  create(){
   fadeIn(this);this.registry.set('mapDragging',false);
-  const config=chapters.find(c=>c.id===this.chapter)!;const group=levels.filter(l=>l.difficulty===this.chapter);const current=group.find(l=>SaveService.isUnlocked(l.id)&&!SaveService.data.progress[l.id]?.completed)??group[group.length-1]!;
+  const config=chapters.find(c=>c.id===this.chapter)??chapters[0]!;
+  const group=levels.filter(l=>l.difficulty===config.id);
+  if(!group.length){this.scene.start('Home');return;}
+  this.chapter=config.id;
+  const current=group.find(l=>SaveService.isUnlocked(l.id)&&!SaveService.data.progress[l.id]?.completed)??group[group.length-1]!;
   const height=group.length*250+1650,base=height-690;this.cameras.main.setBounds(0,0,1080,height);this.add.image(540,960,'tree-bg').setDisplaySize(1080,1920).setScrollFactor(0);this.add.rectangle(540,960,1080,1920,0xfaf0ff,.23).setScrollFactor(0);
   const trunk=this.add.graphics();trunk.fillStyle(0xe4c4b1,.88).fillRoundedRect(485,650,110,base-510,45);trunk.lineStyle(5,0xf8e5d3,.8);for(let y=690;y<base+100;y+=27)trunk.lineBetween(490,y,590,y-20);
   group.forEach((level,i)=>{
