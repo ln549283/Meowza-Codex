@@ -16,16 +16,16 @@ export function press(scene:Phaser.Scene,c:Phaser.GameObjects.Container,w:number
  let downX=0,downY=0,pressed=false;
  c.setSize(w,h).setInteractive({useHandCursor:true});
  c.on('pointerdown',(p:Phaser.Input.Pointer)=>{pressed=true;downX=p.x;downY=p.y;if(!SaveService.data.settings.reducedMotion)c.setScale(.96);});
- c.on('pointerout',()=>{pressed=false;c.setScale(1);});
  c.on('pointerup',(p:Phaser.Input.Pointer)=>{
   c.setScale(1);
   if(!pressed)return;
   pressed=false;
   const moved=Math.hypot(p.x-downX,p.y-downY);
   const isMap=scene.scene.key==='LevelSelect';
-  if(moved>28||(isMap&&scene.registry.get('mapDragging')===true))return;
+  if(moved>32||(isMap&&scene.registry.get('mapDragging')===true))return;
   AudioService.play('button');onClick();
  });
+ c.on('pointerupoutside',()=>{pressed=false;c.setScale(1);});
  return c;
 }
 export function button(scene:Phaser.Scene,x:number,y:number,w:number,text:string,onClick:()=>void,color=C.teal){
