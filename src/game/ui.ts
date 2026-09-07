@@ -8,8 +8,12 @@ export function cozyBackground(scene:Phaser.Scene){
  scene.cameras.main.setBackgroundColor(C.cream);
  const theme=cosmetics.find(c=>c.id===SaveService.data.equipped.background)!;
  scene.cameras.main.setBackgroundColor(theme.color);
- const g=scene.add.graphics();g.fillStyle(0xffffff,.25).fillCircle(100,360,280).fillCircle(1080,1500,400);
- g.lineStyle(3,0xffffff,.22);for(let x=90;x<1080;x+=180)g.lineBetween(x,0,x,1920);
+ if(scene.textures.exists('room-v5')){
+  const room=scene.add.image(540,960,'room-v5').setDisplaySize(1080,1920);
+  if(theme.id==='mint')room.setTint(0xd9f4df);else if(theme.id==='night')room.setTint(0xcfc8ed);
+  if(scene.scene.key==='Game'||scene.scene.key==='Hint'||scene.scene.key==='Rules')scene.add.rectangle(540,960,1080,1920,theme.color,.77);
+ }
+
 }
 export function title(scene:Phaser.Scene,text:string,y:number,size=64){return label(scene,540,y,text,size);}
 export function panel(scene:Phaser.Scene,x:number,y:number,w:number,h:number,fill=C.panel,alpha=.97){
