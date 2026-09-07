@@ -3,7 +3,7 @@ name: Deploy GitHub Pages
 on:
   push:
     branches:
-      - codex/kawaii-cat-tree
+      - kawaii-cat-tree-refonte-v3
 
   workflow_dispatch:
 
