@@ -6,6 +6,7 @@ on:
       - kawaii-cat-tree-refonte-v2
   workflow_dispatch:
 
+# Custom Vite deployment for Meowza v2.
 permissions:
   contents: read
   pages: write
