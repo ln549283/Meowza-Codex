@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import type { HumanStep } from '../../core/humanSolver';
-import { hintCost } from '../../core/economy';
+import { hintCost,MAX_HINTS_PER_ATTEMPT } from '../../core/economy';
 import { SaveService } from '../../services/SaveService';
 import { button,cozyBackground,imageContain,label,panel,title } from '../ui';
 import { C } from '../theme';
@@ -11,14 +11,18 @@ export class HintScene extends Phaser.Scene {
   cozyBackground(this);title(this,'Un petit coup de patte',235,56);panel(this,540,940,940,1120);
   const close=()=>{this.scene.stop();this.scene.resume('Game');};
   const owned=step&&(SaveService.data.purchasedHints[levelId]??[]).some(s=>s.position[0]===step.position[0]&&s.position[1]===step.position[1]);
+  const used=SaveService.data.attemptPurchases,exhausted=used>=MAX_HINTS_PER_ATTEMPT;
   if(!open&&!owned){
    imageContain(this.add.image(540,590,'orange-cat'),230,230);
-   label(this,540,835,step?'Un indice pour cette grille':'Aucune déduction disponible',45);
-   const cost=hintCost(SaveService.data.attemptPurchases),affordable=SaveService.data.kibble>=cost;
-   label(this,540,1030,step?'Une case expliquée, étape par étape.':'Tu peux consulter les règles ou revenir au jeu.',34);
+   label(this,540,815,exhausted?'3/3 indices utilisés':step?'Un indice pour cette grille':'Aucune déduction disponible',45);
+   const cost=hintCost(used),affordable=!exhausted&&SaveService.data.kibble>=cost;
+   const quotaText=exhausted?'Tes trois indices précis ont été utilisés.':used===2?`Dernier indice · ${cost} croquettes`:`Indice ${used+1}/3 · ${cost} croquettes`;
+   label(this,540,960,quotaText,34);
+   label(this,540,1060,step&&!exhausted?'Une case expliquée, étape par étape.':'Tu peux consulter les règles ou continuer à réfléchir.',31);
    label(this,540,1180,`${SaveService.data.kibble} croquettes disponibles`,32);
-   const buy=button(this,540,1400,770,!step?'Revenir au jeu':affordable?`Voir l’indice · ${cost} croquettes`:`Il manque ${cost-SaveService.data.kibble} croquettes`,()=>{if(!step){close();return;}if(!affordable||!SaveService.buyHint(levelId,step))return;this.scene.restart({step,levelId,apply,onRead,open:true});},C.teal);
-   if(step&&!affordable)buy.disableInteractive().setAlpha(.5);
+   const text=!step||exhausted?'Revenir au jeu':affordable?`Voir l’indice · ${cost} croquettes`:`Il manque ${cost-SaveService.data.kibble} croquettes`;
+   const buy=button(this,540,1400,770,text,()=>{if(!step||exhausted){close();return;}if(!affordable||!SaveService.buyHint(levelId,step))return;this.scene.restart({step,levelId,apply,onRead,open:true});},C.teal);
+   if(step&&!exhausted&&!affordable)buy.disableInteractive().setAlpha(.5);
    button(this,540,1590,640,'Continuer à réfléchir',close,0xb398a5);
    button(this,540,1760,540,'Consulter les règles',()=>{this.scene.stop();this.scene.start('Rules',{fromGame:true});},0xb99773);return;
   }
