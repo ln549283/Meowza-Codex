@@ -43,7 +43,7 @@ export class GameScene extends Phaser.Scene {
    if(board.errors>=2)heart.lineBetween(x+13,y+14,x-8,y+48).lineBetween(x-8,y+48,x+7,y+70);
    if(broken)heart.lineStyle(9,0x9b6674,.75).lineBetween(x-13,y-8,x+13,y+14);
   };
-  const drawHintQuota=()=>{hintQuota.clear();for(let i=0;i<MAX_HINTS_PER_ATTEMPT;i++)hintQuota.fillStyle(i<SaveService.data.attemptPurchases?0xc9bcc7:0xffffff,i<SaveService.data.attemptPurchases?.55:1).fillCircle(505+i*35,1753,9);};
+  const drawHintQuota=()=>{hintQuota.clear();for(let i=0;i<MAX_HINTS_PER_ATTEMPT;i++){const used=i<SaveService.data.attemptPurchases;hintQuota.fillStyle(used?0xc9bcc7:0xffffff,used?.55:1).fillCircle(505+i*35,1753,9);}};
 
   const hint=button(this,540,1680,390,'Indice',()=>{if(this.won)return;const found=humanHint(board.grid,level.constraints,1);this.scene.pause();this.scene.launch('Hint',{step:found,levelId:level.id,onRead:()=>{const key=found?found.position.join(','):'';if(key&&!usedHints.has(key)){usedHints.add(key);this.hints++;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);}},apply:()=>{if(this.won||!found)return;board.reveal(found.position,found.value);AudioService.play('hint');}});},C.teal);
   const magnifier=this.add.graphics().lineStyle(6,0xffffff).strokeCircle(462,1674,18);magnifier.lineBetween(475,1687,493,1705);
