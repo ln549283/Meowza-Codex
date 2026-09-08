@@ -140,3 +140,16 @@ P03 — Recette web : niveau 2 repris sur la même grille et avec 50 croquettes 
 P04 — Liaison explication / plateau : à la fermeture d'un indice déjà acheté, les prémisses et la cible sont mises en évidence sur le plateau. La fermeture d'une confirmation sans achat ne déclenche pas ce repère. Aucun coût, quota ou timing modifié ; aucun travail d'animation ajouté.
 
 P04 — Le premier contrôle web a trouvé un défaut : l'événement de reprise de Game effaçait le surlignage demandé à la fermeture de Hint. Correction : conserver la preuve affichée au niveau de la scène jusqu'au prochain placement, y compris pendant la reprise. Le débit observé était correct (50 → 35 croquettes, 1/3). Recette de la correction à confirmer.
+
+Contrôle complémentaire P03 (environnement de développement, pas téléphone) :
+
+| Niveau | Timed | Unique | Human Solver | Hypothèses | Chaîne max | Génération observée |
+|---|---|---|---|---:|---:|---:|
+| 151 | Non | Oui | Résolu | 0 | 0 | 124 ms |
+| 154 | Oui | Oui | Résolu | 3 | 4 | 658 ms |
+| 10004 | Oui | Oui | Résolu | 2 | 4 | 423 ms |
+| 100004 | Oui | Oui | Résolu | 3 | 3 | 1023 ms |
+
+Échantillon ponctuel, pas une garantie pour toute graine ni une calibration humaine du chrono.
+
+Validation du correctif c314c85653d2b4c3799f7442637221d7203f78db : bundle index-dIvtZsPY.js observé sur Netlify ; nouveau premier lancement directement sur L1, texte en trois lignes sans chevauchement ; placements hors de l'ordre proposé correctement suivis ; victoire +5 ; replay sans tutoriel. Achat d'un indice dans ce replay : 65 → 50 croquettes, quota 1/3, puis retour au plateau avec prémisses dorées et cible turquoise persistantes. CI verify, Android et iOS réussies. Validation physique toujours ouverte.
