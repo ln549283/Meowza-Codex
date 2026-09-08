@@ -19,18 +19,18 @@ export class GameScene extends Phaser.Scene {
   fadeIn(this);cozyBackground(this);
   title(this,`${level.id.startsWith('bonus-')?'Défi bonus':'Petit sommet'} ${Number(level.id.split('-')[1])}`,103,47);
   const onboarding=level.id.startsWith('trail-')?Number(level.id.split('-')[1]):0;
-  const ruleText=onboarding===1?'Autant de chats gris que de chats roux\ndans chaque ligne et chaque colonne.':onboarding===2?'Le cœur relie deux chats identiques.':onboarding===3?'Jamais trois chats identiques à la suite.':onboarding===4?'Les griffes relient deux chats différents.':onboarding===5?'Combine les règles pour trouver leur place !':'';
-  if(ruleText){
-   const ruleCard=panel(this,540,286,900,onboarding===1?150:118,0xfffaf7,.94);
-   const ruleX=onboarding===1?565:540;
-   label(this,ruleX,286,ruleText,onboarding===1?27:28);
-   if(onboarding===1){
-    imageContain(this.add.image(190,286,'grey-cat'),66,66);
-    imageContain(this.add.image(268,286,'orange-cat'),66,66);
-   }
-   ruleCard.setDepth(0);
+  if(onboarding>=1&&onboarding<=5){
+   const chip=(x:number,y:number,w:number,text:string)=>{panel(this,x,y,w,74,0xfffaf7,.95);label(this,x,y,text,23);};
+   panel(this,540,238,900,104,0xfffaf7,.96);
+   imageContain(this.add.image(170,238,'grey-cat'),54,54);
+   imageContain(this.add.image(235,238,'orange-cat'),54,54);
+   label(this,585,238,'Autant de chats gris que de chats roux\npar ligne et par colonne.',25);
+   if(onboarding>=2)chip(285,334,420,'♥  Deux chats identiques');
+   if(onboarding>=3)chip(795,334,420,'Jamais 3 identiques à la suite');
+   if(onboarding>=4)chip(285,420,420,'Griffes : deux chats différents');
+   if(onboarding>=5)chip(795,420,420,'Combine toutes les règles');
   }
-  const board=new BoardView(this,540,790,level,960);
+  const board=new BoardView(this,540,onboarding>=1&&onboarding<=5?870:790,level,onboarding>=1&&onboarding<=5?840:960);
   const saved=SaveService.data.session;if(saved?.id===level.id&&saved.failed){this.scene.start('Lost',{reason:saved.remaining===0?'time':'errors'});return;}if(saved?.id===level.id){board.restore(saved.grid,saved.errors);this.hints=Math.max(0,saved.hints);}
   let remaining=saved?.id===level.id?saved.remaining??level.timeLimit??360:level.timeLimit??360;
   let started=saved?.id===level.id?!!saved.started:false;
