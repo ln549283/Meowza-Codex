@@ -44,6 +44,7 @@ export class GameScene extends Phaser.Scene {
   const magnifier=this.add.graphics().lineStyle(7,0xffffff).strokeCircle(532,1660,22);magnifier.lineBetween(548,1676,570,1698);(hint.list.find(o=>o.type==='Text') as Phaser.GameObjects.Text).setText('');
   const quota=this.add.graphics();
   let previousErrors=board.errors;
+  let pendingProof:HumanStep|null=null;
   const changed=()=>{
    if(this.won)return;
    this.hints=SaveService.data.session?.id===level.id?SaveService.data.session.hints:this.hints;
@@ -53,7 +54,7 @@ export class GameScene extends Phaser.Scene {
 
    const teaching=currentLesson(lessons,board.grid);
    lesson.setText(teaching?lessonText(teaching,Number(level.id.slice(6))):level.id==='trail-5'?'À toi de combiner les règles !':'');
-   if(board.errors===previousErrors)board.highlight(teaching?.sources??[],teaching?.position);
+   if(board.errors===previousErrors)board.highlight(pendingProof?.sources??teaching?.sources??[],pendingProof?.position??teaching?.position);
    previousErrors=board.errors;
    info.setText(`${SaveService.data.kibble} croquettes`);
    drawAttemptHeart(lives,240,1790,board.errors);
@@ -70,7 +71,7 @@ export class GameScene extends Phaser.Scene {
    const detail=label(this,540,940,`${Math.round(remaining/60)} minutes · 3 erreurs possibles\n\nLe chrono démarre au premier placement.\nTu peux recommencer gratuitement.`,34).setDepth(202);
    const go=button(this,540,1160,660,'Je suis prêt',()=>{[cover,card,heading,detail,go].forEach(o=>o.destroy());board.locked=false;}).setDepth(202);
   }
-  const focusProof=(step:HumanStep)=>{if(!this.won)board.highlight(step.sources,step.position);};
-  board.onChanged=changed;this.events.on('resume',changed);this.events.on('show-proof',focusProof);this.events.once('shutdown',()=>{this.events.off('resume',changed);this.events.off('show-proof',focusProof);});changed();
+  const focusProof=(step:HumanStep)=>{if(!this.won){pendingProof=step;board.highlight(step.sources,step.position);}};
+  board.onChanged=()=>{pendingProof=null;changed();};this.events.on('resume',changed);this.events.on('show-proof',focusProof);this.events.once('shutdown',()=>{this.events.off('resume',changed);this.events.off('show-proof',focusProof);});changed();
  }
 }

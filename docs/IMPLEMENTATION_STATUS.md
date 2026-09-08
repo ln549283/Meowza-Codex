@@ -138,3 +138,5 @@ Statut : code réalisé, contrôle visuel après publication en cours ; validati
 P03 — Recette web : niveau 2 repris sur la même grille et avec 50 croquettes ; texte logique lisible au-dessus du plateau, case connue dorée et cible turquoise. Les tests d'onboarding et de proportions passent (4 tests ciblés), en complément du contrôle complet à 36 tests effectué avant l'ajout du test de répartition. CI vérifie la suite complète à 37 tests.
 
 P04 — Liaison explication / plateau : à la fermeture d'un indice déjà acheté, les prémisses et la cible sont mises en évidence sur le plateau. La fermeture d'une confirmation sans achat ne déclenche pas ce repère. Aucun coût, quota ou timing modifié ; aucun travail d'animation ajouté.
+
+P04 — Le premier contrôle web a trouvé un défaut : l'événement de reprise de Game effaçait le surlignage demandé à la fermeture de Hint. Correction : conserver la preuve affichée au niveau de la scène jusqu'au prochain placement, y compris pendant la reprise. Le débit observé était correct (50 → 35 croquettes, 1/3). Recette de la correction à confirmer.
