@@ -42,7 +42,7 @@ export class LevelSelectScene extends Phaser.Scene {
     (b.list.find(o=>o.type==='Text') as Phaser.GameObjects.Text).setColor('#493d48');
     if(!owned)b.setAlpha(.55);label(this,210+j*330,1684,item.name,23,C.ink,0).setScrollFactor(0).setDepth(111);
    });
-   label(this,540,1740,'Un décor surprise tous les 10 nouveaux niveaux.',25,C.ink,0).setScrollFactor(0).setDepth(111);
+   label(this,540,1740,SaveService.data.ownedCosmetics.length>=cosmetics.length?'Collection de décors complétée.':`Prochain décor : niveau ${Math.min(60,(Math.floor((current-1)/10)+1)*10)}.`,25,C.ink,0).setScrollFactor(0).setDepth(111);
    button(this,540,1835,500,'Terminé',()=>this.scene.restart({offset:this.offset})).setScrollFactor(0).setDepth(111);
   }
 
@@ -65,7 +65,7 @@ export class LevelSelectScene extends Phaser.Scene {
   const add=(o:Phaser.GameObjects.GameObject)=>{row.add(o);return o;};
   const wood=SaveService.data.equipped.wood,tint=wood==='walnut'?0xd6b6a2:wood==='birch'?0xfff1d9:0xffffff;
   if(n>1){const post=this.add.image(540,TREE_STEP/2+60,'tree-modules-v5','post').setDisplaySize(96,TREE_STEP+30).setTint(tint);add(post);}
-  else {add(this.add.image(540,135,'tree-modules-v5','post').setDisplaySize(96,240).setTint(tint));add(imageContain(this.add.image(540,225,'tree-modules-v5','base'),660,300).setTint(tint));}
+  else {add(this.add.image(x,225,'tree-modules-v5','post').setDisplaySize(96,320).setTint(tint));add(imageContain(this.add.image(540,350,'tree-modules-v5','base'),610,205).setTint(tint));}
   const support=this.add.graphics().lineStyle(28,0xae784c).lineBetween(540,105,x,70).lineStyle(9,0xf5cf9b).lineBetween(540,97,x,62);add(support);
   const cushion=SaveService.data.equipped.cushion;
   add(imageContain(this.add.image(x,74,'tree-modules-v5',cushion==='teal'?'teal':'peach'),440,270).setTint(cushion==='rose'?0xffd2e4:tint));
