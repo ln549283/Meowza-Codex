@@ -1,13 +1,13 @@
 import Phaser from 'phaser';
 import { humanHint } from '../../core/humanSolver';
-import { MAX_HINTS_PER_ATTEMPT } from '../../core/economy';
+import { hintCost,MAX_HINTS_PER_ATTEMPT } from '../../core/economy';
 import { isWon } from '../../core/validator';
 import { AudioService } from '../../services/AudioService';
 import { HapticsService } from '../../services/HapticsService';
 import { SaveService } from '../../services/SaveService';
 import { BoardView } from '../BoardView';
 import { GameRegistry } from '../registry';
-import { backButton,button,cozyBackground,fadeIn,imageContain,label,panel,roundButton,sparkles,title } from '../ui';
+import { button,cozyBackground,fadeIn,imageContain,label,panel,sparkles } from '../ui';
 import { C } from '../theme';
 
 export class GameScene extends Phaser.Scene {
@@ -15,23 +15,46 @@ export class GameScene extends Phaser.Scene {
  constructor(){super('Game');}
  create(){
   this.hints=0;this.won=false;
-  this.registry.set('mapDragging',false);const level=GameRegistry.selected;if(!level||!SaveService.isUnlocked(level.id)){this.scene.start('LevelSelect');return;}
+  this.registry.set('mapDragging',false);
+  const level=GameRegistry.selected;
+  if(!level||!SaveService.isUnlocked(level.id)){this.scene.start('LevelSelect');return;}
   fadeIn(this);cozyBackground(this);
-  title(this,`${level.id.startsWith('bonus-')?'Défi bonus':'Petit sommet'} ${Number(level.id.split('-')[1])}`,103,47);
-  const onboarding=level.id.startsWith('trail-')?Number(level.id.split('-')[1]):0;
+
+  const artPanel=(x:number,y:number,w:number,h:number)=>this.add.image(x,y,'puzzle-panel').setDisplaySize(w,h);
+  const artButton=(x:number,y:number,w:number,text:string,onClick:()=>void,primary=true)=>{
+   const c=this.add.container(x,y),skin=this.add.image(0,0,primary?'button-primary-skin':'button-secondary-skin').setDisplaySize(w,112),txt=label(this,0,-2,text,32,primary?'#ffffff':C.ink);
+   c.add([skin,txt]);c.setSize(w,120).setInteractive({useHandCursor:true});
+   c.on('pointerdown',()=>{if(!SaveService.data.settings.reducedMotion)this.tweens.add({targets:c,scaleX:.965,scaleY:.965,duration:70});});
+   c.on('pointerout',()=>c.setScale(1));
+   c.on('pointerup',(p:Phaser.Input.Pointer)=>{c.setScale(1);if(p.getDistance()>32)return;AudioService.play('button');onClick();});
+   return c;
+  };
+
+  const levelNumber=Number(level.id.split('-')[1]);
+  artPanel(540,118,700,132);
+  label(this,540,94,`${level.id.startsWith('bonus-')?'Défi bonus':'Niveau'} ${levelNumber}`,44);
+  label(this,540,142,level.timed?'Coup de griffe · 5 min':'Puzzle des chats',25,'#775F68',24);
+
+  const onboarding=level.id.startsWith('trail-')?levelNumber:0;
   if(onboarding>=1&&onboarding<=5){
-   const chip=(x:number,y:number,w:number,text:string)=>{panel(this,x,y,w,74,0xfffaf7,.95);label(this,x,y,text,23);};
-   panel(this,540,238,900,104,0xfffaf7,.96);
-   imageContain(this.add.image(170,238,'grey-cat'),54,54);
-   imageContain(this.add.image(235,238,'orange-cat'),54,54);
-   label(this,585,238,'Autant de chats gris que de chats roux\npar ligne et par colonne.',25);
-   if(onboarding>=2)chip(285,334,420,'♥  Deux chats identiques');
-   if(onboarding>=3)chip(795,334,420,'Jamais 3 identiques à la suite');
-   if(onboarding>=4)chip(285,420,420,'Griffes : deux chats différents');
-   if(onboarding>=5)chip(795,420,420,'Combine toutes les règles');
+   const lines=['Autant de chats gris que de chats roux dans chaque ligne et chaque colonne.'];
+   if(onboarding>=2)lines.push('♥  Le cœur relie deux chats identiques.');
+   if(onboarding>=3)lines.push('Jamais trois chats identiques à la suite.');
+   if(onboarding>=4)lines.push('Griffes : les deux chats sont différents.');
+   artPanel(540,300,950,onboarding>=4?310:onboarding>=3?250:onboarding>=2?205:155);
+   imageContain(this.add.image(142,258,'grey-cat'),58,58);
+   imageContain(this.add.image(208,258,'orange-cat'),58,58);
+   const text=label(this,610,300,lines.join('\n'),onboarding>=4?24:26);
+   text.setLineSpacing(onboarding>=4?8:10).setWordWrapWidth(760,true);
   }
-  const board=new BoardView(this,540,onboarding>=1&&onboarding<=5?870:790,level,onboarding>=1&&onboarding<=5?840:960);
-  const saved=SaveService.data.session;if(saved?.id===level.id&&saved.failed){this.scene.start('Lost',{reason:saved.remaining===0?'time':'errors'});return;}if(saved?.id===level.id){board.restore(saved.grid,saved.errors);this.hints=Math.max(0,saved.hints);}
+
+  const boardY=onboarding>=1&&onboarding<=5?(onboarding>=4?900:850):760;
+  const boardSize=onboarding>=1&&onboarding<=5?820:900;
+  const board=new BoardView(this,540,boardY,level,boardSize);
+
+  const saved=SaveService.data.session;
+  if(saved?.id===level.id&&saved.failed){this.scene.start('Lost',{reason:saved.remaining===0?'time':'errors'});return;}
+  if(saved?.id===level.id){board.restore(saved.grid,saved.errors);this.hints=Math.max(0,saved.hints);}
   let remaining=saved?.id===level.id?saved.remaining??level.timeLimit??360:level.timeLimit??360;
   let started=saved?.id===level.id?!!saved.started:false;
   const markStarted=()=>{if(!started){started=true;SaveService.trackAttemptStart(level.id);}};
@@ -45,41 +68,54 @@ export class GameScene extends Phaser.Scene {
    const stay=button(this,540,1080,690,'Continuer la partie',()=>{[shade,card,heading,detail,stay,leave].forEach(o=>o.destroy());},C.teal).setDepth(302);
    const leave=button(this,540,1240,690,'Quitter et recommencer plus tard',()=>{SaveService.trackAbandon(level.id);quit();},0xb398a5).setDepth(302);
   };
-  backButton(this,confirmQuit);roundButton(this,985,105,'?',()=>{this.scene.pause();this.scene.launch('Rules',{fromGame:true});});
-  const clock=label(this,540,198,'',38);board.onAttempt=markStarted;board.onPlacement=(correct)=>SaveService.trackPlacement(level.id,correct);
+  artButton(110,116,150,'‹',confirmQuit,false);
+  artButton(970,116,150,'?',()=>{this.scene.pause();this.scene.launch('Rules',{fromGame:true});},false);
+
+  const clock=label(this,540,202,'',34);
+  board.onAttempt=markStarted;board.onPlacement=(correct)=>SaveService.trackPlacement(level.id,correct);
   const lose=(reason:'errors'|'time')=>{board.locked=true;SaveService.data.failures[level.id]=(SaveService.data.failures[level.id]??0)+1;SaveService.trackFailure(level.id,reason);SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,true);this.scene.start('Lost',{reason});};
   if(level.timed){
-   const clockText=()=>clock.setText(`◷ ${Math.floor(remaining/60)}:${String(Math.ceil(remaining%60)).padStart(2,'0')}${started?'':' · au premier chat'}`);
+   const clockText=()=>clock.setText(`◷ ${Math.floor(remaining/60)}:${String(Math.ceil(remaining%60)).padStart(2,'0')}${started?'':' · démarre au premier chat'}`);
    clockText();
    this.time.addEvent({delay:1000,loop:true,callback:()=>{if(!started||this.won||document.hidden)return;remaining=Math.max(0,remaining-1);clockText();SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started);if(remaining===0){this.won=true;lose('time');}}});
   }
-  panel(this,540,1430,960,195,0xfffaf7,.92);
-  const selectors:Phaser.GameObjects.Graphics[]=[];
-  const select=(value:1|2)=>{board.brush=value;selectors.forEach((g,i)=>{g.clear();if(i+1===value)g.lineStyle(5,C.teal).strokeRoundedRect(-205,-77,410,154,30);});};
-  ([1,2] as const).forEach((value,i)=>{const c=this.add.container(305+i*465,1430),g=this.add.graphics();selectors.push(g);const cat=imageContain(this.add.image(-105,0,value===1?'grey-cat':'orange-cat'),112,112);c.add([g,cat,label(this,55,-22,value===1?'Nimbus':'Moka',34),label(this,55,29,value===1?'Chat gris':'Chat roux',30)]);c.setSize(440,190).setInteractive({useHandCursor:true}).on('pointerdown',()=>{if(!this.won)select(value);});});select(1);
+
+  const selectorY=boardY+boardSize/2+125;
+  artPanel(540,selectorY,950,190);
+  const selectorCards:Phaser.GameObjects.Container[]=[];
+  const select=(value:1|2)=>{board.brush=value;selectorCards.forEach((c,i)=>{c.setScale(i+1===value?1.04:1);c.setAlpha(i+1===value?1:.82);});};
+  ([1,2] as const).forEach((value,i)=>{
+   const c=this.add.container(330+i*420,selectorY),bg=this.add.image(0,0,'button-secondary-skin').setDisplaySize(330,126),cat=imageContain(this.add.image(-78,0,value===1?'grey-cat':'orange-cat'),94,94),name=label(this,65,-18,value===1?'Nimbus':'Moka',32),kind=label(this,65,24,value===1?'Chat gris':'Chat roux',24,'#7A6470',24);
+   c.add([bg,cat,name,kind]);c.setSize(340,132).setInteractive({useHandCursor:true}).on('pointerdown',()=>{if(!this.won)select(value);});selectorCards.push(c);
+  });
+  select(1);
 
   const usedHints=new Set<string>(saved?.id===level.id?saved.hintPositions:[]);
-  const status=label(this,540,1560,'',29);const info=label(this,770,1830,'',30);const heart=this.add.graphics();const hintQuota=this.add.graphics();let previousErrors=board.errors;
-  const drawHeart=()=>{
-   const x=205,y=1822;heart.clear();const broken=board.errors>=3;heart.fillStyle(broken?0xd9a7b1:0xe97589,1);heart.fillCircle(x-34,y-18,43).fillCircle(x+34,y-18,43).fillTriangle(x-77,y-7,x+77,y-7,x,y+78);heart.lineStyle(6,0xffffff,.92);
-   if(board.errors>=1)heart.lineBetween(x+4,y-58,x-13,y-8).lineBetween(x-13,y-8,x+13,y+14);
-   if(board.errors>=2)heart.lineBetween(x+13,y+14,x-8,y+48).lineBetween(x-8,y+48,x+7,y+70);
-   if(broken)heart.lineStyle(9,0x9b6674,.75).lineBetween(x-13,y-8,x+13,y+14);
-  };
-  const drawHintQuota=()=>{hintQuota.clear();for(let i=0;i<MAX_HINTS_PER_ATTEMPT;i++){const used=i<SaveService.data.attemptPurchases;hintQuota.fillStyle(used?0xc9bcc7:0xffffff,used ? .55 : 1).fillCircle(505+i*35,1753,9);}};
+  const footerY=Math.min(1810,selectorY+220);
+  const heart=this.add.image(165,footerY,'heart-full').setDisplaySize(145,145);
+  const heartCaption=label(this,165,footerY+92,'Cœur',24,'#745D68',24);
+  const kibble=label(this,862,footerY+12,'',28);
+  const status=label(this,540,footerY-125,'',28);
+  const hintQuota=this.add.graphics();
+  let previousErrors=board.errors;
 
-  const hint=button(this,540,1680,390,'Indice',()=>{if(this.won||SaveService.data.attemptPurchases>=MAX_HINTS_PER_ATTEMPT)return;const found=humanHint(board.grid,level.constraints,1);this.scene.pause();this.scene.launch('Hint',{step:found,levelId:level.id,onPurchased:()=>{markStarted();SaveService.trackHint(level.id);SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);},onRead:()=>{const key=found?found.position.join(','):'';if(key&&!usedHints.has(key)){usedHints.add(key);this.hints++;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);}},apply:()=>{if(this.won||!found)return;board.reveal(found.position,found.value);AudioService.play('hint');}});},C.teal);
-  const magnifier=this.add.graphics().lineStyle(6,0xffffff).strokeCircle(462,1674,18);magnifier.lineBetween(475,1687,493,1705);
-  const updateHintButton=()=>{const exhausted=SaveService.data.attemptPurchases>=MAX_HINTS_PER_ATTEMPT;if(exhausted){hint.disableInteractive().setAlpha(.42);magnifier.setAlpha(.42);}else{hint.setInteractive({useHandCursor:true}).setAlpha(1);magnifier.setAlpha(1);}};
+  const setHeart=()=>{const key=board.errors<=0?'heart-full':board.errors===1?'heart-crack-1':board.errors===2?'heart-crack-2':'heart-broken';heart.setTexture(key);};
+  const drawHintQuota=()=>{hintQuota.clear();for(let i=0;i<MAX_HINTS_PER_ATTEMPT;i++){const used=i<SaveService.data.attemptPurchases;hintQuota.fillStyle(used?0xb8a8b4:0xffffff,used?.58:1).fillCircle(470+i*34,footerY+78,9);}};
+  const hintLabel=()=>{const purchase=SaveService.data.attemptPurchases,cost=hintCost(purchase);return purchase>=MAX_HINTS_PER_ATTEMPT?'Indices épuisés':`Indice · ${cost} croquettes`;};
+  const openHint=()=>{if(this.won||SaveService.data.attemptPurchases>=MAX_HINTS_PER_ATTEMPT)return;const found=humanHint(board.grid,level.constraints,1);this.scene.pause();this.scene.launch('Hint',{step:found,levelId:level.id,onPurchased:()=>{markStarted();SaveService.trackHint(level.id);SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);},onRead:()=>{const key=found?found.position.join(','):'';if(key&&!usedHints.has(key)){usedHints.add(key);this.hints++;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);}},apply:()=>{if(this.won||!found)return;board.reveal(found.position,found.value);AudioService.play('hint');}});};
+  const hint=artButton(540,footerY,430,hintLabel(),openHint,true);
+  const hintText=hint.list.find(o=>o instanceof Phaser.GameObjects.Text) as Phaser.GameObjects.Text;
+  const updateHintButton=()=>{const exhausted=SaveService.data.attemptPurchases>=MAX_HINTS_PER_ATTEMPT;hintText.setText(hintLabel());if(exhausted){hint.disableInteractive().setAlpha(.44);}else{hint.setInteractive({useHandCursor:true}).setAlpha(1);}};
 
   const changed=()=>{
-   status.setText('');info.setText(`${SaveService.data.kibble} croquettes`);drawHeart();drawHintQuota();updateHintButton();
-   if(board.errors>previousErrors&&!SaveService.data.settings.reducedMotion){this.tweens.add({targets:heart,scaleX:1.14,scaleY:1.14,duration:120,yoyo:true});}previousErrors=board.errors;
+   status.setText('');kibble.setText(`${SaveService.data.kibble} croquettes`);setHeart();drawHintQuota();updateHintButton();
+   if(board.errors>previousErrors&&!SaveService.data.settings.reducedMotion){heart.setScale(1);this.tweens.add({targets:heart,scaleX:1.14,scaleY:1.14,duration:120,yoyo:true,ease:'Sine.Out'});}previousErrors=board.errors;
    if(!started&&board.grid.some((row,r)=>row.some((v,c)=>v!==level.initial[r]![c])))markStarted();
    SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started);
-   if(board.errors>=3&&!this.won){this.won=true;board.locked=true;this.time.delayedCall(SaveService.data.settings.reducedMotion?50:320,()=>{if(this.scene.isActive())lose('errors');});return;}
-   if(isWon(board.grid,level.constraints)&&!this.won){this.won=true;board.locked=true;hint.disableInteractive();SaveService.trackWin(level.id);GameRegistry.result={level,errors:board.errors,hints:this.hints};AudioService.play('victory');void HapticsService.victory();sparkles(this,540,790,24);status.setText('Tout le monde a trouvé sa place !');void SaveService.complete(level.id,board.errors,this.hints).then(()=>{if(this.scene.isActive())this.time.delayedCall(SaveService.data.settings.reducedMotion?100:650,()=>this.scene.start('Victory'));});}
+   if(board.errors>=3&&!this.won){this.won=true;board.locked=true;this.time.delayedCall(SaveService.data.settings.reducedMotion?50:360,()=>{if(this.scene.isActive())lose('errors');});return;}
+   if(isWon(board.grid,level.constraints)&&!this.won){this.won=true;board.locked=true;hint.disableInteractive();SaveService.trackWin(level.id);GameRegistry.result={level,errors:board.errors,hints:this.hints};AudioService.play('victory');void HapticsService.victory();sparkles(this,540,boardY,24);status.setText('Tout le monde a trouvé sa place !');void SaveService.complete(level.id,board.errors,this.hints).then(()=>{if(this.scene.isActive())this.time.delayedCall(SaveService.data.settings.reducedMotion?100:650,()=>this.scene.start('Victory'));});}
   };
+
   if(level.timed&&!started){
    board.locked=true;
    const cover=this.add.rectangle(540,960,1080,1920,0x453c51,.7).setDepth(200).setInteractive();
