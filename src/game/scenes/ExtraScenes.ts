@@ -17,7 +17,7 @@ export class LostScene extends Phaser.Scene {
   button(this,540,1640,720,'Retour à mon arbre',()=>this.scene.start('LevelSelect'),0xb398a5);
   if(GameRegistry.selected?.timed&&(SaveService.data.failures[GameRegistry.selected.id]??0)>=3){
    button(this,540,1800,760,'Réessayer · temps +50 % offert',()=>{const l=GameRegistry.selected!;SaveService.restartAttempt();SaveService.remember(l.id,l.initial,0,0,(l.timeLimit??360)*1.5,false);this.scene.start('Game');},C.orange);
-  }else label(this,540,1800,'Nouvelle grille de départ · 3 indices disponibles',27);
+  }else label(this,540,1800,'Même grille · 3 indices disponibles',27);
  }
 
 }

@@ -114,3 +114,13 @@ Loïc a créé https://meowza-473953555.netlify.app/ pour cette branche. D008 re
 - Tests de contrat de placement et de double récompense ajoutés. Recette web et compilation de ce delta à consigner après publication.
 
 Statut : implémentation partielle P02/P04 ; pas de validation mobile ni de certification commerciale. P03–P16 restent ouverts selon la roadmap.
+
+## Vérification P02 et première passe des résultats — 2026-09-08
+
+Source gameplay publiée : f21bd5888c8c4cfbed2adabcef5df429d2e4ccbb. 33 tests passent ; 110 grilles de la banque validées ; build web réussi. CI verify, Android debug et iOS simulateur réussis sur cette source.
+
+Source graphique : 5ed1bfbd76a7a03034e9a4e19c5697b25d471769. Illustration retry-v6 chargée et inspectée sur Netlify : carte lisible, personnages déçus/rassurants, action gratuite dominante, aucune publicité simulée. Première correction du socle inspectée puis ajustée pour poser le poteau sur la base et décaler le texte hors du poteau.
+
+Recette web observée : placement correct accepté ; second toucher sans effacement ; rechargement → Continuer → même placement conservé ; première puis deuxième fissure ; troisième erreur → défaite ; retry → grille initiale, cœur intact, quota 0/3, portefeuille conservé à 45 croquettes.
+
+Les anciennes sections ci-dessus sont historiques. L'illustration triste n'est plus absente. Restent : réactions en cours de grille, calibration/onboarding, finition globale arbre/collection, missions/diamants, boutique réelle/rewarded, backend Daily/Cat Day, appareils physiques et validation commerciale. Ce lot n'est pas une version finale commerciale.

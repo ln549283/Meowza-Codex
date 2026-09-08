@@ -2,7 +2,7 @@ name: Native smoke build
 on:
   push:
     branches: [codex/kawaii-cat-tree]
-    paths: ['src/**', 'android/**', 'ios/**', '.github/workflows/native-smoke.yml']
+    paths: ['src/**', 'public/**', 'index.html', 'package.json', 'package-lock.json', 'vite.config.ts', 'tsconfig.json', 'capacitor.config.ts', 'android/**', 'ios/**', '.github/workflows/native-smoke.yml']
   workflow_dispatch:
 jobs:
   android:

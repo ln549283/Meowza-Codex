@@ -65,7 +65,7 @@ export class LevelSelectScene extends Phaser.Scene {
   const add=(o:Phaser.GameObjects.GameObject)=>{row.add(o);return o;};
   const wood=SaveService.data.equipped.wood,tint=wood==='walnut'?0xd6b6a2:wood==='birch'?0xfff1d9:0xffffff;
   if(n>1){const post=this.add.image(540,TREE_STEP/2+60,'tree-modules-v5','post').setDisplaySize(96,TREE_STEP+30).setTint(tint);add(post);}
-  else {add(this.add.image(x,225,'tree-modules-v5','post').setDisplaySize(96,320).setTint(tint));add(imageContain(this.add.image(540,350,'tree-modules-v5','base'),610,205).setTint(tint));}
+  else {add(this.add.image(x,225,'tree-modules-v5','post').setDisplaySize(96,320).setTint(tint));add(imageContain(this.add.image(430,320,'tree-modules-v5','base'),610,240).setTint(tint));}
   const support=this.add.graphics().lineStyle(28,0xae784c).lineBetween(540,105,x,70).lineStyle(9,0xf5cf9b).lineBetween(540,97,x,62);add(support);
   const cushion=SaveService.data.equipped.cushion;
   add(imageContain(this.add.image(x,74,'tree-modules-v5',cushion==='teal'?'teal':'peach'),440,270).setTint(cushion==='rose'?0xffd2e4:tint));
@@ -78,7 +78,7 @@ export class LevelSelectScene extends Phaser.Scene {
   press(this,node,210,210,()=>{if(this.input.activePointer.y>235&&this.input.activePointer.y<1580)this.events.emit('play-level',n);});add(node);
   if(done)add(label(this,x+115,-90,'✓',43,'#348e84'));
   if(spec.timed)add(label(this,x-122,-88,'◷',50,'#7658a3'));
-  if(n===this.current)add(label(this,x,213,'À toi de jouer',29,'#397972',0));
+  if(n===this.current)add(label(this,n===1?x+230:x,213,'À toi de jouer',29,'#397972',0));
   return row;
  }
 }
