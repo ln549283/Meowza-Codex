@@ -9,16 +9,18 @@ import { cloneGrid, type Grid, type Level } from '../core/model';
 export interface Settings { music:boolean; sounds:boolean; vibrations:boolean; reducedMotion:boolean }
 export interface LevelProgress { completed:boolean; bestErrors:number; bestHints:number }
 export interface Session { id:string; grid:Grid; errors:number; hints:number; remaining?:number|undefined; started?:boolean|undefined; failed?:boolean; hintPositions?:string[] }
-export interface SaveData { saveVersion:2; tutorialCompleted:boolean; settings:Settings; progress:Record<string,LevelProgress>; stats:{levelsCompleted:number;totalHints:number;totalErrors:number}; session:Session|null; journeyLevels:Record<string,Level>; refuges:Record<string,string>; kibble:number; purchasedHints:Record<string,HumanStep[]>; attemptPurchases:number; lastReward:number; logicVersion:number; ownedCosmetics:string[]; equipped:{background:string;cushion:string;wood:string}; cosmeticSeed:number; failures:Record<string,number>; lastUnlock:string|null }
+export interface LevelAnalytics { attempts:number;wins:number;abandons:number;failuresErrors:number;failuresTime:number;placements:number;wrongPlacements:number;hintsBought:number }
+export interface SaveData { saveVersion:2; tutorialCompleted:boolean; settings:Settings; progress:Record<string,LevelProgress>; stats:{levelsCompleted:number;totalHints:number;totalErrors:number}; analytics:Record<string,LevelAnalytics>; session:Session|null; journeyLevels:Record<string,Level>; refuges:Record<string,string>; kibble:number; purchasedHints:Record<string,HumanStep[]>; attemptPurchases:number; lastReward:number; logicVersion:number; ownedCosmetics:string[]; equipped:{background:string;cushion:string;wood:string}; cosmeticSeed:number; failures:Record<string,number>; lastUnlock:string|null }
 
-const defaults=():SaveData=>({saveVersion:2,tutorialCompleted:false,settings:{music:false,sounds:true,vibrations:true,reducedMotion:typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches},progress:{},stats:{levelsCompleted:0,totalHints:0,totalErrors:0},session:null,journeyLevels:{},refuges:{},kibble:STARTING_KIBBLE,purchasedHints:{},attemptPurchases:0,lastReward:0,logicVersion:3,ownedCosmetics:[...starterCosmetics],equipped:{background:'cream',cushion:'peach',wood:'honey'},cosmeticSeed:Math.floor(Math.random()*4294967296),failures:{},lastUnlock:null});
+const defaults=():SaveData=>({saveVersion:2,tutorialCompleted:false,settings:{music:false,sounds:true,vibrations:true,reducedMotion:typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches},progress:{},stats:{levelsCompleted:0,totalHints:0,totalErrors:0},analytics:{},session:null,journeyLevels:{},refuges:{},kibble:STARTING_KIBBLE,purchasedHints:{},attemptPurchases:0,lastReward:0,logicVersion:3,ownedCosmetics:[...starterCosmetics],equipped:{background:'cream',cushion:'peach',wood:'honey'},cosmeticSeed:Math.floor(Math.random()*4294967296),failures:{},lastUnlock:null});
+const emptyAnalytics=():LevelAnalytics=>({attempts:0,wins:0,abandons:0,failuresErrors:0,failuresTime:0,placements:0,wrongPlacements:0,hintsBought:0});
 
 export class SaveServiceImpl {
   constructor(private storage: Pick<typeof Preferences, "get"|"set"> = Preferences) {}
   data:SaveData=defaults(); private key='meowza-save-v1'; private pending=Promise.resolve();
   saveFailed=false;
 
-  async load(){try{const{value}=await this.storage.get({key:this.key});if(value){const parsed=JSON.parse(value) as Partial<SaveData>&{progress?:Record<string,Partial<LevelProgress>&{stars?:number}>};const rawProgress=parsed.progress&&typeof parsed.progress==='object'?parsed.progress:{};const progress:Record<string,LevelProgress>={};for(const[id,p]of Object.entries(rawProgress))progress[id]={completed:!!p.completed,bestErrors:Number.isFinite(p.bestErrors)?Number(p.bestErrors):0,bestHints:Number.isFinite(p.bestHints)?Number(p.bestHints):0};this.data={...defaults(),...parsed,saveVersion:2,logicVersion:parsed.logicVersion??1,progress,settings:{...defaults().settings,...parsed.settings},stats:{...defaults().stats,...parsed.stats}};}}catch{this.data=defaults();}
+  async load(){try{const{value}=await this.storage.get({key:this.key});if(value){const parsed=JSON.parse(value) as Partial<SaveData>&{progress?:Record<string,Partial<LevelProgress>&{stars?:number}>};const rawProgress=parsed.progress&&typeof parsed.progress==='object'?parsed.progress:{};const progress:Record<string,LevelProgress>={};for(const[id,p]of Object.entries(rawProgress))progress[id]={completed:!!p.completed,bestErrors:Number.isFinite(p.bestErrors)?Number(p.bestErrors):0,bestHints:Number.isFinite(p.bestHints)?Number(p.bestHints):0};const rawAnalytics=parsed.analytics&&typeof parsed.analytics==='object'?parsed.analytics:{};const analytics:Record<string,LevelAnalytics>={};for(const[id,a]of Object.entries(rawAnalytics))analytics[id]={...emptyAnalytics(),...a};this.data={...defaults(),...parsed,saveVersion:2,logicVersion:parsed.logicVersion??1,progress,analytics,settings:{...defaults().settings,...parsed.settings},stats:{...defaults().stats,...parsed.stats}};}}catch{this.data=defaults();}
    this.data.equipped={...defaults().equipped,...this.data.equipped};
    for(const slot of ['background','cushion','wood'] as const)if(!cosmetics.some(c=>c.id===this.data.equipped[slot]&&c.slot===slot))this.data.equipped[slot]=defaults().equipped[slot];
    const owned=this.data.ownedCosmetics;const cleared=Object.entries(this.data.progress).filter(([id,p])=>id.startsWith('trail-')&&p.completed).length;
@@ -29,6 +31,13 @@ export class SaveServiceImpl {
   persist(){const value=JSON.stringify(this.data);this.pending=this.pending.then(()=>this.storage.set({key:this.key,value})).then(()=>{this.saveFailed=false;}).catch(()=>{this.saveFailed=true;});return this.pending;}
   isUnlocked(id:string){return isLevelUnlocked(id,this.data.progress);}
   completedCount(difficulty:string){return Object.entries(this.data.progress).filter(([id,p])=>id.startsWith(`${difficulty}-`)&&p.completed).length;}
+  private analyticsFor(id:string){return this.data.analytics[id]??(this.data.analytics[id]=emptyAnalytics());}
+  trackAttemptStart(id:string){this.analyticsFor(id).attempts++;}
+  trackPlacement(id:string,correct:boolean){const a=this.analyticsFor(id);a.placements++;if(!correct)a.wrongPlacements++;}
+  trackHint(id:string){this.analyticsFor(id).hintsBought++;}
+  trackAbandon(id:string){this.analyticsFor(id).abandons++;}
+  trackFailure(id:string,reason:'errors'|'time'){const a=this.analyticsFor(id);if(reason==='time')a.failuresTime++;else a.failuresErrors++;}
+  trackWin(id:string){this.analyticsFor(id).wins++;}
 
   restartAttempt(){this.data.session=null;this.data.attemptPurchases=0;this.data.purchasedHints={};void this.persist();}
   async newGame(){const settings={...this.data.settings};this.data=defaults();this.data.settings=settings;await this.persist();}
