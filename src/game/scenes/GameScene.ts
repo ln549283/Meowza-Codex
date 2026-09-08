@@ -1,5 +1,6 @@
 
 import Phaser from 'phaser';
+import { MAX_HINTS } from '../../core/economy';
 import { humanHint } from '../../core/humanSolver';
 import { isWon } from '../../core/validator';
 
@@ -34,14 +35,18 @@ export class GameScene extends Phaser.Scene {
   const selectors:Phaser.GameObjects.Graphics[]=[];
   const select=(value:1|2)=>{board.brush=value;selectors.forEach((g,i)=>{g.clear();if(i+1===value)g.lineStyle(5,C.teal).strokeRoundedRect(-205,-77,410,154,30);});};
   ([1,2] as const).forEach((value,i)=>{const c=this.add.container(305+i*465,1430),g=this.add.graphics();selectors.push(g);const cat=imageContain(this.add.image(-105,0,value===1?'grey-cat':'orange-cat'),112,112);c.add([g,cat,label(this,55,-22,value===1?'Nimbus':'Moka',34),label(this,55,29,value===1?'Chat gris':'Chat roux',30)]);c.setSize(440,190).setInteractive({useHandCursor:true}).on('pointerdown',()=>{if(!this.won)select(value);});});select(1);
-  const usedHints=new Set<string>(saved?.id===level.id?saved.hintPositions:[]);
   const status=label(this,540,1560,'',29);const info=label(this,710,1830,'',32);const lives=this.add.graphics();
   const undo=button(this,205,1680,290,'↶ Annuler',()=>board.undo(),0x9a8aac);
-  const hint=button(this,540,1680,310,'⌕',()=>{if(this.won)return;const found=humanHint(board.grid,level.constraints,1);this.scene.pause();this.scene.launch('Hint',{step:found,levelId:level.id,onRead:()=>{const key=found?found.position.join(','):'';if(key&&!usedHints.has(key)){usedHints.add(key);this.hints++;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);}},apply:()=>{if(this.won||!found)return;board.reveal(found.position,found.value);AudioService.play('hint');}});},C.teal);
-  const magnifier=this.add.graphics().lineStyle(7,0xffffff).strokeCircle(532,1674,22);magnifier.lineBetween(548,1690,570,1712);(hint.list.find(o=>o.type==='Text') as Phaser.GameObjects.Text).setText('');
+  const hint=button(this,540,1680,310,'⌕',()=>{if(this.won||(SaveService.data.session?.hints??0)>=MAX_HINTS)return;const found=humanHint(board.grid,level.constraints,1);this.scene.pause();this.scene.launch('Hint',{step:found,levelId:level.id,apply:()=>{if(this.won||!found)return;board.reveal(found.position,found.value);AudioService.play('hint');}});},C.teal);
+  const magnifier=this.add.graphics().lineStyle(7,0xffffff).strokeCircle(532,1660,22);magnifier.lineBetween(548,1676,570,1698);(hint.list.find(o=>o.type==='Text') as Phaser.GameObjects.Text).setText('');
+  const quota=this.add.graphics();
   const reset=button(this,875,1680,290,'↻ Effacer',()=>{if(!this.won)board.reset();},0xb98597);
   const changed=()=>{
-   status.setText('');
+   this.hints=SaveService.data.session?.id===level.id?SaveService.data.session.hints:this.hints;
+   status.setText(`${this.hints}/${MAX_HINTS} indices utilisés`);
+   quota.clear();for(let i=0;i<MAX_HINTS;i++)quota.fillStyle(i<this.hints?0x667f83:0xffffff).fillCircle(514+i*26,1715,7);
+   if(this.hints>=MAX_HINTS)hint.disableInteractive().setAlpha(.5);
+
    info.setText(`${SaveService.data.kibble} croquettes`);
    lives.clear();for(let i=0;i<3;i++){const x=180+i*82,y=1830;lives.fillStyle(i<3-board.errors?0xe97589:0xd9cdd3);lives.fillCircle(x-12,y-8,17).fillCircle(x+12,y-8,17).fillTriangle(x-29,y-4,x+29,y-4,x,y+30);} 
    if(!started&&board.grid.some((row,r)=>row.some((v,c)=>v!==level.initial[r]![c])))started=true;

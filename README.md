@@ -1,5 +1,7 @@
 # Meowza — l’arbre des petits bonheurs
 
+> **Références actuelles (2026-09-08)** : [Product Bible](docs/MEOWZA_PRODUCT_BIBLE.md), [audit de compréhension](docs/PRODUCT_AUDIT.md), [état réel](docs/IMPLEMENTATION_STATUS.md), [roadmap](docs/IMPLEMENTATION_ROADMAP.md), [décisions](docs/DECISION_LOG.md), [spec visuelle/motion](docs/VISUAL_MOTION_SPEC.md). Le texte ci-dessous est historique : les refuges, extrêmes facultatifs et anciens indices ne définissent plus la cible. La branche auditée est `codex/kawaii-cat-tree` ; notre prévisualisation est [Netlify](https://meowza-473953555.netlify.app/). Le site Pages reste réservé à l’autre version. Voir l’état réel avant toute publication.
+
 Version biomes et croquettes : [règles, économie, migration et graphismes](docs/release-v3.md). Ce document remplace les descriptions de refuges et d’indices de la version précédente.
 
 Puzzle félin Phaser / TypeScript, embarqué sur iOS et Android avec Capacitor. Deux familles de chats : autant de gris que de roux dans chaque ligne et colonne, jamais trois identiques consécutifs, liens cœur (identiques) et griffes (différents).
