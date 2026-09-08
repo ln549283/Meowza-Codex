@@ -11,7 +11,11 @@ test('first hundred authored puzzles have bounded human proofs including every t
   const l=generateJourneyLevel(n),s=journeySpec(n),proof=humanSolve(l.initial,l.constraints,s.depth);
   assert.equal(proof.status,'solved',`level ${n}`);assert.deepEqual(proof.grid,l.solution);
   const key=l.timed?'timed':l.difficulty;counts[key]=(counts[key]??0)+1;
-  if(l.difficulty==='extreme'){assert.equal(humanSolve(l.initial,l.constraints,0).status,'stuck',`extreme ${n}`);assert.ok(proof.steps.filter(s=>s.rule==='contradiction').length<=3);}
+  if(l.difficulty==='hard'||l.difficulty==='extreme'){
+   assert.equal(humanSolve(l.initial,l.constraints,0).status,'stuck',`${l.difficulty} ${n}`);
+   const lookahead=proof.steps.filter(s=>s.rule==='contradiction');assert.ok(lookahead.length>=1&&lookahead.length<=3,`${l.difficulty} ${n}`);
+  }
+  if(l.difficulty==='easy'||l.difficulty==='medium')assert.equal(humanSolve(l.initial,l.constraints,0).status,'solved',`${l.difficulty} ${n}`);
   if(n===1)assert.equal(l.constraints.length,0);
   if(n===2||n===3)assert.ok(l.constraints.length>0&&l.constraints.every(c=>c.type==='same'));
   if(n===4)assert.ok(l.constraints.length>0&&l.constraints.every(c=>c.type==='different'));
