@@ -36,7 +36,7 @@ function candidate(n:number,bonus:boolean,attempt:number):Level{
   const proof=humanSolve(initial,base.constraints,spec.depth,12000);
   if(proof.status==='solved'&&proof.steps.filter(s=>s.rule==='contradiction').length<=3)clues--;else initial[r]![c]=old;
  }
- return{...base,initial,...(spec.timed?{timed:true,timeLimit:360}:{})};
+ return{...base,initial,...(spec.timed?{timed:true,timeLimit:300}:{})};
 }
 export const refugeNames=['Le hamac pêche','La cabane lavande','Le coussin nuage','Le balcon des ronrons'];
 
