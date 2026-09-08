@@ -34,6 +34,7 @@ export class GameScene extends Phaser.Scene {
   const saved=SaveService.data.session;if(saved?.id===level.id&&saved.failed){this.scene.start('Lost',{reason:saved.remaining===0?'time':'errors'});return;}if(saved?.id===level.id){board.restore(saved.grid,saved.errors);this.hints=Math.max(0,saved.hints);}
   let remaining=saved?.id===level.id?saved.remaining??level.timeLimit??360:level.timeLimit??360;
   let started=saved?.id===level.id?!!saved.started:false;
+  const markStarted=()=>{if(!started){started=true;SaveService.trackAttemptStart(level.id);}};
   const quit=()=>{SaveService.restartAttempt();this.scene.start('LevelSelect');};
   const confirmQuit=()=>{
    if(!started){quit();return;}
@@ -42,11 +43,11 @@ export class GameScene extends Phaser.Scene {
    const heading=label(this,540,730,'Quitter ce niveau ?',48).setDepth(302);
    const detail=label(this,540,900,'Ta progression sur cette tentative sera perdue :\ngrille, erreurs, chrono et indices.',32).setDepth(302);
    const stay=button(this,540,1080,690,'Continuer la partie',()=>{[shade,card,heading,detail,stay,leave].forEach(o=>o.destroy());},C.teal).setDepth(302);
-   const leave=button(this,540,1240,690,'Quitter et recommencer plus tard',quit,0xb398a5).setDepth(302);
+   const leave=button(this,540,1240,690,'Quitter et recommencer plus tard',()=>{SaveService.trackAbandon(level.id);quit();},0xb398a5).setDepth(302);
   };
   backButton(this,confirmQuit);roundButton(this,985,105,'?',()=>{this.scene.pause();this.scene.launch('Rules',{fromGame:true});});
-  const clock=label(this,540,198,'',38);board.onAttempt=()=>{started=true;};
-  const lose=(reason:string)=>{board.locked=true;SaveService.data.failures[level.id]=(SaveService.data.failures[level.id]??0)+1;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,true);this.scene.start('Lost',{reason});};
+  const clock=label(this,540,198,'',38);board.onAttempt=markStarted;board.onPlacement=(correct)=>SaveService.trackPlacement(level.id,correct);
+  const lose=(reason:'errors'|'time')=>{board.locked=true;SaveService.data.failures[level.id]=(SaveService.data.failures[level.id]??0)+1;SaveService.trackFailure(level.id,reason);SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,true);this.scene.start('Lost',{reason});};
   if(level.timed){
    const clockText=()=>clock.setText(`◷ ${Math.floor(remaining/60)}:${String(Math.ceil(remaining%60)).padStart(2,'0')}${started?'':' · au premier chat'}`);
    clockText();
@@ -67,17 +68,17 @@ export class GameScene extends Phaser.Scene {
   };
   const drawHintQuota=()=>{hintQuota.clear();for(let i=0;i<MAX_HINTS_PER_ATTEMPT;i++){const used=i<SaveService.data.attemptPurchases;hintQuota.fillStyle(used?0xc9bcc7:0xffffff,used ? .55 : 1).fillCircle(505+i*35,1753,9);}};
 
-  const hint=button(this,540,1680,390,'Indice',()=>{if(this.won||SaveService.data.attemptPurchases>=MAX_HINTS_PER_ATTEMPT)return;const found=humanHint(board.grid,level.constraints,1);this.scene.pause();this.scene.launch('Hint',{step:found,levelId:level.id,onPurchased:()=>{started=true;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);},onRead:()=>{const key=found?found.position.join(','):'';if(key&&!usedHints.has(key)){usedHints.add(key);this.hints++;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);}},apply:()=>{if(this.won||!found)return;board.reveal(found.position,found.value);AudioService.play('hint');}});},C.teal);
+  const hint=button(this,540,1680,390,'Indice',()=>{if(this.won||SaveService.data.attemptPurchases>=MAX_HINTS_PER_ATTEMPT)return;const found=humanHint(board.grid,level.constraints,1);this.scene.pause();this.scene.launch('Hint',{step:found,levelId:level.id,onPurchased:()=>{markStarted();SaveService.trackHint(level.id);SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);},onRead:()=>{const key=found?found.position.join(','):'';if(key&&!usedHints.has(key)){usedHints.add(key);this.hints++;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);}},apply:()=>{if(this.won||!found)return;board.reveal(found.position,found.value);AudioService.play('hint');}});},C.teal);
   const magnifier=this.add.graphics().lineStyle(6,0xffffff).strokeCircle(462,1674,18);magnifier.lineBetween(475,1687,493,1705);
   const updateHintButton=()=>{const exhausted=SaveService.data.attemptPurchases>=MAX_HINTS_PER_ATTEMPT;if(exhausted){hint.disableInteractive().setAlpha(.42);magnifier.setAlpha(.42);}else{hint.setInteractive({useHandCursor:true}).setAlpha(1);magnifier.setAlpha(1);}};
 
   const changed=()=>{
    status.setText('');info.setText(`${SaveService.data.kibble} croquettes`);drawHeart();drawHintQuota();updateHintButton();
    if(board.errors>previousErrors&&!SaveService.data.settings.reducedMotion){this.tweens.add({targets:heart,scaleX:1.14,scaleY:1.14,duration:120,yoyo:true});}previousErrors=board.errors;
-   if(!started&&board.grid.some((row,r)=>row.some((v,c)=>v!==level.initial[r]![c])))started=true;
+   if(!started&&board.grid.some((row,r)=>row.some((v,c)=>v!==level.initial[r]![c])))markStarted();
    SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started);
    if(board.errors>=3&&!this.won){this.won=true;board.locked=true;this.time.delayedCall(SaveService.data.settings.reducedMotion?50:320,()=>{if(this.scene.isActive())lose('errors');});return;}
-   if(isWon(board.grid,level.constraints)&&!this.won){this.won=true;board.locked=true;hint.disableInteractive();GameRegistry.result={level,errors:board.errors,hints:this.hints};AudioService.play('victory');void HapticsService.victory();sparkles(this,540,790,24);status.setText('Tout le monde a trouvé sa place !');void SaveService.complete(level.id,board.errors,this.hints).then(()=>{if(this.scene.isActive())this.time.delayedCall(SaveService.data.settings.reducedMotion?100:650,()=>this.scene.start('Victory'));});}
+   if(isWon(board.grid,level.constraints)&&!this.won){this.won=true;board.locked=true;hint.disableInteractive();SaveService.trackWin(level.id);GameRegistry.result={level,errors:board.errors,hints:this.hints};AudioService.play('victory');void HapticsService.victory();sparkles(this,540,790,24);status.setText('Tout le monde a trouvé sa place !');void SaveService.complete(level.id,board.errors,this.hints).then(()=>{if(this.scene.isActive())this.time.delayedCall(SaveService.data.settings.reducedMotion?100:650,()=>this.scene.start('Victory'));});}
   };
   if(level.timed&&!started){
    board.locked=true;
