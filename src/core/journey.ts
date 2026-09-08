@@ -14,7 +14,9 @@ export function journeySpec(n:number,bonus=false):{difficulty:Difficulty;size:4|
  if(!Number.isSafeInteger(n)||n<1)throw new Error('Invalid summit');
  const kind:Kind=bonus?'extreme':n<=5?'easy':n<=20?EARLY[n-6]!:n<=50?MIDDLE[n-21]!:LATE[(n-51)%50]!;
  const difficulty=kind==='timed'?'extreme':kind;
- return difficulty==='easy'?{difficulty,size:4,depth:0,clueRatio:n===1?.75:.56}:difficulty==='medium'?{difficulty,size:n<20?4:6,depth:0,clueRatio:n<20?.44:.56}:difficulty==='hard'?{difficulty,size:6,depth:1,clueRatio:.32}:{difficulty,size:8,depth:1,clueRatio:.28,timed:kind==='timed'};
+ // The first five puzzles are intentionally short: teach one idea, then combine it.
+ const onboardingRatio=n===1?.75:n===2?.69:n===3?.63:n===4?.56:.50;
+ return difficulty==='easy'?{difficulty,size:4,depth:0,clueRatio:n<=5?onboardingRatio:.56}:difficulty==='medium'?{difficulty,size:n<20?4:6,depth:0,clueRatio:n<20?.44:.56}:difficulty==='hard'?{difficulty,size:6,depth:1,clueRatio:.32}:{difficulty,size:8,depth:1,clueRatio:.28,timed:kind==='timed'};
 }
 /** Versioned seed + saved output keep replay stable. Every removed clue is human-solvable. */
 function candidate(n:number,bonus:boolean,attempt:number):Level{
@@ -23,7 +25,10 @@ function candidate(n:number,bonus:boolean,attempt:number):Level{
  if(!bonus&&n<=5){
   const pairs:typeof base.constraints=[];
   for(let r=0;r<4;r++)for(let c=0;c<3;c++)pairs.push({a:[r,c],b:[r,c+1],type:base.solution[r]![c]===base.solution[r]![c+1]?'same':'different'});
-  base.constraints=n===1?[]:n<=3?pairs.filter(p=>p.type==='same').slice(0,n-1):[...pairs.filter(p=>p.type==='same').slice(0,2),...pairs.filter(p=>p.type==='different').slice(0,n-3)];
+  // L1 balance only; L2 introduces one heart; L3 adds another heart while
+  // never-three becomes explicit; L4 introduces claws; L5 mixes both relations.
+  const same=pairs.filter(p=>p.type==='same'),different=pairs.filter(p=>p.type==='different');
+  base.constraints=n===1?[]:n===2?same.slice(0,1):n===3?same.slice(0,2):n===4?different.slice(0,2):[...same.slice(0,2),...different.slice(0,2)];
  }
  const initial=base.solution.map(row=>[...row]),rng=new SeededRandom(seed^0x50415753);
  const cells=rng.shuffle(Array.from({length:spec.size**2},(_,i)=>i));let clues=cells.length;
