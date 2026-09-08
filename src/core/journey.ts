@@ -41,7 +41,11 @@ function candidate(n:number,bonus:boolean,attempt:number):Level{
 export const refugeNames=['Le hamac pêche','La cabane lavande','Le coussin nuage','Le balcon des ronrons'];
 
 export function generateJourneyLevel(n:number,bonus=false):Level{
- const extreme=journeySpec(n,bonus).difficulty==='extreme';
- for(let attempt=0;attempt<(extreme?64:1);attempt++){const level=candidate(n,bonus,attempt);if(!extreme||humanSolve(level.initial,level.constraints,0).status!=='solved')return level;}
+ const spec=journeySpec(n,bonus),needsLookahead=spec.difficulty==='hard'||spec.difficulty==='extreme';
+ const attempts=spec.difficulty==='extreme'?64:spec.difficulty==='hard'?32:1;
+ for(let attempt=0;attempt<attempts;attempt++){
+  const level=candidate(n,bonus,attempt);
+  if(!needsLookahead||humanSolve(level.initial,level.constraints,0).status!=='solved')return level;
+ }
  throw new Error('Aucun défi suffisamment corsé trouvé pour cette graine.');
 }
