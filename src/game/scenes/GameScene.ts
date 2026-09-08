@@ -18,7 +18,18 @@ export class GameScene extends Phaser.Scene {
   this.registry.set('mapDragging',false);const level=GameRegistry.selected;if(!level||!SaveService.isUnlocked(level.id)){this.scene.start('LevelSelect');return;}
   fadeIn(this);cozyBackground(this);
   title(this,`${level.id.startsWith('bonus-')?'Défi bonus':'Petit sommet'} ${Number(level.id.split('-')[1])}`,103,47);
-  label(this,540,290,level.id==='trail-1'?'Autant de gris que de roux.':level.id==='trail-2'?'Le cœur relie deux chats identiques.':level.id==='trail-3'?'Jamais trois chats identiques à la suite.':level.id==='trail-4'?'Les griffes relient deux chats différents.':level.id==='trail-5'?'À toi de combiner les règles !':'',28);
+  const onboarding=level.id.startsWith('trail-')?Number(level.id.split('-')[1]):0;
+  const ruleText=onboarding===1?'Autant de chats gris que de chats roux\ndans chaque ligne et chaque colonne.':onboarding===2?'Le cœur relie deux chats identiques.':onboarding===3?'Jamais trois chats identiques à la suite.':onboarding===4?'Les griffes relient deux chats différents.':onboarding===5?'Combine les règles pour trouver leur place !':'';
+  if(ruleText){
+   const ruleCard=panel(this,540,286,900,onboarding===1?150:118,0xfffaf7,.94);
+   const ruleX=onboarding===1?565:540;
+   label(this,ruleX,286,ruleText,onboarding===1?27:28);
+   if(onboarding===1){
+    imageContain(this.add.image(190,286,'grey-cat'),66,66);
+    imageContain(this.add.image(268,286,'orange-cat'),66,66);
+   }
+   ruleCard.setDepth(0);
+  }
   const board=new BoardView(this,540,790,level,960);
   const saved=SaveService.data.session;if(saved?.id===level.id&&saved.failed){this.scene.start('Lost',{reason:saved.remaining===0?'time':'errors'});return;}if(saved?.id===level.id){board.restore(saved.grid,saved.errors);this.hints=Math.max(0,saved.hints);}
   let remaining=saved?.id===level.id?saved.remaining??level.timeLimit??360:level.timeLimit??360;
