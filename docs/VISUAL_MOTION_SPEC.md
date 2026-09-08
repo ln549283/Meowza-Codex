@@ -106,3 +106,5 @@ Correction : « Edit only the background. Replace EVERY checkerboard square with
 ## P03 — Repères pédagogiques sur la grille
 
 Texte au-dessus du plateau (29 px dans le repère 1080 × 1920), largeur maximale 940. Prémisses sur fond doré pâle ; cible avec contour turquoise de 5 px. Aucun déplacement forcé du curseur, aucune case bloquée, aucune animation nouvelle. Les repères disparaissent lorsque la leçon est résolue et ne s'appliquent pas à L5. Vérifier le texte le plus long, les deux sélecteurs et le contour sur petit écran.
+
+P04 — Relecture d'une preuve : même code visuel que l'apprentissage (prémisses dorées / cible turquoise) après fermeture de l'explication achetée. Le prochain placement actualise le plateau. Une hypothèse sans prémisse directe met seulement sa cible en évidence ; la chaîne détaillée reste dans le panneau.

@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 import { drawAttemptHeart } from '../AttemptHeart';
 import { lessonPlan,currentLesson,lessonText } from '../../core/onboarding';
 import { MAX_HINTS } from '../../core/economy';
-import { humanHint } from '../../core/humanSolver';
+import { humanHint,type HumanStep } from '../../core/humanSolver';
 import { isWon } from '../../core/validator';
 
 import { AudioService } from '../../services/AudioService';
@@ -70,6 +70,7 @@ export class GameScene extends Phaser.Scene {
    const detail=label(this,540,940,`${Math.round(remaining/60)} minutes · 3 erreurs possibles\n\nLe chrono démarre au premier placement.\nTu peux recommencer gratuitement.`,34).setDepth(202);
    const go=button(this,540,1160,660,'Je suis prêt',()=>{[cover,card,heading,detail,go].forEach(o=>o.destroy());board.locked=false;}).setDepth(202);
   }
-  board.onChanged=changed;this.events.on('resume',changed);this.events.once('shutdown',()=>this.events.off('resume',changed));changed();
+  const focusProof=(step:HumanStep)=>{if(!this.won)board.highlight(step.sources,step.position);};
+  board.onChanged=changed;this.events.on('resume',changed);this.events.on('show-proof',focusProof);this.events.once('shutdown',()=>{this.events.off('resume',changed);this.events.off('show-proof',focusProof);});changed();
  }
 }

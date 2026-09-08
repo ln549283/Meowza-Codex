@@ -32,6 +32,10 @@ export function lessonPlan(level:LessonLevel):HumanStep[]{
 }
 export function currentLesson(plan:readonly HumanStep[],grid:Grid){return plan.find(s=>grid[s.position[0]]?.[s.position[1]]===0)??null;}
 export function lessonText(step:HumanStep,n:number){
- const name=step.value===1?'Nimbus (gris)':'Moka (roux)';
- return n===1?`Chaque ligne et colonne contient 2 gris et 2 roux.\n${step.explanation}\nChoisis ${name}, puis la case encadrée.`:step.explanation;
+ const name=step.value===1?'Nimbus':'Moka';
+ const row=step.sources.every(p=>p[0]===step.position[0]);
+ const line=`${row?'ligne':'colonne'} ${step.position[row?0:1]+1}`;
+ return n===1?`2 gris + 2 roux par ligne et colonne.
+La ${line} a déjà 2 chats ${step.value===1?'roux':'gris'}.
+Choisis ${name}, puis la case encadrée.`:step.explanation;
 }

@@ -9,7 +9,7 @@ export class HintScene extends Phaser.Scene {
  constructor(){super('Hint');}
  create({step,levelId,apply,open=false}:{step:HumanStep|null;levelId:string;apply:()=>void;open?:boolean}){
   cozyBackground(this);title(this,'Un petit coup de patte',235,56);panel(this,540,940,940,1120);
-  const close=()=>{this.scene.stop();this.scene.resume('Game');};
+  const close=()=>{const proof=step&&SaveService.ownedHint(levelId,step);this.scene.stop();this.scene.resume('Game');if(proof)this.scene.get('Game').events.emit('show-proof',proof);};
   const owned=step&&SaveService.ownedHint(levelId,step);
   const used=SaveService.data.session?.hints??0,cost=hintCost(used),exhausted=cost===null;
   if(!open&&!owned){

@@ -134,3 +134,7 @@ Dernier lot source : 86c0f8b286a5158626be315fc08eb21582d079ab. Les modifications
 Ajout du module core/onboarding.ts et de ses tests : ordre pédagogique, prémisses visibles, absence de lecture de solution, reprise et indépendance à partir de L5. Le texte et les surlignages suivent les placements restants dans la tentative. Home lance directement le parcours. Aucune grille, économie ou animation modifiée.
 
 Statut : code réalisé, contrôle visuel après publication en cours ; validation novice/mobile ouverte. L3 propose effectivement le raisonnement « jamais trois », sans prétendre que c'est l'unique technique possible sur une 4×4. Calibration chrono, corpus lointain et tests physiques restent ouverts.
+
+P03 — Recette web : niveau 2 repris sur la même grille et avec 50 croquettes ; texte logique lisible au-dessus du plateau, case connue dorée et cible turquoise. Les tests d'onboarding et de proportions passent (4 tests ciblés), en complément du contrôle complet à 36 tests effectué avant l'ajout du test de répartition. CI vérifie la suite complète à 37 tests.
+
+P04 — Liaison explication / plateau : à la fermeture d'un indice déjà acheté, les prémisses et la cible sont mises en évidence sur le plateau. La fermeture d'une confirmation sans achat ne déclenche pas ce repère. Aucun coût, quota ou timing modifié ; aucun travail d'animation ajouté.
