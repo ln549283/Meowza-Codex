@@ -15,35 +15,43 @@ export class PreloadScene extends Phaser.Scene{
   this.load.image('grey-cat','assets/cats/nimbus.webp');
   this.load.image('orange-cat','assets/cats/moka.webp');
  }
- private makeRoundedTexture(key:string,w:number,h:number,fill:number,stroke:number,r:number,highlight?:number){
-  const g=this.add.graphics();
-  g.fillStyle(0x6f5148,.14).fillRoundedRect(8,14,w-16,h-18,r);
-  g.fillStyle(fill,1).lineStyle(6,stroke,1).fillRoundedRect(8,6,w-16,h-18,r).strokeRoundedRect(8,6,w-16,h-18,r);
-  if(highlight!==undefined)g.fillStyle(highlight,.42).fillRoundedRect(22,18,w-44,Math.max(22,h*.28),Math.max(12,r*.55));
-  g.generateTexture(key,w,h);g.destroy();
+ private rounded(ctx:CanvasRenderingContext2D,x:number,y:number,w:number,h:number,r:number){
+  const rr=Math.min(r,w/2,h/2);
+  ctx.beginPath();ctx.moveTo(x+rr,y);ctx.arcTo(x+w,y,x+w,y+h,rr);ctx.arcTo(x+w,y+h,x,y+h,rr);ctx.arcTo(x,y+h,x,y,rr);ctx.arcTo(x,y,x+w,y,rr);ctx.closePath();
+ }
+ private makeRoundedTexture(key:string,w:number,h:number,fill:string,stroke:string,r:number,highlight?:string){
+  const tex=this.textures.createCanvas(key,w,h);if(!tex)return;
+  const ctx=tex.context;
+  ctx.fillStyle='rgba(111,81,72,.14)';this.rounded(ctx,8,14,w-16,h-18,r);ctx.fill();
+  ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=6;this.rounded(ctx,8,6,w-16,h-18,r);ctx.fill();ctx.stroke();
+  if(highlight){ctx.fillStyle=highlight;ctx.globalAlpha=.42;this.rounded(ctx,22,18,w-44,Math.max(22,h*.28),Math.max(12,r*.55));ctx.fill();ctx.globalAlpha=1;}
+  tex.refresh();
+ }
+ private heartPath(ctx:CanvasRenderingContext2D){
+  ctx.beginPath();ctx.moveTo(128,218);ctx.lineTo(39,129);ctx.bezierCurveTo(6,96,14,45,58,31);ctx.bezierCurveTo(87,22,112,35,128,58);ctx.bezierCurveTo(144,35,169,22,198,31);ctx.bezierCurveTo(242,45,250,96,217,129);ctx.lineTo(128,218);ctx.closePath();
  }
  private makeHeart(key:string,damage:0|1|2|3){
-  const g=this.add.graphics(),x=128,y=124;
+  const tex=this.textures.createCanvas(key,256,256);if(!tex)return;
+  const ctx=tex.context;ctx.lineJoin='round';ctx.lineCap='round';
   if(damage===3){
-   g.fillStyle(0xd7a0ac,1).lineStyle(7,0x9d5365,1);
-   g.beginPath().moveTo(x,y+94).lineTo(40,y+8).cubicBezierTo(5,y-28,26,y-83,73,y-83).cubicBezierTo(101,y-83,120,y-62,x,y-43).lineTo(x-13,y+4).lineTo(x+10,y+25).lineTo(x-10,y+56).lineTo(x,y+94).closePath().fillPath().strokePath();
-   g.beginPath().moveTo(x+18,y+73).lineTo(x+38,y+47).lineTo(x+22,y+23).lineTo(x+39,y+2).lineTo(x+26,y-42).cubicBezierTo(143,y-63,164,y-83,192,y-83).cubicBezierTo(239,y-83,251,y-28,216,y+8).lineTo(x+18,y+73).closePath().fillPath().strokePath();
+   ctx.fillStyle='#d7a0ac';ctx.strokeStyle='#9d5365';ctx.lineWidth=7;
+   ctx.beginPath();ctx.moveTo(128,218);ctx.lineTo(40,132);ctx.bezierCurveTo(5,96,26,41,73,41);ctx.bezierCurveTo(101,41,120,62,128,81);ctx.lineTo(115,128);ctx.lineTo(138,149);ctx.lineTo(118,180);ctx.lineTo(128,218);ctx.closePath();ctx.fill();ctx.stroke();
+   ctx.beginPath();ctx.moveTo(146,197);ctx.lineTo(166,171);ctx.lineTo(150,147);ctx.lineTo(167,126);ctx.lineTo(154,82);ctx.bezierCurveTo(143,61,164,41,192,41);ctx.bezierCurveTo(239,41,251,96,216,132);ctx.lineTo(146,197);ctx.closePath();ctx.fill();ctx.stroke();
   }else{
-   g.fillStyle(0xf35d78,1).lineStyle(7,0xa62f4e,1);
-   g.beginPath().moveTo(x,y+94).lineTo(39,y+5).cubicBezierTo(6,y-28,14,y-79,58,y-93).cubicBezierTo(87,y-102,112,y-89,x,y-66).cubicBezierTo(144,y-89,169,y-102,198,y-93).cubicBezierTo(242,y-79,250,y-28,217,y+5).lineTo(x,y+94).closePath().fillPath().strokePath();
-   g.lineStyle(10,0xffd5de,.82).beginPath().moveTo(59,65).cubicBezierTo(78,47,103,48,116,60).strokePath();
-   if(damage>=1)g.lineStyle(9,0xfff2f3,1).beginPath().moveTo(132,55).lineTo(116,103).lineTo(139,123).strokePath();
-   if(damage>=2)g.lineStyle(9,0xfff2f3,1).beginPath().moveTo(139,123).lineTo(119,157).lineTo(136,188).strokePath();
+   ctx.fillStyle='#f35d78';ctx.strokeStyle='#a62f4e';ctx.lineWidth=7;this.heartPath(ctx);ctx.fill();ctx.stroke();
+   ctx.strokeStyle='rgba(255,213,222,.82)';ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(59,65);ctx.bezierCurveTo(78,47,103,48,116,60);ctx.stroke();
+   if(damage>=1){ctx.strokeStyle='#fff2f3';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(132,55);ctx.lineTo(116,103);ctx.lineTo(139,123);ctx.stroke();}
+   if(damage>=2){ctx.beginPath();ctx.moveTo(139,123);ctx.lineTo(119,157);ctx.lineTo(136,188);ctx.stroke();}
   }
-  g.generateTexture(key,256,256);g.destroy();
+  tex.refresh();
  }
  create(){
-  // Runtime-generated raster textures avoid an Android/WebView SVG-alpha issue that rendered the first visual-slice skins black.
-  // Keep these keys stable: GameScene/BoardView remain asset-driven and can later swap to final WebP art without layout changes.
-  this.makeRoundedTexture('puzzle-board-frame',1024,1024,0xfff8ef,0xb97a4d,76,0xf3d7ba);
-  this.makeRoundedTexture('puzzle-panel',1000,260,0xfff8ee,0xd8ad83,44,0xffffff);
-  this.makeRoundedTexture('button-primary-skin',640,180,0x54a46f,0x2d704a,50,0x8fd197);
-  this.makeRoundedTexture('button-secondary-skin',640,180,0xfff7ed,0xc9a47d,50,0xffffff);
+  // CanvasTexture is used deliberately here: unlike SVG images and Graphics.generateTexture,
+  // it uploads a normal HTML canvas on Android/WebView and avoids texImage2D bad-image-data failures.
+  this.makeRoundedTexture('puzzle-board-frame',1024,1024,'#fff8ef','#b97a4d',76,'#f3d7ba');
+  this.makeRoundedTexture('puzzle-panel',1000,260,'#fff8ee','#d8ad83',44,'#ffffff');
+  this.makeRoundedTexture('button-primary-skin',640,180,'#54a46f','#2d704a',50,'#8fd197');
+  this.makeRoundedTexture('button-secondary-skin',640,180,'#fff7ed','#c9a47d',50,'#ffffff');
   this.makeHeart('heart-full',0);this.makeHeart('heart-crack-1',1);this.makeHeart('heart-crack-2',2);this.makeHeart('heart-broken',3);
   const modules=this.textures.get('tree-modules-v5');
   for(const [name,x,y,w,h] of [['peach',0,270,430,290],['teal',430,270,425,290],['house',860,120,390,465],['hammock',0,690,510,390],['post',550,600,150,490],['base',760,740,494,350]] as const)modules.add(name,0,x,y,w,h);
