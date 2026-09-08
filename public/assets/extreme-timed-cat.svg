@@ -1,1 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><defs><radialGradient id="r"><stop stop-color="#d93538"/><stop offset="1" stop-color="#72151d"/></radialGradient><linearGradient id="g" x2="0" y2="1"><stop stop-color="#ffe071"/><stop offset="1" stop-color="#e99a20"/></linearGradient></defs><circle cx="128" cy="128" r="119" fill="url(#r)" stroke="url(#g)" stroke-width="14"/><path d="M42 84 29 30l49 28M214 84l13-54-49 28" fill="#403746" stroke="#241e28" stroke-width="7" stroke-linejoin="round"/><path d="M51 73 40 47l26 17M205 73l11-26-26 17" fill="#ef6c72"/><ellipse cx="128" cy="137" rx="83" ry="76" fill="#403746"/><path d="M92 74c-18-16-21-37-7-55 3 20 17 25 23 42zM164 74c18-16 21-37 7-55-3 20-17 25-23 42z" fill="#f02d3e" stroke="#8b1520" stroke-width="6"/><path d="M63 115q28-26 52 2-29 31-52-2M193 115q-28-26-52 2 29 31 52-2" fill="#fff5df" stroke="#211a20" stroke-width="7"/><ellipse cx="91" cy="117" rx="12" ry="18" fill="#f4a51c"/><ellipse cx="165" cy="117" rx="12" ry="18" fill="#f4a51c"/><circle cx="94" cy="113" r="5"/><circle cx="162" cy="113" r="5"/><path d="M111 153q17 14 34 0-4 35-17 35t-17-35" fill="#351a1e" stroke="#211a20" stroke-width="5"/><path d="m120 157 8 8 8-8" fill="#ef5e6d"/><path d="m115 157 7 3-4 10M141 157l-7 3 4 10" fill="#fff"/><circle cx="128" cy="145" r="7" fill="#ee5965"/><path d="M65 145 24 136M67 157l-40 8M191 145l41-9M189 157l40 8" stroke="#f9eee7" stroke-width="4" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <circle cx="128" cy="128" r="116" fill="#fffaf3" stroke="#8f79a0" stroke-width="10"/>
+  <circle cx="128" cy="130" r="92" fill="#eee8f7"/>
+
+  <!-- Nimbus: same calm visual language as the regular tree nodes. -->
+  <path d="M69 105 78 55l35 31M187 105l-9-50-35 31" fill="#aaa0b7" stroke="#6f6479" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M81 82 84 67l14 13M175 82l-3-15-14 13" fill="#f1b7c7"/>
+  <ellipse cx="128" cy="129" rx="66" ry="59" fill="#aaa0b7"/>
+  <path d="M91 121q14-12 28 0M165 121q-14-12-28 0" fill="none" stroke="#554b5d" stroke-width="7" stroke-linecap="round"/>
+  <path d="m120 143 8 7 8-7" fill="#d9879e"/>
+  <path d="M128 150q-8 12-18 2M128 150q8 12 18 2" fill="none" stroke="#554b5d" stroke-width="5" stroke-linecap="round"/>
+  <path d="M91 149 57 144M92 159l-32 8M165 149l34-5M164 159l32 8" stroke="#6f6479" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Small stopwatch badge: the only special signal needed for Coup de griffe. -->
+  <circle cx="187" cy="187" r="43" fill="#fff" stroke="#e38a68" stroke-width="8"/>
+  <path d="M177 137h20M187 137v9M214 153l8-8" fill="none" stroke="#e38a68" stroke-width="7" stroke-linecap="round"/>
+  <path d="M187 187v-23M187 187l17 10" fill="none" stroke="#6f6479" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="187" cy="187" r="5" fill="#6f6479"/>
+  <rect x="157" y="211" width="60" height="27" rx="13.5" fill="#e38a68"/>
+  <text x="187" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#fff">5 MIN</text>
+</svg>
