@@ -100,3 +100,9 @@ Application des §6–7 : suppression Undo/Reset et étoiles actives. Les ancien
 Le cœur unique présente les dégâts sans dépendre d'une animation. Une courte transition permet de voir l'état brisé. Ce dessin vectoriel constitue le composant fonctionnel, pas la validation finale de la direction artistique ou des réactions de Nimbus/Moka. L'aide chrono historique +50 % après trois échecs est conservée ; aucune publicité simulée n'est activée.
 
 Continuer privilégie une tentative active, y compris un ancien niveau rejoué. Les doubles callbacks de victoire sans nouvelle tentative ne répètent plus les statistiques ni ne remplacent le reçu de récompense.
+
+## D011 — Apprentissage en contexte, P03
+
+Les niveaux 1–4 présentent une déduction pédagogique construite uniquement à partir des cases visibles ; la solution cachée n'est pas un paramètre du module onboarding. L1 guide les placements par équilibre, L2 le cœur, L3 un trio potentiel, L4 le lien griffe (avec le cœur préalable si nécessaire). L5 ne reçoit pas de guidage. Ce parcours pédagogique initial ne consomme ni croquettes ni quota d'indices, conformément au L1 très guidé de la Bible ; il n'est pas activé sur les niveaux suivants ni sur les niveaux déjà gagnés. Les autres cases restent jouables.
+
+Pas de modification des grilles ou de migration des puzzles : les caches, tentatives et solutions existants sont conservés. Les indices payants restent un système distinct. Le premier lancement ne force plus quatre pages de règles ; leur accès indépendant est maintenu. Un playtest novice reste indispensable : le test prouve les prémisses logiques, pas la compréhension humaine.

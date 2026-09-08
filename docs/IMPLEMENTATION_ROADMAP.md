@@ -63,7 +63,7 @@ P12 dépend de P02/P07/P08 ; P13 dépend du cadrage identité/serveur ; P14 dép
 - Tests : onboarding, proportions arrondies, seeds, unicité, preuves, no two timed.
 - Visuel : une mini-illustration + une phrase par règle.
 - Mobile : novice sans accompagnement, 4×4/6×6/8×8.
-- Statut : à faire ; paramètres finaux en attente playtest.
+- Statut : accompagnement L1–4 implémenté, recette web en cours ; L5 libre. Difficulté ressentie et paramètres finaux en attente playtest.
 
 ## P04 — Lisibilité du puzzle et système graphique
 

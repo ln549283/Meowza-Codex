@@ -128,3 +128,9 @@ Les anciennes sections ci-dessus sont historiques. L'illustration triste n'est p
 Recette complémentaire : nouvelle défaite illustrée vue sur Netlify, bouton Recommencer gratuit fonctionnel ; victoire au niveau 1 sans étoiles, gain +5 (45 → 50 croquettes), puis lancement du niveau 2.
 
 Dernier lot source : 86c0f8b286a5158626be315fc08eb21582d079ab. Les modifications des assets, dépendances et configurations déclenchent désormais aussi les compilations natives. Builds debug/simulateur seulement : aucun binaire store signé ni test sur appareil n'est revendiqué.
+
+## P03 — Première implémentation pédagogique
+
+Ajout du module core/onboarding.ts et de ses tests : ordre pédagogique, prémisses visibles, absence de lecture de solution, reprise et indépendance à partir de L5. Le texte et les surlignages suivent les placements restants dans la tentative. Home lance directement le parcours. Aucune grille, économie ou animation modifiée.
+
+Statut : code réalisé, contrôle visuel après publication en cours ; validation novice/mobile ouverte. L3 propose effectivement le raisonnement « jamais trois », sans prétendre que c'est l'unique technique possible sur une 4×4. Calibration chrono, corpus lointain et tests physiques restent ouverts.

@@ -1,6 +1,7 @@
 
 import Phaser from 'phaser';
 import { drawAttemptHeart } from '../AttemptHeart';
+import { lessonPlan,currentLesson,lessonText } from '../../core/onboarding';
 import { MAX_HINTS } from '../../core/economy';
 import { humanHint } from '../../core/humanSolver';
 import { isWon } from '../../core/validator';
@@ -20,7 +21,9 @@ export class GameScene extends Phaser.Scene {
   this.registry.set('mapDragging',false);const level=GameRegistry.selected;if(!level||!SaveService.isUnlocked(level.id)){this.scene.start('LevelSelect');return;}
   fadeIn(this);cozyBackground(this);backButton(this,()=>this.scene.start('LevelSelect'));roundButton(this,985,105,'?',()=>{this.scene.pause();this.scene.launch('Rules',{fromGame:true});});
   title(this,`${level.id.startsWith('bonus-')?'Défi bonus':'Petit sommet'} ${Number(level.id.split('-')[1])}`,103,47);
-  label(this,540,290,level.id==='trail-1'?'Autant de gris que de roux.':level.id==='trail-2'?'Le cœur relie deux chats identiques.':level.id==='trail-3'?'Jamais trois chats identiques à la suite.':level.id==='trail-4'?'Les griffes relient deux chats différents.':level.id==='trail-5'?'À toi de combiner les règles !':'',28);
+  const lesson=label(this,540,224,'',29,C.ink,29).setWordWrapWidth(940);
+  const lessons=SaveService.data.progress[level.id]?.completed?[]:lessonPlan(level);
+
   const board=new BoardView(this,540,790,level,960);
   const saved=SaveService.data.session;if(saved?.id===level.id&&saved.failed){this.scene.start('Lost',{reason:saved.remaining===0?'time':'errors'});return;}if(saved?.id===level.id){board.restore(saved.grid,saved.errors);this.hints=Math.max(0,saved.hints);}
   let remaining=saved?.id===level.id?saved.remaining??level.timeLimit??360:level.timeLimit??360;
@@ -40,6 +43,7 @@ export class GameScene extends Phaser.Scene {
   const hint=button(this,540,1680,310,'⌕',()=>{if(this.won||(SaveService.data.session?.hints??0)>=MAX_HINTS)return;const found=humanHint(board.grid,level.constraints,1);this.scene.pause();this.scene.launch('Hint',{step:found,levelId:level.id,apply:()=>{if(this.won||!found)return;board.reveal(found.position,found.value);AudioService.play('hint');}});},C.teal);
   const magnifier=this.add.graphics().lineStyle(7,0xffffff).strokeCircle(532,1660,22);magnifier.lineBetween(548,1676,570,1698);(hint.list.find(o=>o.type==='Text') as Phaser.GameObjects.Text).setText('');
   const quota=this.add.graphics();
+  let previousErrors=board.errors;
   const changed=()=>{
    if(this.won)return;
    this.hints=SaveService.data.session?.id===level.id?SaveService.data.session.hints:this.hints;
@@ -47,6 +51,10 @@ export class GameScene extends Phaser.Scene {
    quota.clear();for(let i=0;i<MAX_HINTS;i++)quota.fillStyle(i<this.hints?0x667f83:0xffffff).fillCircle(514+i*26,1715,7);
    if(this.hints>=MAX_HINTS)hint.disableInteractive().setAlpha(.5);
 
+   const teaching=currentLesson(lessons,board.grid);
+   lesson.setText(teaching?lessonText(teaching,Number(level.id.slice(6))):level.id==='trail-5'?'À toi de combiner les règles !':'');
+   if(board.errors===previousErrors)board.highlight(teaching?.sources??[],teaching?.position);
+   previousErrors=board.errors;
    info.setText(`${SaveService.data.kibble} croquettes`);
    drawAttemptHeart(lives,240,1790,board.errors);
    if(!started&&board.grid.some((row,r)=>row.some((v,c)=>v!==level.initial[r]![c])))started=true;
