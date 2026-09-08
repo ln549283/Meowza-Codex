@@ -1,444 +1,303 @@
-# MEOWZA — AUDIT RÉEL & ROADMAP V3
+# MEOWZA — ROADMAP D’EXÉCUTION V3
 
-> Branche de référence technique : `kawaii-cat-tree-refonte-v3`
+> Branche de travail : `kawaii-cat-tree-refonte-v3`
 >
-> Base réelle : `codex/kawaii-cat-tree`
+> Base source : `codex/kawaii-cat-tree`
 >
 > Cible produit : `MEOWZA_PRODUCT_BIBLE.md`
->
-> Cette roadmap remplace l'audit réalisé sur `kawaii-cat-tree-refonte-v2`, qui reposait sur une base obsolète.
 
 ---
 
-# 1. Verdict exécutif
+# 0. RÈGLE D’EXÉCUTION — OBLIGATOIRE
 
-La vraie branche est **beaucoup plus avancée** que l'ancien audit ne le laissait penser.
+Cette roadmap est la **source de vérité opérationnelle**.
 
-Meowza possède déjà :
+Une étape n’est jamais considérée terminée parce que « le code existe » ou parce que la CI est verte.
 
-- un arbre unique continu et virtualisé ;
-- une progression `trail-*` déterministe ;
-- une génération hybride seedée ;
-- un Human Solver explicable ;
-- les déductions balance / triple / relation / contradiction ;
-- des indices payants en croquettes ;
-- des niveaux Extreme Timed ;
-- une sauvegarde de tentative ;
-- une validation immédiate contre la solution cachée ;
-- trois erreurs avant défaite ;
-- une économie croquettes ;
-- des cosmétiques d'arbre ;
-- une Home et une direction visuelle déjà nettement plus proches de la cible.
+Pour avancer au bloc suivant, il faut :
 
-La stratégie correcte n'est donc **ni une réécriture, ni la reconstruction du Human Solver ou de l'arbre**.
+1. toutes les tâches du bloc cochées ;
+2. le critère de sortie du bloc validé ;
+3. la validation réelle sur téléphone lorsque le bloc touche au tactile, à la performance, au rendu ou aux animations ;
+4. aucune tâche ouverte du même métier laissée derrière ;
+5. les idées hors bloc sont mises en backlog, pas implémentées immédiatement.
 
-> **Le prochain chantier est un nettoyage ciblé de la boucle de tentative pour la rendre strictement conforme à la Bible.**
+**Règle : un bloc = un objectif mesurable.**
+
+Ne pas ouvrir le méta économique tant que le core fonctionnel **et** le polish visuel ne sont pas fermés.
 
 ---
 
-# 2. Ce qui est déjà aligné avec la Bible
+# 1. ÉTAT GLOBAL
 
-## A. Arbre unique continu — 🟢 IMPLÉMENTÉ
-
-Le produit utilise déjà une progression `trail-*` dans un arbre unique. `LevelSelectScene` virtualise les rangées visibles, conserve un offset de scroll et mélange les difficultés dans le même parcours.
-
-**Décision : conserver cette architecture.**
-
----
-
-## B. Progression déterministe / long tail — 🟢 IMPLÉMENTÉ
-
-`journey.ts` définit :
-
-- des séquences de difficulté contrôlées ;
-- des niveaux 1–5 spécifiques ;
-- des seeds déterministes ;
-- une génération vérifiée par Human Solver ;
-- des Extreme et Extreme Timed ;
-- une sortie stable par niveau sauvegardée via le système Journey.
-
-**Décision : ne pas reconstruire le système de génération. Le calibrer seulement.**
+```text
+V3-1  Conformité tentative            ✅ FERMÉ
+V3-2A Gameplay / calibration core      ✅ FERMÉ
+V3-2B Polish visuel / juice / motion   🟡 EN COURS
+V3-2C Playtest 20 premières minutes    ⬜ À FAIRE
+V3-3  Méta économique léger            ⬜ BLOQUÉ
+V3-4  Rewarded continuation            ⬜ BLOQUÉ
+V3-5  Daily / backend / Cat Day        ⬜ BLOQUÉ
+```
 
 ---
 
-## C. Human Solver — 🟢 IMPLÉMENTÉ, À CALIBRER
+# 2. V3-1 — CONFORMITÉ DE LA TENTATIVE — ✅ FERMÉ
 
-Le Human Solver existe réellement et ne lit pas la solution cachée pour produire ses déductions.
+Objectif : une tentative strictement conforme à la Bible.
 
-Il gère :
+- [x] supprimer Undo ;
+- [x] supprimer Reset / Effacer ;
+- [x] supprimer les étoiles ;
+- [x] Retry = reset total ;
+- [x] supprimer la persistance inter-tentative des indices ;
+- [x] prix indices = 15 / 25 / 40 ;
+- [x] quota dur = 3 indices ;
+- [x] quota 1/3, 2/3, 3/3 visible ;
+- [x] gros cœur unique à trois états ;
+- [x] confirmation avant abandon d’une tentative commencée ;
+- [x] Nouvelle partie ;
+- [x] tests ;
+- [x] validation mobile réelle.
 
-- équilibre 50/50 ;
-- jamais trois ;
-- SAME / DIFFERENT ;
-- hypothèse temporaire ;
-- propagation ;
-- contradiction ;
-- explications et sources.
+### Critère de sortie — VALIDÉ
 
-**Décision : conserver.**
+> placement → erreur rejetée → cœur se dégrade → troisième erreur → Chat alors… → Retry total
 
-Travail restant : tests de couverture, calibration de profondeur/chaînes, validation que les grilles difficiles restent agréables pour un humain.
-
----
-
-## D. Validation immédiate contre solution cachée — 🟢 IMPLÉMENTÉ
-
-`BoardView` compare déjà le chat joué à `level.solution`.
-
-Un mauvais chat :
-
-- ne reste pas dans la grille ;
-- incrémente le nombre d'erreurs ;
-- déclenche feedback audio/haptique ;
-- mène à la défaite à la troisième erreur.
-
-**Décision : conserver le principe.**
+> indice 1/3 à 15 → 2/3 à 25 → 3/3 à 40 → aucun quatrième indice avant retry
 
 ---
 
-## E. Extreme Timed — 🟢 BASE IMPLÉMENTÉE
+# 3. V3-2A — GAMEPLAY / CALIBRATION CORE — ✅ FERMÉ
 
-Le chrono :
+Objectif : rendre la boucle puzzle fiable, claire et agréable avant tout ajout méta.
 
-- démarre avec la tentative / premier placement ;
-- se suspend lorsque le document est caché ;
-- mène à une défaite à zéro ;
-- retry gratuit ;
-- propose déjà une aide anti-bloc après plusieurs échecs (+50 % de temps).
+- [x] onboarding L1–5 progressif ;
+- [x] règle équilibre formulée clairement en chats gris / roux par ligne et colonne ;
+- [x] cœur SAME introduit progressivement ;
+- [x] jamais trois introduit progressivement ;
+- [x] griffes DIFFERENT introduites progressivement ;
+- [x] Human Solver conservé et calibré ;
+- [x] Hard / Extreme nécessitent du lookahead humain ;
+- [x] indices courts, rule-led, explicables ;
+- [x] Extreme Timed à 5 minutes ;
+- [x] sélection tactile dense fiabilisée ;
+- [x] optimisation grille / feedback local ;
+- [x] chauffe téléphone validée sur appareil réel ;
+- [x] instrumentation probing / erreurs / abandons / hints / victoire / timeout ;
+- [x] tests et CI.
 
-**Décision : conserver l'architecture et calibrer plus tard.**
+### Critère de sortie — VALIDÉ
 
----
-
-## F. Croquettes — 🟢 IMPLÉMENTÉ
-
-Le jeu possède déjà :
-
-- un solde de croquettes ;
-- des récompenses par difficulté ;
-- des achats d'indices ;
-- une persistance locale.
-
-**Décision : ne pas refaire l'économie croquettes, mais corriger les paramètres et règles qui divergent de la Bible.**
+Le puzzle peut être joué sur téléphone avec des grilles denses sans problème tactile bloquant, sans chauffe anormale observée pendant le test réel, et les principales frictions de résolution sont mesurables.
 
 ---
 
-## G. Cosmétiques sur l'arbre — 🟢 BASE IMPLÉMENTÉE
+# 4. V3-2B — POLISH VISUEL / JUICE / MOTION — 🟡 EN COURS
 
-L'arbre possède déjà des slots d'ambiance / coussins / bois et des déblocages cosmétiques.
+**C’est le chantier actif.**
 
-**Décision : conserver le principe de personnalisation directement sur l'arbre.**
+Objectif : faire disparaître l’impression « UI dessinée par Phaser » et amener le jeu au niveau visuel commercial visé, tout en gardant l’interface simple, épurée et immédiatement compréhensible.
 
----
+Phaser reste le moteur de rendu et d’animation. Il ne doit pas dicter l’apparence finale des composants.
 
-# 3. Divergences prioritaires avec la Bible
+## B1 — Langage visuel des composants — À FAIRE EN PREMIER
 
-## A. Undo encore présent — 🔴 CONTRADICTION
+- [ ] inventorier les rectangles / cercles / panneaux / boutons génériques encore dessinés en primitives Phaser ;
+- [ ] définir une famille cohérente de boutons : principal, secondaire, danger, disabled, pressed ;
+- [ ] définir une famille cohérente de panneaux / cartes / modales ;
+- [ ] harmoniser coins, bordures, ombres, matières, spacing et typographie ;
+- [ ] améliorer les sélecteurs Nimbus / Moka ;
+- [ ] améliorer le HUD cœur / indices / croquettes ;
+- [ ] améliorer visuellement la grille, les cases et les contraintes sans réduire la lisibilité ;
+- [ ] supprimer les composants temporaires ou trop « debug / prototype ».
 
-La Bible supprime Undo.
+### Critère de sortie B1
 
-Le code actuel affiche encore `↶ Annuler` et maintient un historique de grille.
-
-**Action : supprimer Undo de l'UI et nettoyer uniquement l'historique devenu inutile.**
-
-**Priorité : P0.**
-
----
-
-## B. Reset / Effacer encore présent — 🔴 CONTRADICTION
-
-La Bible supprime Reset / Tout effacer.
-
-Le code actuel affiche encore `↻ Effacer` et permet de revenir à la grille initiale pendant la tentative.
-
-**Action : supprimer.**
-
-**Priorité : P0.**
+Sur Home, arbre, puzzle, indice, victoire et défaite, les composants importants appartiennent clairement à la même DA et aucun bouton/panneau majeur ne donne l’impression d’un simple rectangle Phaser générique.
 
 ---
 
-## C. Étoiles encore présentes — 🔴 CONTRADICTION
+## B2 — Arbre et identité des niveaux
 
-La Bible supprime les étoiles.
+- [ ] finaliser l’icône dédiée Extreme Timed / Coup de griffe ;
+- [ ] vérifier sa lisibilité directement dans l’arbre sur téléphone ;
+- [ ] différencier clairement Easy / Medium / Hard / Extreme / Timed sans surcharge ;
+- [ ] harmoniser nodes, supports, coussins et éléments décoratifs ;
+- [ ] vérifier la cohérence des assets avec Nimbus, Moka et la palette globale.
 
-Le code actuel :
+### Critère de sortie B2
 
-- calcule encore 1–3 étoiles ;
-- stocke `stars` dans `LevelProgress` ;
-- les affiche dans Victory ;
-- utilise le texte « Trois étoiles, bravo ! ».
-
-**Action : supprimer le concept produit des étoiles.**
-
-Conserver éventuellement les statistiques erreurs / indices si utiles, mais ne plus les transformer en note 1–3 étoiles.
-
-Prévoir une migration de save sans casser les joueurs existants.
-
-**Priorité : P0.**
+En regardant l’arbre sans ouvrir un niveau, un joueur distingue immédiatement un Coup de griffe d’un Extreme normal et comprend visuellement la hiérarchie sans texte supplémentaire.
 
 ---
 
-## D. Trois petits cœurs au lieu d'un gros cœur — 🔴 CONTRADICTION VISUELLE
+## B3 — Feedback gameplay / personnages
 
-Le code actuel dessine trois petits cœurs dans le HUD.
+- [ ] finaliser les trois états visuels du gros cœur ;
+- [ ] animation claire à chaque erreur ;
+- [ ] animation de cœur brisé à la troisième erreur ;
+- [ ] réaction Nimbus / Moka sur erreur ;
+- [ ] réaction positive discrète sur bonne séquence / ligne complète ;
+- [ ] feedback d’indice appliqué ;
+- [ ] éviter les animations permanentes inutiles.
 
-La Bible verrouille un **gros cœur unique** avec trois états :
+### Critère de sortie B3
 
-1. fissuré ;
-2. très endommagé ;
-3. brisé avec fragments + réaction triste.
-
-**Action : remplacer les trois petits cœurs par le composant gros cœur.**
-
-**Priorité : P0, mais après suppression Undo/Reset/stars pour garder le chantier simple.**
-
----
-
-## E. Retry conserve les indices achetés — 🔴 CONTRADICTION MAJEURE
-
-La Bible verrouille : **Retry = reset total**.
-
-Le code actuel conserve `purchasedHints[levelId]` entre les tentatives et l'écran de défaite dit explicitement :
-
-> « Tes indices achetés restent disponibles. »
-
-`restartAttempt()` remet `attemptPurchases` à 0 mais ne supprime pas les déductions achetées du niveau.
-
-**Action : supprimer cette persistance inter-tentative.**
-
-À chaque retry :
-
-- indices précis = 0/3 ;
-- prix repart au premier palier ;
-- aucune ancienne déduction conservée par le jeu.
-
-**Priorité : P0.**
+Une erreur, une réussite, un indice et une défaite se comprennent par le mouvement et l’expression avant même de lire du texte.
 
 ---
 
-## F. Prix des indices incorrects — 🔴 CONTRADICTION
+## B4 — Micro-interactions et boutons
 
-Bible :
+- [ ] état pressed visible ;
+- [ ] rebond / squash léger sur tap ;
+- [ ] disabled clairement distinct ;
+- [ ] haptique cohérente avec le feedback visuel ;
+- [ ] apparition / disparition des modales ;
+- [ ] easing cohérent ;
+- [ ] aucun feedback qui ralentit la résolution rapide.
 
-- 15 ;
-- 25 ;
-- 40 croquettes.
+### Critère de sortie B4
 
-Code actuel :
-
-- 20 ;
-- 35 ;
-- 50.
-
-**Action : passer à 15 / 25 / 40.**
-
-**Priorité : P0.**
+Tous les boutons principaux donnent une réponse immédiate au toucher et utilisent le même langage de mouvement.
 
 ---
 
-## G. Pas de limite réelle à 3 indices — 🔴 CONTRADICTION
+## B5 — Transitions de scènes
 
-La Bible verrouille **maximum 3 indices précis par grille et par tentative**.
+- [ ] Home → arbre ;
+- [ ] arbre → puzzle ;
+- [ ] puzzle → indice → puzzle ;
+- [ ] puzzle → victoire ;
+- [ ] puzzle → défaite ;
+- [ ] victoire → niveau suivant ;
+- [ ] retour vers l’arbre ;
+- [ ] transitions compatibles reducedMotion.
 
-Le code actuel utilise `hintCost()` qui plafonne simplement le prix au troisième tarif. Il n'interdit donc pas explicitement un quatrième achat.
+### Critère de sortie B5
 
-**Action : quota dur 3/3.**
-
-Le bouton doit rester visible mais désactivé après le troisième.
-
-**Priorité : P0.**
-
----
-
-## H. Quota d'indices peu lisible avant achat — 🟡 PARTIEL
-
-Le panneau indique le coût, mais la Bible demande que le joueur sache **avant le premier achat** qu'il dispose de trois indices maximum.
-
-**Action :**
-
-- trois marqueurs visibles près de la loupe ;
-- `Indice 1/3 · 15`, `Indice 2/3 · 25`, `Dernier indice · 40` ;
-- après troisième : `3/3 utilisés`.
-
-**Priorité : P0/P1.**
+Les changements de scène ne ressemblent plus à des écrans qui apparaissent brutalement et aucune transition ne gêne le rythme de jeu.
 
 ---
 
-## I. Aide générale gratuite — 🟡 PARTIEL
+## B6 — Victoire / défaite / moments forts
 
-Les règles sont consultables gratuitement, ce qui couvre une partie du besoin.
+- [ ] victoire plus satisfaisante sans étoiles ;
+- [ ] animation de fin de grille ;
+- [ ] réaction de chat ;
+- [ ] défaite plus émotionnelle mais courte ;
+- [ ] Coup de griffe : tension visuelle spécifique mais lisible ;
+- [ ] pas de surenchère d’effets.
 
-Mais l'architecture actuelle du bouton Loupe ouvre directement la logique d'indice précis payant.
+### Critère de sortie B6
 
-**Action : vérifier en playtest si l'accès aux règles suffit comme aide générale ou si une micro-aide contextuelle gratuite séparée est nécessaire.**
-
-**Priorité : P1, pas avant le quota payant.**
-
----
-
-# 4. Systèmes cible encore absents ou incomplets
-
-## A. Diamants — 🔴 ABSENT
-
-Aucune monnaie premium diamant dans le SaveData actuel.
-
-**Priorité : P2/P3.**
-
-Ne pas l'ajouter avant validation de la boucle puzzle et de la rétention des premières sessions.
+La fin d’un niveau donne une vraie récompense émotionnelle et la défaite reste claire, rapide et incite au retry.
 
 ---
 
-## B. Missions quotidiennes — 🔴 ABSENT
+## B7 — Performance visuelle réelle
 
-Pas de système de 3 missions quotidiennes / 1 diamant chacune.
+- [ ] test téléphone 10–15 minutes avec animations activées ;
+- [ ] vérifier chauffe ;
+- [ ] vérifier FPS / saccades perceptibles ;
+- [ ] vérifier tactile pendant les animations ;
+- [ ] vérifier reducedMotion ;
+- [ ] alléger les effets coûteux si nécessaire.
 
-**Priorité : P3.**
+### Critère de sortie V3-2B — OBLIGATOIRE
 
----
+**V3-2B n’est fermé que si :**
 
-## C. Collection de chats — 🔴 ABSENT COMME SYSTÈME COMPLET
-
-Nimbus et Moka existent, mais il n'y a pas encore de vraie collection d'habitants de l'arbre avec sources progression / événement / premium.
-
-**Priorité : P3.**
-
----
-
-## D. Rewarded continuation — 🔴 ABSENT
-
-Pas de provider rewarded-ad / continuation après troisième erreur ou timeout.
-
-**Priorité : P2**, après stabilisation de la tentative.
-
-Commencer par une abstraction/mock, pas par un SDK publicitaire réel.
+> le jeu paraît cohérent et fini sur Home + arbre + puzzle + indice + victoire + défaite, les interactions sont animées avec sobriété, les transitions sont propres, et une session réelle de 10–15 minutes sur téléphone ne montre ni régression tactile ni chauffe problématique.
 
 ---
 
-## E. Daily Extreme / leaderboard / Cat Day — 🔴 ABSENT
+# 5. V3-2C — PLAYTEST DES 20 PREMIÈRES MINUTES — ⬜ BLOQUÉ PAR V3-2B
 
-Les services actuels sont locaux : audio, haptics, journey, save, worker de génération.
+Objectif : valider le produit avant d’ajouter du méta.
 
-Pas de backend, identité, leaderboard, résultat serveur, Daily mondial ou Cat Day.
-
-**Priorité : P4.**
-
-Ne pas bloquer le soft launch solo avec ce chantier.
-
----
-
-# 5. Roadmap corrigée
-
-## SPRINT V3-1 — CONFORMITÉ DE LA TENTATIVE
-
-**C'est le prochain chantier.**
-
-Objectif : enlever les dernières mécaniques héritées qui contredisent directement la Bible.
-
-À faire :
-
-1. supprimer Undo ;
-2. supprimer Reset / Effacer ;
-3. supprimer étoiles du gameplay, Victory et modèle de save avec migration ;
-4. rendre Retry réellement total ;
-5. supprimer la persistance des indices achetés entre tentatives ;
-6. prix indices = 15 / 25 / 40 ;
-7. quota dur = 3 indices ;
-8. afficher clairement 1/3, 2/3, 3/3 ;
-9. remplacer les trois petits cœurs par un gros cœur à trois états ;
-10. tests de tentative / hint / save ;
-11. validation mobile réelle.
+- [ ] Nouvelle partie depuis zéro ;
+- [ ] jouer au moins les niveaux 1–5 ;
+- [ ] poursuivre jusqu’à rencontrer Medium / Hard ;
+- [ ] tester au moins un Extreme et un Coup de griffe si accessible dans le parcours prévu ;
+- [ ] observer compréhension des règles ;
+- [ ] observer probing / erreurs ;
+- [ ] observer achats d’indices ;
+- [ ] observer abandons ;
+- [ ] noter toute hésitation UI ;
+- [ ] relire instrumentation après session ;
+- [ ] corriger uniquement les problèmes réellement observés.
 
 ### Critère de sortie
 
-Une tentative normale suit exactement :
+Les 20 premières minutes sont suffisamment claires, agréables et engageantes pour justifier l’ouverture du méta économique.
 
-> placement → erreur rejetée → gros cœur se dégrade → troisième erreur → Chat alors… → Retry total
-
-Et un indice suit exactement :
-
-> 1/3 à 15 → 2/3 à 25 → 3/3 à 40 → plus aucun indice précis jusqu'au retry.
+**Sans cette validation, V3-3 reste bloqué.**
 
 ---
 
-## SPRINT V3-2 — POLISH & CALIBRATION CORE
+# 6. V3-3 — MÉTA ÉCONOMIQUE LÉGER — ⬜ BLOQUÉ
 
-Après V3-1 seulement :
+Ne commencer qu’après V3-2C.
 
-- feedback gros cœur / chats ;
-- calibration Human Solver ;
-- onboarding L1–5 ;
-- difficulté des séquences ;
-- Extreme Timed ;
-- performances arbre/grille ;
-- sélection tactile ;
-- chauffe téléphone ;
-- instrumentation probing / erreurs / abandon / hints.
-
-Objectif : rendre les 20 premières minutes excellentes avant d'étendre le méta.
+- [ ] diamants ;
+- [ ] missions quotidiennes ;
+- [ ] collection de chats ;
+- [ ] récompenses milestones ;
+- [ ] extension cosmétiques ;
+- [ ] boutique directe ;
+- [ ] aucun gacha payé ;
+- [ ] aucune conversion diamant → croquettes.
 
 ---
 
-## SPRINT V3-3 — META ÉCONOMIQUE LÉGER
+# 7. V3-4 — REWARDED CONTINUATION — ⬜ BLOQUÉ
 
-Seulement après playtests :
-
-- diamants ;
-- missions quotidiennes ;
-- collection de chats ;
-- récompenses milestones ;
-- extension cosmétiques ;
-- boutique directe sans gacha payé.
+- [ ] abstraction provider ;
+- [ ] mock avant SDK réel ;
+- [ ] une continuation maximum par tentative ;
+- [ ] disponible après erreur 3 ou timeout ;
+- [ ] aucun blocage si pub indisponible ;
+- [ ] instrumentation de l’usage et de la frustration.
 
 ---
 
-## SPRINT V3-4 — REWARDED CONTINUATION
+# 8. V3-5 — DAILY / BACKEND / CAT DAY — ⬜ BLOQUÉ
 
-- abstraction provider ;
-- mock ;
-- une continuation max par tentative ;
-- erreur 3 ou timeout ;
-- aucun blocage si pub indisponible ;
-- mesure de l'usage et de la frustration.
+Dernier grand chantier.
 
----
+- [ ] identité ;
+- [ ] backend ;
+- [ ] Daily Extreme ;
+- [ ] tentative classée unique ;
+- [ ] move log ;
+- [ ] serveur autoritaire ;
+- [ ] classement erreurs puis temps ;
+- [ ] anti-cheat ;
+- [ ] récompenses ;
+- [ ] Cat Day.
 
-## SPRINT V3-5 — DAILY / BACKEND / CAT DAY
-
-Dernier gros chantier :
-
-- identité ;
-- backend ;
-- Daily Extreme ;
-- tentative classée unique ;
-- move log ;
-- serveur autoritaire ;
-- classement erreurs puis temps ;
-- anti-cheat multi-signal ;
-- récompenses ;
-- Cat Day.
+Ne pas bloquer un soft launch solo avec ce chantier.
 
 ---
 
-# 6. Ce qu'il ne faut PAS refaire
+# 9. BASES À NE PAS RECONSTRUIRE
 
-Ne pas reconstruire :
+Conserver et améliorer uniquement :
 
-- le Human Solver ;
-- l'arbre unique ;
-- le générateur seedé ;
-- la progression `trail-*` ;
-- l'architecture Timed ;
-- l'économie croquettes de base ;
-- la personnalisation d'arbre existante.
-
-Ces systèmes sont désormais des **bases à améliorer**, pas des trous à combler.
+- Human Solver ;
+- arbre unique et virtualisé ;
+- générateur seedé ;
+- progression `trail-*` ;
+- architecture Timed ;
+- économie croquettes de base ;
+- personnalisation d’arbre existante.
 
 ---
 
-# 7. Décision immédiate
+# 10. PROCHAINE ACTION UNIQUE
 
-> **Commencer par Sprint V3-1 et rien d'autre.**
+> **Terminer V3-2B / B1 : langage visuel des composants.**
 
-C'est un chantier beaucoup plus petit et plus sûr que l'ancien Sprint 1 imaginé sur la branche obsolète.
-
-Il ne faut ajouter ni diamants, ni Daily, ni ads réelles, ni nouveau système de progression avant que cette tentative soit strictement conforme à la Bible et validée sur téléphone.
+Ne pas ouvrir diamants, missions, collection, rewarded ads ou backend avant fermeture explicite de V3-2B puis V3-2C.
