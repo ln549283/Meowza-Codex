@@ -43,7 +43,7 @@ P12 dépend de P02/P07/P08 ; P13 dépend du cadrage identité/serveur ; P14 dép
 - Pourquoi : règles réparties dans BoardView/scènes, commandes abandonnées encore actives.
 - Périmètre : logique tentative, supprimer Undo/Reset/étoiles actifs, chrono/reprise/sortie.
 - Hors périmètre : nouvelle illustration du cœur, économie, SDK ads.
-- Tâches : [ ] invariants erreur/fin hors UI ; [ ] retirer Undo/Reset et tutoriel associé ; [ ] retirer performance étoiles sans effacer les victoires ; [ ] clarifier retoucher une case correcte ; [ ] reprendre exactement la session depuis Home ; [ ] accès legacy ; [ ] idempotence victoire/timeout ; [ ] documenter aide chrono historique.
+- Tâches : [x] invariants placement/erreur hors UI (fin de scène protégée) ; [x] retirer Undo/Reset et tutoriel associé ; [x] retirer performance étoiles sans effacer les victoires ; [x] retoucher une case correcte est sans effet ; [x] reprendre la session active depuis Home ; [ ] accès legacy ; [x] garde terminale et double callback de victoire ; [x] documenter aide chrono historique.
 - Dépendances : P01 ; décision sur aide chrono avant modification de cette règle.
 - Sortie : retry total, fermeture accidentelle = reprise, aucune double récompense, pas de vie globale.
 - Tests : erreurs 1/2/3, mauvais chat non posé, retry/abandon/reload, background et temps, anciennes sauvegardes.
@@ -71,7 +71,7 @@ P12 dépend de P02/P07/P08 ; P13 dépend du cadrage identité/serveur ; P14 dép
 - Pourquoi : trois cœurs, primitives génériques et absence de mise en évidence des preuves.
 - Périmètre : composants/tokens, grille coussin, HUD cœur unique, loupe, panneaux d’aide, erreurs.
 - Hors périmètre : économie, backend, catalogue complet.
-- Tâches : [ ] famille composants idle/pressed/disabled/selected ; [ ] cœur intact/fissuré/très abîmé/brisé ; [ ] distinction cœur santé/SAME ; [ ] source → règle → case d’indice ; [ ] états sans mouvement ; [ ] tester dimensions réelles et contraste.
+- Tâches : [ ] famille composants idle/pressed/disabled/selected ; [x] cœur intact/fissuré/très abîmé/brisé fonctionnel, contrôle mobile ouvert ; [ ] distinction cœur santé/SAME ; [ ] source → règle → case d’indice ; [ ] états sans mouvement ; [ ] tester dimensions réelles et contraste.
 - Dépendances : P01/P02/P03, direction visuelle de la Bible.
 - Sortie : une composition validée, pas collection d’assets isolés ; information identique sans animation.
 - Tests : actions ne traversent pas les modales, hit areas stables, reducedMotion.

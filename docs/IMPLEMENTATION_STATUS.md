@@ -124,3 +124,7 @@ Source graphique : 5ed1bfbd76a7a03034e9a4e19c5697b25d471769. Illustration retry-
 Recette web observée : placement correct accepté ; second toucher sans effacement ; rechargement → Continuer → même placement conservé ; première puis deuxième fissure ; troisième erreur → défaite ; retry → grille initiale, cœur intact, quota 0/3, portefeuille conservé à 45 croquettes.
 
 Les anciennes sections ci-dessus sont historiques. L'illustration triste n'est plus absente. Restent : réactions en cours de grille, calibration/onboarding, finition globale arbre/collection, missions/diamants, boutique réelle/rewarded, backend Daily/Cat Day, appareils physiques et validation commerciale. Ce lot n'est pas une version finale commerciale.
+
+Recette complémentaire : nouvelle défaite illustrée vue sur Netlify, bouton Recommencer gratuit fonctionnel ; victoire au niveau 1 sans étoiles, gain +5 (45 → 50 croquettes), puis lancement du niveau 2.
+
+Dernier lot source : 86c0f8b286a5158626be315fc08eb21582d079ab. Les modifications des assets, dépendances et configurations déclenchent désormais aussi les compilations natives. Builds debug/simulateur seulement : aucun binaire store signé ni test sur appareil n'est revendiqué.
