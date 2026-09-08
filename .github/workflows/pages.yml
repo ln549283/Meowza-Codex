@@ -13,7 +13,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-v3
   cancel-in-progress: true
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
 
   deploy:
     environment:
-      name: github-pages
+      name: github-pages-v3
       url: ${{ steps.deployment.outputs.page_url }}
 
     runs-on: ubuntu-latest
