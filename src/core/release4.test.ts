@@ -22,7 +22,7 @@ test('first hundred authored puzzles have bounded human proofs including every t
  assert.equal(journeySpec(101).difficulty,'hard');
 });
 test('onboarding progressively removes clues and introduces one concept at a time',()=>{
- const levels=[1,2,3,4,5].map(generateJourneyLevel);
+ const levels=[1,2,3,4,5].map(n=>generateJourneyLevel(n));
  const blanks=levels.map(l=>l.initial.flat().filter(v=>v===0).length);
  assert.ok(blanks.every((n,i)=>i===0||n>=blanks[i-1]!));
  assert.equal(levels[0]!.constraints.length,0);
