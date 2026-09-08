@@ -84,3 +84,7 @@ Home, arbre L1/milieu/lointain, décoration, grilles 4/6/8, achat indice 1/2/der
 ## Limite de l’inspection du 2026-09-08
 
 La page GitHub Pages actuellement visible provient de `kawaii-cat-tree-refonte-v3`, pas de la branche auditée. Son Home, son arbre et sa grille ont été vus ; aucune conclusion de conformité de nos scènes n’en est tirée. Les huit images runtime ont été inspectées directement sur disque. P01 nécessite encore une recette visuelle de son propre build ; la prévisualisation locale est refusée par le navigateur cloud.
+
+## Complément : recette de notre build sur Netlify
+
+Le commit 6c66996 est désormais inspecté sur sa prévisualisation isolée. Grille 4×4 : quota texte + trois marqueurs dans une loupe, panneau d’achat 1/3 à 15 et avertissement du maximum, explication, écran de défaite et retry contrôlés. Ces états sont lisibles au viewport desktop inspecté. Les états 2/3, dernier/épuisé, migration et petit écran restent à inspecter. Ce contrôle ne valide pas la DA cible, notamment cœur expressif/Undo/Reset/étoiles qui restent les chantiers P02/P04.

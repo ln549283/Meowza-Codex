@@ -82,3 +82,13 @@
 - Pourquoi : permettre deux prévisualisations sans écraser l’autre version.
 - Impact : aucun changement sur kawaii-cat-tree-refonte-v3. Push atomique de la suppression Pages et du travail P01.
 - Validation : vérifier déploiement du nouveau code sur Netlify ; recette P01 et mobile restent à consigner séparément.
+
+## D009 — Preuve d’isolation et de livraison P01
+
+- Date : 2026-09-08. Statut : publication et scénario web principal vérifiés ; mobile à tester.
+- Contexte : site Netlify lié à la branche, suppression Pages et P01 envoyés atomiquement dans 6c66996.
+- Décision : Netlify devient la prévisualisation de travail ; conserver P01 jaune jusqu’à recette restante et mobile. Ne pas lancer un autre chantier pour masquer la validation manquante.
+- Alternatives : annoncer terminé depuis la CI seule ; rejeté.
+- Pourquoi : maintenir la distinction code, publication, UX, validation physique.
+- Impact : status/roadmap/spec actualisés ; aucune modification de règle supplémentaire.
+- Validation : achat 60→45, relecture sans débit, défaite puis retry 0/3 et nouveau tarif 15 dans le navigateur ; Quality/Android/iOS réussis sur le commit publié.

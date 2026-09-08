@@ -35,7 +35,7 @@ P12 dépend de P02/P07/P08 ; P13 dépend du cadrage identité/serveur ; P14 dép
 - Tests : service, migration, coûts, quatrième achat, relecture même tentative, échec/retry, build et banque.
 - Visuel : panneau 1/3, 2/3, dernier, solde insuffisant et épuisé ; texte sans chevauchement.
 - Mobile : achat/relecture/reprise/retour règles sur téléphone.
-- Statut : implémentation locale réalisée ; 🟡 EN ATTENTE VALIDATION VISUELLE ET MOBILE. Pas de publication : conflit de branche Pages documenté D007. Prochain bloc autorisé = recette P01, pas nouveau chantier.
+- Statut : implémentation locale réalisée ; 🟡 EN ATTENTE VALIDATION VISUELLE ET MOBILE. Publié sur Netlify (6c66996), isolation vérifiée D008/D009 ; recette web du scénario achat/relecture/défaite/retry réussie. États complémentaires et téléphone restent à vérifier. Prochain bloc autorisé = fin de recette P01, pas nouveau chantier.
 
 ## P02 — Tentative cohérente
 

@@ -92,3 +92,14 @@ P01 n’a modifié ni les gains, ni les difficultés, ni le cœur, ni les étoil
 ## Mise à jour hébergement
 
 Loïc a créé https://meowza-473953555.netlify.app/ pour cette branche. D008 remplace la suspension D007 : le workflow Pages est retiré uniquement ici et netlify.toml fixe Node 22 / npm run check / dist. Le site s’ouvre ; la présence du nouveau code P01 doit être vérifiée après push. Les anciennes observations du site Pages ne valident toujours pas cette version.
+
+## Recette Netlify — commit 6c669964958b8ca55cd9d84fc4e7b5ea2981e17e
+
+- Publication de cette branche vérifiée sur https://meowza-473953555.netlify.app/ ; le code du quota et du prix 15 est effectivement servi.
+- Workflow Pages absent de cette branche ; GitHub n’a déclenché que Quality et Native smoke build. L’autre branche reste indépendante.
+- Quality réussie (run 34218308178) ; Android Debug et iOS Simulator réussis (run 34218308276). Ces builds ne sont pas des tests physiques.
+- Recette navigateur de cette version : Home, arbre et grille ; quota 0/3 et marqueurs ; confirmation 1/3 à 15 avec plafond annoncé ; achat 60→45 et compteur 1/3 ; relecture directe sans nouveau débit ; trois erreurs et défaite ; retry gratuit, même grille, trois cœurs restaurés, quota 0/3, solde 45 ; ancien indice non conservé, confirmation à 15 à nouveau.
+- Rendu de ces états inspecté sans chevauchement bloquant. Il s’agit d’un contrôle fonctionnel desktop ; la qualité artistique complète n’est pas validée.
+- Restent à inspecter visuellement : états 2/3, dernier indice/épuisé, fonds insuffisants, migration, interruption et Timed. Ces contrats logiques sont couverts par tests lorsqu’indiqué, pas tous par cette recette manuelle.
+- Statut P01 : implémenté et publié ; recette web partielle ; EN ATTENTE VALIDATION MOBILE. Aucun feu vert commercial.
+- Prochain bloc : terminer la recette P01 (états restants puis téléphone), avant d’ouvrir P02.
