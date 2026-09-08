@@ -31,6 +31,7 @@ export class SaveServiceImpl {
   completedCount(difficulty:string){return Object.entries(this.data.progress).filter(([id,p])=>id.startsWith(`${difficulty}-`)&&p.completed).length;}
 
   restartAttempt(){this.data.session=null;this.data.attemptPurchases=0;this.data.purchasedHints={};void this.persist();}
+  async newGame(){const settings={...this.data.settings};this.data=defaults();this.data.settings=settings;await this.persist();}
 
   buyHint(id:string,step:HumanStep){
    if(this.data.attemptPurchases>=MAX_HINTS_PER_ATTEMPT)return false;
