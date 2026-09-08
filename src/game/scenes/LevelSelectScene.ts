@@ -74,10 +74,10 @@ export class LevelSelectScene extends Phaser.Scene {
   const node=this.add.container(x,-62),bg=this.add.graphics();
   bg.fillStyle(0x6c4b51,.16).fillCircle(0,8,99).fillStyle(0xfffcf2).fillCircle(0,0,99);
   bg.lineStyle(n===this.current?8:4,n===this.current?C.teal:0xe2bc83).strokeCircle(0,0,99);
-  node.add([bg,imageContain(this.add.image(0,-17,'atlas-v3',spec.difficulty),150,132),label(this,0,65,String(n),34,C.ink,0)]);
+  const badge=spec.timed?imageContain(this.add.image(0,-10,'extreme-timed'),168,168):imageContain(this.add.image(0,-17,'atlas-v3',spec.difficulty),150,132);
+  node.add([bg,badge,label(this,0,65,String(n),34,C.ink,0)]);
   press(this,node,210,210,()=>{if(this.input.activePointer.y>235&&this.input.activePointer.y<1580)this.events.emit('play-level',n);});add(node);
   if(done)add(label(this,x+115,-90,'✓',43,'#348e84'));
-  if(spec.timed)add(label(this,x-122,-88,'◷',50,'#7658a3'));
   if(n===this.current)add(label(this,x,213,'À toi de jouer',29,'#397972',0));
   return row;
  }
