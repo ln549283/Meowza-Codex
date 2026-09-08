@@ -92,3 +92,11 @@
 - Pourquoi : maintenir la distinction code, publication, UX, validation physique.
 - Impact : status/roadmap/spec actualisés ; aucune modification de règle supplémentaire.
 - Validation : achat 60→45, relecture sans débit, défaite puis retry 0/3 et nouveau tarif 15 dans le navigateur ; Quality/Android/iOS réussis sur le commit publié.
+
+## D010 — Contrat de tentative et commandes (2026-09-08)
+
+Application des §6–7 : suppression Undo/Reset et étoiles actives. Les anciennes étoiles restent des données historiques inertes ; les victoires et droits existants sont conservés. Retoucher un chat accepté ne l'efface pas et ne coûte pas de chance : la Bible garantit que ce placement est correct. La validation du placement est isolée dans core/attempt.ts, sans dépendance Phaser. Les indices utilisent toujours Human Solver ; la vérification du résultat au moment du placement ne sert pas à produire leurs preuves.
+
+Le cœur unique présente les dégâts sans dépendre d'une animation. Une courte transition permet de voir l'état brisé. Ce dessin vectoriel constitue le composant fonctionnel, pas la validation finale de la direction artistique ou des réactions de Nimbus/Moka. L'aide chrono historique +50 % après trois échecs est conservée ; aucune publicité simulée n'est activée.
+
+Continuer privilégie une tentative active, y compris un ancien niveau rejoué. Les doubles callbacks de victoire sans nouvelle tentative ne répètent plus les statistiques ni ne remplacent le reçu de récompense.

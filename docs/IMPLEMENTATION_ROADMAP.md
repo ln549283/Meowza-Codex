@@ -35,7 +35,7 @@ P12 dépend de P02/P07/P08 ; P13 dépend du cadrage identité/serveur ; P14 dép
 - Tests : service, migration, coûts, quatrième achat, relecture même tentative, échec/retry, build et banque.
 - Visuel : panneau 1/3, 2/3, dernier, solde insuffisant et épuisé ; texte sans chevauchement.
 - Mobile : achat/relecture/reprise/retour règles sur téléphone.
-- Statut : implémentation locale réalisée ; 🟡 EN ATTENTE VALIDATION VISUELLE ET MOBILE. Publié sur Netlify (6c66996), isolation vérifiée D008/D009 ; recette web du scénario achat/relecture/défaite/retry réussie. États complémentaires et téléphone restent à vérifier. Prochain bloc autorisé = fin de recette P01, pas nouveau chantier.
+- Statut : implémentation locale réalisée ; 🟡 EN ATTENTE VALIDATION VISUELLE ET MOBILE. Publié sur Netlify (6c66996), isolation vérifiée D008/D009 ; recette web du scénario achat/relecture/défaite/retry réussie. États complémentaires et téléphone restent à vérifier. Recette complémentaire P01 reste ouverte ; la demande de finalisation autorise la poursuite P02 en conservant ce statut jaune.
 
 ## P02 — Tentative cohérente
 
@@ -49,7 +49,7 @@ P12 dépend de P02/P07/P08 ; P13 dépend du cadrage identité/serveur ; P14 dép
 - Tests : erreurs 1/2/3, mauvais chat non posé, retry/abandon/reload, background et temps, anciennes sauvegardes.
 - Visuel : commandes supprimées sans vide incohérent, victoire sans étoiles.
 - Mobile : interruptions, retour Android, fermeture/reprise et timeout.
-- Statut : à faire.
+- Statut : implémentation partielle P02, tests et recette en cours ; cœur fonctionnel P04 intégré à la suppression des anciennes commandes. Validation physique toujours ouverte.
 
 ## P03 — Apprentissage et calibration
 

@@ -102,6 +102,6 @@ test('changing level and completing a level do not leak deductions into the next
  assert.equal(s.ownedHint('trail-1',step()),undefined);
  assert.equal(s.data.session?.hints,0);
  assert.deepEqual(s.data.session?.hintSteps,[]);
- await s.complete('easy-01',1,0,0);
+ await s.complete('easy-01',0,0);
  assert.equal(s.data.session,null);
 });

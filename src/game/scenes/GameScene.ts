@@ -1,5 +1,6 @@
 
 import Phaser from 'phaser';
+import { drawAttemptHeart } from '../AttemptHeart';
 import { MAX_HINTS } from '../../core/economy';
 import { humanHint } from '../../core/humanSolver';
 import { isWon } from '../../core/validator';
@@ -25,7 +26,7 @@ export class GameScene extends Phaser.Scene {
   let remaining=saved?.id===level.id?saved.remaining??level.timeLimit??360:level.timeLimit??360;
   let started=saved?.id===level.id?!!saved.started:false;
   const clock=label(this,540,198,'',38);board.onAttempt=()=>{started=true;};
-  const lose=(reason:string)=>{this.won=true;board.locked=true;SaveService.data.failures[level.id]=(SaveService.data.failures[level.id]??0)+1;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,true);this.scene.start('Lost',{reason});};
+  const lose=(reason:string)=>{if(this.won)return;this.won=true;board.locked=true;SaveService.data.failures[level.id]=(SaveService.data.failures[level.id]??0)+1;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,true);this.time.delayedCall(SaveService.data.settings.reducedMotion?100:450,()=>this.scene.start('Lost',{reason}));};
   if(level.timed){
    const clockText=()=>clock.setText(`◷ ${Math.floor(remaining/60)}:${String(Math.ceil(remaining%60)).padStart(2,'0')}${started?'':' · au premier chat'}`);
    clockText();
@@ -36,30 +37,29 @@ export class GameScene extends Phaser.Scene {
   const select=(value:1|2)=>{board.brush=value;selectors.forEach((g,i)=>{g.clear();if(i+1===value)g.lineStyle(5,C.teal).strokeRoundedRect(-205,-77,410,154,30);});};
   ([1,2] as const).forEach((value,i)=>{const c=this.add.container(305+i*465,1430),g=this.add.graphics();selectors.push(g);const cat=imageContain(this.add.image(-105,0,value===1?'grey-cat':'orange-cat'),112,112);c.add([g,cat,label(this,55,-22,value===1?'Nimbus':'Moka',34),label(this,55,29,value===1?'Chat gris':'Chat roux',30)]);c.setSize(440,190).setInteractive({useHandCursor:true}).on('pointerdown',()=>{if(!this.won)select(value);});});select(1);
   const status=label(this,540,1560,'',29);const info=label(this,710,1830,'',32);const lives=this.add.graphics();
-  const undo=button(this,205,1680,290,'↶ Annuler',()=>board.undo(),0x9a8aac);
   const hint=button(this,540,1680,310,'⌕',()=>{if(this.won||(SaveService.data.session?.hints??0)>=MAX_HINTS)return;const found=humanHint(board.grid,level.constraints,1);this.scene.pause();this.scene.launch('Hint',{step:found,levelId:level.id,apply:()=>{if(this.won||!found)return;board.reveal(found.position,found.value);AudioService.play('hint');}});},C.teal);
   const magnifier=this.add.graphics().lineStyle(7,0xffffff).strokeCircle(532,1660,22);magnifier.lineBetween(548,1676,570,1698);(hint.list.find(o=>o.type==='Text') as Phaser.GameObjects.Text).setText('');
   const quota=this.add.graphics();
-  const reset=button(this,875,1680,290,'↻ Effacer',()=>{if(!this.won)board.reset();},0xb98597);
   const changed=()=>{
+   if(this.won)return;
    this.hints=SaveService.data.session?.id===level.id?SaveService.data.session.hints:this.hints;
    status.setText(`${this.hints}/${MAX_HINTS} indices utilisés`);
    quota.clear();for(let i=0;i<MAX_HINTS;i++)quota.fillStyle(i<this.hints?0x667f83:0xffffff).fillCircle(514+i*26,1715,7);
    if(this.hints>=MAX_HINTS)hint.disableInteractive().setAlpha(.5);
 
    info.setText(`${SaveService.data.kibble} croquettes`);
-   lives.clear();for(let i=0;i<3;i++){const x=180+i*82,y=1830;lives.fillStyle(i<3-board.errors?0xe97589:0xd9cdd3);lives.fillCircle(x-12,y-8,17).fillCircle(x+12,y-8,17).fillTriangle(x-29,y-4,x+29,y-4,x,y+30);} 
+   drawAttemptHeart(lives,240,1790,board.errors);
    if(!started&&board.grid.some((row,r)=>row.some((v,c)=>v!==level.initial[r]![c])))started=true;
    SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started);
-   if(board.errors>=3&&!this.won){this.won=true;board.locked=true;lose('errors');return;}
-   if(isWon(board.grid,level.constraints)&&!this.won){this.won=true;board.locked=true;undo.disableInteractive();hint.disableInteractive();reset.disableInteractive();const stars=this.hints===0&&board.errors===0?3:this.hints<=1&&board.errors<=3?2:1;GameRegistry.result={level,stars,errors:board.errors,hints:this.hints};AudioService.play('victory');void HapticsService.victory();sparkles(this,540,790,24);status.setText('Tout le monde a trouvé sa place !');void SaveService.complete(level.id,stars,board.errors,this.hints).then(()=>{if(this.scene.isActive())this.time.delayedCall(SaveService.data.settings.reducedMotion?100:650,()=>this.scene.start('Victory'));});}
+   if(board.errors>=3&&!this.won){lose('errors');return;}
+   if(isWon(board.grid,level.constraints)&&!this.won){this.won=true;board.locked=true;hint.disableInteractive();GameRegistry.result={level,errors:board.errors,hints:this.hints};AudioService.play('victory');void HapticsService.victory();sparkles(this,540,790,24);status.setText('Tout le monde a trouvé sa place !');void SaveService.complete(level.id,board.errors,this.hints).then(()=>{if(this.scene.isActive())this.time.delayedCall(SaveService.data.settings.reducedMotion?100:650,()=>this.scene.start('Victory'));});}
   };
   if(level.timed&&!started){
    board.locked=true;
    const cover=this.add.rectangle(540,960,1080,1920,0x453c51,.7).setDepth(200).setInteractive();
    const card=panel(this,540,930,920,690).setDepth(201);
    const heading=label(this,540,710,'Défi coup de griffe',52).setDepth(202);
-   const detail=label(this,540,940,`${Math.round(remaining/60)} minutes · 3 cœurs\n\nLe chrono démarre au premier placement.\nTu peux recommencer gratuitement.`,34).setDepth(202);
+   const detail=label(this,540,940,`${Math.round(remaining/60)} minutes · 3 erreurs possibles\n\nLe chrono démarre au premier placement.\nTu peux recommencer gratuitement.`,34).setDepth(202);
    const go=button(this,540,1160,660,'Je suis prêt',()=>{[cover,card,heading,detail,go].forEach(o=>o.destroy());board.locked=false;}).setDepth(202);
   }
   board.onChanged=changed;this.events.on('resume',changed);this.events.once('shutdown',()=>this.events.off('resume',changed));changed();

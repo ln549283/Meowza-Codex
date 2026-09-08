@@ -103,3 +103,14 @@ Loïc a créé https://meowza-473953555.netlify.app/ pour cette branche. D008 re
 - Restent à inspecter visuellement : états 2/3, dernier indice/épuisé, fonds insuffisants, migration, interruption et Timed. Ces contrats logiques sont couverts par tests lorsqu’indiqué, pas tous par cette recette manuelle.
 - Statut P01 : implémenté et publié ; recette web partielle ; EN ATTENTE VALIDATION MOBILE. Aucun feu vert commercial.
 - Prochain bloc : terminer la recette P01 (états restants puis téléphone), avant d’ouvrir P02.
+
+## Delta P02 — 2026-09-08
+
+- Validation des placements extraite dans core/attempt.ts : mauvais chat rejeté, troisième erreur terminale, chat accepté non effaçable.
+- Undo/Reset et étoiles de victoire/archives retirés. Ancienne progression conservée.
+- Home reprend la session active depuis le cache ou la banque historique.
+- Victoire protégée contre doubles callbacks ; état terminal protégé contre reprise d'une scène.
+- Cœur unique fissuré/endommagé/brisé et transition défaite ajoutés. Réaction triste illustrée encore absente.
+- Tests de contrat de placement et de double récompense ajoutés. Recette web et compilation de ce delta à consigner après publication.
+
+Statut : implémentation partielle P02/P04 ; pas de validation mobile ni de certification commerciale. P03–P16 restent ouverts selon la roadmap.

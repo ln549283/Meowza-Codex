@@ -88,3 +88,9 @@ La page GitHub Pages actuellement visible provient de `kawaii-cat-tree-refonte-v
 ## Complément : recette de notre build sur Netlify
 
 Le commit 6c66996 est désormais inspecté sur sa prévisualisation isolée. Grille 4×4 : quota texte + trois marqueurs dans une loupe, panneau d’achat 1/3 à 15 et avertissement du maximum, explication, écran de défaite et retry contrôlés. Ces états sont lisibles au viewport desktop inspecté. Les états 2/3, dernier/épuisé, migration et petit écran restent à inspecter. Ce contrôle ne valide pas la DA cible, notamment cœur expressif/Undo/Reset/étoiles qui restent les chantiers P02/P04.
+
+## Composant santé et résultats — delta P02
+
+Un seul cœur rose, ombre prune et reflet clair, rendu vectoriel indépendant de la résolution. Les fissures distinguent les états 1/2/3 erreurs même avec reducedMotion. Défaite après 450 ms, ou 100 ms en mouvement réduit. Les commandes Annuler/Effacer disparaissent ; la loupe reste l'action centrale. La victoire remercie la résolution sans étoiles ni note de performance.
+
+Limites : poses de personnages existantes conservées, émotion triste pas encore illustrée ; le rendu publié doit être inspecté avant validation esthétique.
