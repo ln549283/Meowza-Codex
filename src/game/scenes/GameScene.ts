@@ -93,7 +93,7 @@ export class GameScene extends Phaser.Scene {
   const usedHints=new Set<string>(saved?.id===level.id?saved.hintPositions:[]);
   const footerY=Math.min(1810,selectorY+220);
   const heart=this.add.image(165,footerY,'heart-full').setDisplaySize(145,145);
-  const heartCaption=label(this,165,footerY+92,'Cœur',24,'#745D68',24);
+  label(this,165,footerY+92,'Cœur',24,'#745D68',24);
   const kibble=label(this,862,footerY+12,'',28);
   const status=label(this,540,footerY-125,'',28);
   const hintQuota=this.add.graphics();
