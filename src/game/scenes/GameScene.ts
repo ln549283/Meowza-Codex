@@ -100,7 +100,7 @@ export class GameScene extends Phaser.Scene {
   let previousErrors=board.errors;
 
   const setHeart=()=>{const key=board.errors<=0?'heart-full':board.errors===1?'heart-crack-1':board.errors===2?'heart-crack-2':'heart-broken';heart.setTexture(key);};
-  const drawHintQuota=()=>{hintQuota.clear();for(let i=0;i<MAX_HINTS_PER_ATTEMPT;i++){const used=i<SaveService.data.attemptPurchases;hintQuota.fillStyle(used?0xb8a8b4:0xffffff,used?.58:1).fillCircle(470+i*34,footerY+78,9);}};
+  const drawHintQuota=()=>{hintQuota.clear();for(let i=0;i<MAX_HINTS_PER_ATTEMPT;i++){const used=i<SaveService.data.attemptPurchases;hintQuota.fillStyle(used?0xb8a8b4:0xffffff,used ? .58 : 1).fillCircle(470+i*34,footerY+78,9);}};
   const hintLabel=()=>{const purchase=SaveService.data.attemptPurchases,cost=hintCost(purchase);return purchase>=MAX_HINTS_PER_ATTEMPT?'Indices épuisés':`Indice · ${cost} croquettes`;};
   const openHint=()=>{if(this.won||SaveService.data.attemptPurchases>=MAX_HINTS_PER_ATTEMPT)return;const found=humanHint(board.grid,level.constraints,1);this.scene.pause();this.scene.launch('Hint',{step:found,levelId:level.id,onPurchased:()=>{markStarted();SaveService.trackHint(level.id);SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);},onRead:()=>{const key=found?found.position.join(','):'';if(key&&!usedHints.has(key)){usedHints.add(key);this.hints++;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);}},apply:()=>{if(this.won||!found)return;board.reveal(found.position,found.value);AudioService.play('hint');}});};
   const hint=artButton(540,footerY,430,hintLabel(),openHint,true);
