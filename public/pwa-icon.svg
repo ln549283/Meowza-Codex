@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Meowza</title>
+  <desc id="desc">Icône temporaire Meowza pour les tests PWA.</desc>
+  <rect width="512" height="512" rx="112" fill="#fff6ee"/>
+  <circle cx="194" cy="246" r="118" fill="#9b8da6"/>
+  <path d="M115 185 143 92l70 74M275 180l41-82 55 101" fill="#9b8da6" stroke="#51425f" stroke-width="20" stroke-linejoin="round"/>
+  <circle cx="166" cy="240" r="13" fill="#51425f"/>
+  <circle cx="223" cy="240" r="13" fill="#51425f"/>
+  <path d="M183 275q13 16 26 0" fill="none" stroke="#51425f" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="330" cy="296" r="102" fill="#e79a58"/>
+  <path d="M264 251 285 171l65 62M351 234l62-57 15 84" fill="#e79a58" stroke="#51425f" stroke-width="18" stroke-linejoin="round"/>
+  <circle cx="307" cy="292" r="11" fill="#51425f"/>
+  <circle cx="351" cy="292" r="11" fill="#51425f"/>
+  <path d="M318 326q13 14 26 0" fill="none" stroke="#51425f" stroke-width="11" stroke-linecap="round"/>
+  <path d="M107 415h298" stroke="#42c99b" stroke-width="26" stroke-linecap="round"/>
+</svg>
