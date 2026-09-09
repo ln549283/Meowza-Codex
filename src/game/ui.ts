@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { TapGesture } from '../core/tapGesture';
 import { cosmetics } from '../core/cosmetics';
 import { C,FONT } from './theme';
 import { AudioService } from '../services/AudioService';
@@ -21,9 +22,11 @@ export function panel(scene:Phaser.Scene,x:number,y:number,w:number,h:number,fil
 }
 export function press(scene:Phaser.Scene,c:Phaser.GameObjects.Container,w:number,h:number,onClick:()=>void){
  c.setSize(w,h).setInteractive({useHandCursor:true});
- c.on('pointerdown',()=>c.setAlpha(.88));
- c.on('pointerout',()=>c.setAlpha(1));
- c.on('pointerup',(p:Phaser.Input.Pointer)=>{c.setAlpha(1);if(p.getDistance()>32||scene.registry.get('mapDragging'))return;AudioService.play('button');onClick();});return c;
+ const tap=new TapGesture(32);
+ c.on('pointerdown',(p:Phaser.Input.Pointer)=>{tap.start(p.id);c.setAlpha(.88);});
+ c.on('pointerout',()=>{tap.cancel();c.setAlpha(1);});
+ c.on('pointerupoutside',()=>{tap.cancel();c.setAlpha(1);});
+ c.on('pointerup',(p:Phaser.Input.Pointer)=>{c.setAlpha(1);if(!tap.release(p.id,p.getDistance())||scene.registry.get('mapDragging'))return;AudioService.play('button');onClick();});return c;
 }
 export function button(scene:Phaser.Scene,x:number,y:number,w:number,text:string,onClick:()=>void,color=C.teal){
  const c=scene.add.container(x,y),g=scene.add.graphics();g.fillStyle(0x55405e,.28).fillRoundedRect(-w/2,-42,w,115,38);g.fillStyle(color).fillRoundedRect(-w/2,-56,w,108,38);g.lineStyle(3,0xffffff,.65).strokeRoundedRect(-w/2,-56,w,108,38);g.fillStyle(0xffffff,.32).fillRoundedRect(-w/2+10,-48,w-20,42,26);g.lineStyle(4,0xffffff,.75).lineBetween(-w/2+38,-39,w/2-38,-39);c.add([g,label(scene,0,-2,text,34,'#ffffff')]);return press(scene,c,w,116,onClick);

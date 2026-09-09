@@ -153,3 +153,11 @@ Contrôle complémentaire P03 (environnement de développement, pas téléphone)
 Échantillon ponctuel, pas une garantie pour toute graine ni une calibration humaine du chrono.
 
 Validation du correctif c314c85653d2b4c3799f7442637221d7203f78db : bundle index-dIvtZsPY.js observé sur Netlify ; nouveau premier lancement directement sur L1, texte en trois lignes sans chevauchement ; placements hors de l'ordre proposé correctement suivis ; victoire +5 ; replay sans tutoriel. Achat d'un indice dans ce replay : 65 → 50 croquettes, quota 1/3, puis retour au plateau avec prémisses dorées et cible turquoise persistantes. CI verify, Android et iOS réussies. Validation physique toujours ouverte.
+
+## P04 — Contrôles et fermeture des indices — 2026-09-09
+
+Les boutons communs et cases de grille exigent désormais un toucher commencé sur la même cible. Sortir de la cible annule le geste ; un petit mouvement reste toléré. Une seconde identité de pointeur ne peut pas valider le geste initial. Trois tests couvrent ces invariants.
+
+Le retour matériel Android depuis Hint utilise le même chemin de fermeture que le bouton de l'explication, afin de transmettre la preuve acquise au plateau. Le listener est nettoyé à la fermeture de la scène. Validation sur Android physique encore ouverte.
+
+Contrôle local : suite complète, banque et build web réussis (40 tests). Recette web de ce lot à confirmer après publication ; aucun travail d'animation ni changement d'économie.

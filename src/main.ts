@@ -24,7 +24,7 @@ async function start(){
  const visibility=(active:boolean)=>{if(active){game.loop.wake();AudioService.resume();}else{game.loop.sleep();AudioService.suspend();void SaveService.persist();}};
  document.addEventListener('visibilitychange',()=>visibility(!document.hidden));
  void App.addListener('appStateChange',({isActive})=>visibility(isActive));
- void App.addListener('backButton',()=>{const active=game.scene.getScenes(true).at(-1);if(!active)return;const key=active.scene.key;if(key==='Hint'||key==='Rules'&&game.registry.get('rulesFromGame')){active.scene.stop();game.scene.resume('Game');}else if(key==='Game')active.scene.start('LevelSelect');else if(key==='Home')void App.minimizeApp();else if(key!=='Boot'&&key!=='Preload')active.scene.start('Home');});
+ void App.addListener('backButton',()=>{const active=game.scene.getScenes(true).at(-1);if(!active)return;const key=active.scene.key;if(key==='Hint'){active.events.emit('close-hint');}else if(key==='Rules'&&game.registry.get('rulesFromGame')){active.scene.stop();game.scene.resume('Game');}else if(key==='Game')active.scene.start('LevelSelect');else if(key==='Home')void App.minimizeApp();else if(key!=='Boot'&&key!=='Preload')active.scene.start('Home');});
  // Expose only in development for interaction and regression checks.
  if(import.meta.env.DEV)Object.assign(window,{meowza:game});
 }
