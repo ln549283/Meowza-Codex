@@ -9,5 +9,9 @@ export class LostScene extends Phaser.Scene {
 }
 export class ShopScene extends Phaser.Scene {
  constructor(){super('Shop');}
- create(){cozyBackground(this);backButton(this,()=>this.scene.start('Home'));title(this,'Le comptoir des croquettes',340,52);panel(this,540,940,920,870);label(this,540,710,`${SaveService.data.kibble} croquettes`,54);label(this,540,980,'Les croquettes se gagnent en terminant\nde nouveaux niveaux.\n\nLa boutique ouvrira plus tard.',36);button(this,540,1570,650,'Retour',()=>this.scene.start('Home'));}
+ create(){cozyBackground(this);backButton(this,()=>this.scene.start('LevelSelect'));title(this,'Boutique',300,60);panel(this,540,930,920,980);label(this,540,570,'Cosmétiques pour ton arbre\net tes chats',38);label(this,540,760,`${SaveService.data.kibble} croquettes`,42);label(this,540,940,'Le shell Boutique est en place.\n\nLe catalogue, les diamants et les achats\nseront activés dans les prochains blocs.',32);button(this,540,1420,650,'Personnaliser mon arbre',()=>this.scene.start('LevelSelect',{decorating:true}),C.orange);button(this,540,1580,650,'Retour à mon arbre',()=>this.scene.start('LevelSelect'),C.teal);}
+}
+export class MissionsScene extends Phaser.Scene {
+ constructor(){super('Missions');}
+ create(){cozyBackground(this);backButton(this,()=>this.scene.start('LevelSelect'));title(this,'Missions',300,60);panel(this,540,930,920,980);label(this,540,590,'Tes prochains objectifs',40);label(this,540,820,'Jouer · progresser · collectionner',34);label(this,540,1010,'Le shell Missions est prêt.\n\nLes missions quotidiennes et leurs récompenses\nseront branchées sur l’économie au prochain bloc.',32);button(this,540,1540,650,'Retour à mon arbre',()=>this.scene.start('LevelSelect'),C.teal);}
 }
