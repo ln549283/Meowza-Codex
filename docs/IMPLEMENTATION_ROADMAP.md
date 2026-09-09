@@ -57,7 +57,7 @@ P12 dépend de P02/P07/P08 ; P13 dépend du cadrage identité/serveur ; P14 dép
 - Pourquoi : cartes préalables exposent trop tôt toutes les règles ; solvabilité ≠ difficulté ressentie.
 - Périmètre : onboarding préparé/contrôlé, séquences, métriques solveur, calibration Timed.
 - Hors périmètre : nouveau solveur, modification des règles/quotas verrouillés.
-- Tâches : [ ] exemples intégrés et ligne/colonne explicites ; [ ] vérifier que chaque grille exige la technique présentée ; [ ] encadrer arrondis proportions ; [ ] corpus stratégique persisté ; [ ] mesures longueur des preuves ; [ ] temps proposés documentés TUNING ; [ ] génération lointaine/échec Worker.
+- Tâches : [x] exemples intégrés et ligne/colonne explicites (recette L1/L2, autres visuels ouverts) ; [ ] vérifier que chaque grille exige la technique présentée ; [x] encadrer arrondis proportions ; [ ] corpus stratégique persisté ; [ ] mesures longueur des preuves ; [ ] temps proposés documentés TUNING ; [ ] génération lointaine/échec Worker.
 - Dépendances : P02 ; playtest pour durée/difficulté finale.
 - Sortie : solution unique et Human Solver, pas de guessing, pas de chrono avant Extreme, Medium de respiration.
 - Tests : onboarding, proportions arrondies, seeds, unicité, preuves, no two timed.
@@ -71,13 +71,13 @@ P12 dépend de P02/P07/P08 ; P13 dépend du cadrage identité/serveur ; P14 dép
 - Pourquoi : trois cœurs, primitives génériques et absence de mise en évidence des preuves.
 - Périmètre : composants/tokens, grille coussin, HUD cœur unique, loupe, panneaux d’aide, erreurs.
 - Hors périmètre : économie, backend, catalogue complet.
-- Tâches : [ ] famille composants idle/pressed/disabled/selected ; [x] cœur intact/fissuré/très abîmé/brisé fonctionnel, contrôle mobile ouvert ; [ ] distinction cœur santé/SAME ; [ ] source → règle → case d’indice ; [ ] états sans mouvement ; [ ] tester dimensions réelles et contraste.
+- Tâches : [ ] famille composants idle/pressed/disabled/selected ; [x] cœur intact/fissuré/très abîmé/brisé fonctionnel, contrôle mobile ouvert ; [ ] distinction cœur santé/SAME ; [x] source → règle → case d’indice (web, mobile ouvert) ; [ ] états sans mouvement ; [ ] tester dimensions réelles et contraste.
 - Dépendances : P01/P02/P03, direction visuelle de la Bible.
 - Sortie : une composition validée, pas collection d’assets isolés ; information identique sans animation.
 - Tests : actions ne traversent pas les modales, hit areas stables, reducedMotion.
 - Visuel : approuver une grille 4×4 et 8×8 et ses états avant déclinaison.
 - Mobile : touchers rapides, petits mouvements du doigt, lisibilité quota/cœur.
-- Statut : à faire ; validation esthétique requise sur résultat concret.
+- Statut : cœur et liaison des preuves implémentés ; contrôle des gestes renforcé et vérifié sur le web le 2026-09-09. Famille graphique, contraste, états 8×8 et validation tactile restent ouverts. Validation esthétique requise sur résultat concret.
 
 ## P05 — Arbre désirable et lisible
 

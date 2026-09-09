@@ -161,3 +161,5 @@ Les boutons communs et cases de grille exigent désormais un toucher commencé s
 Le retour matériel Android depuis Hint utilise le même chemin de fermeture que le bouton de l'explication, afin de transmettre la preuve acquise au plateau. Le listener est nettoyé à la fermeture de la scène. Validation sur Android physique encore ouverte.
 
 Contrôle local : suite complète, banque et build web réussis (40 tests). Recette web de ce lot à confirmer après publication ; aucun travail d'animation ni changement d'économie.
+
+Recette publiée du commit 01e56772b124b6eac92a8b0111e89472cdd24d57 : bundle index-BPfHo-k2.js chargé sur Netlify. Continuer ouvre L1. Geste court commencé hors de la case puis relâché dedans : aucun chat posé, cœur et quota inchangés. Petit mouvement commencé et terminé dans la case : chat accepté et guide déplacé vers la déduction suivante. CI verify, Android et iOS réussies. Ce contrôle à la souris dans le navigateur ne remplace pas les essais tactiles, multitouch et Retour matériel sur appareil.
