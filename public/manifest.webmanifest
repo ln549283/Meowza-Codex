@@ -1,0 +1,19 @@
+{
+  "name": "Meowza",
+  "short_name": "Meowza",
+  "description": "Puzzle félin de logique avec Nimbus et Moka.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff6ee",
+  "theme_color": "#fff6ee",
+  "icons": [
+    {
+      "src": "./pwa-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
