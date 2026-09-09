@@ -28,8 +28,24 @@ export function press(scene:Phaser.Scene,c:Phaser.GameObjects.Container,w:number
  c.on('pointerupoutside',()=>{tap.cancel();c.setAlpha(1);});
  c.on('pointerup',(p:Phaser.Input.Pointer)=>{c.setAlpha(1);if(!tap.release(p.id,p.getDistance())||scene.registry.get('mapDragging'))return;AudioService.play('button');onClick();});return c;
 }
+/** Choose the more legible ink for solid button and cosmetic swatch colors. */
+export function buttonInk(color:number){
+ const linear=(v:number)=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;};
+ const luminance=(v:number)=>.2126*linear((v>>16)&255)+.7152*linear((v>>8)&255)+.0722*linear(v&255);
+ const dark=0x35263f,light=0xffffff,l=luminance(color),d=luminance(dark);
+ return (l+.05)/(d+.05)>1.05/(l+.05)?dark:light;
+}
 export function button(scene:Phaser.Scene,x:number,y:number,w:number,text:string,onClick:()=>void,color=C.teal){
- const c=scene.add.container(x,y),g=scene.add.graphics();g.fillStyle(0x55405e,.28).fillRoundedRect(-w/2,-42,w,115,38);g.fillStyle(color).fillRoundedRect(-w/2,-56,w,108,38);g.lineStyle(3,0xffffff,.65).strokeRoundedRect(-w/2,-56,w,108,38);g.fillStyle(0xffffff,.32).fillRoundedRect(-w/2+10,-48,w-20,42,26);g.lineStyle(4,0xffffff,.75).lineBetween(-w/2+38,-39,w/2-38,-39);c.add([g,label(scene,0,-2,text,34,'#ffffff')]);return press(scene,c,w,116,onClick);
+ const c=scene.add.container(x,y),g=scene.add.graphics(),caption=label(scene,0,-2,text,34);
+ const draw=(enabled:boolean)=>{const fill=enabled?color:0xe2d9dd;
+  g.clear().fillStyle(0x55405e,enabled?.28:.12).fillRoundedRect(-w/2,-42,w,115,38);
+  g.fillStyle(fill).fillRoundedRect(-w/2,-56,w,108,38);
+  g.lineStyle(3,0xffffff,.65).strokeRoundedRect(-w/2,-56,w,108,38);
+  if(enabled){g.fillStyle(0xffffff,.25).fillRoundedRect(-w/2+10,-48,w-20,30,26);g.lineStyle(4,0xffffff,.75).lineBetween(-w/2+38,-39,w/2-38,-39);}
+  caption.setColor(`#${buttonInk(fill).toString(16).padStart(6,'0')}`);
+ };
+ c.add([g,caption]);draw(true);press(scene,c,w,116,onClick);
+ return Object.assign(c,{setEnabled(enabled:boolean){c.setAlpha(1);if(c.input)c.input.enabled=enabled;draw(enabled);return c;}});
 }
 export function roundButton(scene:Phaser.Scene,x:number,y:number,text:string,onClick:()=>void,color=0xfff9f2){const c=scene.add.container(x,y),g=scene.add.graphics();g.fillStyle(0x79618a,.12).fillCircle(0,7,56);g.fillStyle(color).fillCircle(0,0,56);g.lineStyle(3,0xffffff,.9).strokeCircle(0,0,56);c.add([g,label(scene,0,-3,text,46)]);return press(scene,c,120,120,onClick);}
 export function backButton(scene:Phaser.Scene,onClick:()=>void){return roundButton(scene,95,105,'‹',onClick);}

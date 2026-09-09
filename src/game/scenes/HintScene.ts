@@ -21,7 +21,7 @@ export class HintScene extends Phaser.Scene {
    label(this,540,1030,SaveService.data.session?.hintMigrationNotice?'Nouvelle règle : 3 indices par tentative.\nLes anciens indices ne sont plus conservés.':exhausted?'Tu as utilisé tes trois indices précis.\nLes règles restent accessibles gratuitement.':step?'3 indices précis maximum par tentative.\nUne déduction expliquée, étape par étape.':'Tu peux consulter les règles ou revenir au jeu.',34);
    label(this,540,1180,`${SaveService.data.kibble} croquettes disponibles`,32);
    const buy=button(this,540,1400,770,exhausted?'3/3 utilisés':!step?'Revenir au jeu':affordable?`${used===2?'Dernier indice':`Indice ${used+1}/3`} · ${cost} croquettes`:`Il manque ${(cost??0)-SaveService.data.kibble} croquettes`,()=>{if(!step){close();return;}if(!affordable||!SaveService.buyHint(levelId,step))return;this.scene.restart({step,levelId,apply,open:true});},C.teal);
-   if(exhausted||(step&&!affordable))buy.disableInteractive().setAlpha(.5);
+   if(exhausted||(step&&!affordable))buy.setEnabled(false);
    button(this,540,1590,640,'Continuer à réfléchir',close,0xb398a5);
    button(this,540,1760,540,'Consulter les règles',()=>{this.scene.stop();this.scene.start('Rules',{fromGame:true});},0xb99773);return;
   }
