@@ -9,23 +9,20 @@ function proofPages(s:HumanStep):string[]{return s.rule==='contradiction'?[`On t
 export class HintScene extends Phaser.Scene {
  constructor(){super('Hint');}
  create({step,levelId,apply,onRead,onPurchased,open=false}:{step:HumanStep|null;levelId:string;apply:()=>void;onRead:()=>void;onPurchased?:()=>void;open?:boolean}){
-  cozyBackground(this);title(this,'Un petit coup de patte',235,56);panel(this,540,940,940,1120);
+  cozyBackground(this);title(this,'Un petit coup de patte',235,56);panel(this,540,940,940,1040);
   const close=()=>{this.scene.stop();this.scene.resume('Game');};
   const owned=step&&(SaveService.data.purchasedHints[levelId]??[]).some(s=>s.position[0]===step.position[0]&&s.position[1]===step.position[1]);
   const used=SaveService.data.attemptPurchases,exhausted=used>=MAX_HINTS_PER_ATTEMPT;
   if(!open&&!owned){
-   imageContain(this.add.image(540,590,'orange-cat'),230,230);
-   label(this,540,815,exhausted?'3/3 indices utilisés':step?'Un indice pour cette grille':'Aucune déduction disponible',45);
+   imageContain(this.add.image(540,610,'orange-cat'),230,230);
+   label(this,540,825,step&&!exhausted?'Besoin d’un petit coup de patte ?':exhausted?'Plus d’indice pour cette tentative':'Aucune déduction disponible',43);
    const cost=hintCost(used),affordable=!exhausted&&SaveService.data.kibble>=cost;
-   const quotaText=exhausted?'Tes trois indices précis ont été utilisés.':used===2?`Dernier indice · ${cost} croquettes`:`Indice ${used+1}/3 · ${cost} croquettes`;
-   label(this,540,960,quotaText,34);
-   label(this,540,1060,step&&!exhausted?'Une règle, une raison, une case.':'Tu peux consulter les règles ou continuer à réfléchir.',31);
-   label(this,540,1180,`${SaveService.data.kibble} croquettes disponibles`,32);
+   label(this,540,970,step&&!exhausted?`Cet indice coûte ${cost} croquettes.`:'Continue à observer la grille : la solution est toujours logique.',33);
+   label(this,540,1080,step&&!exhausted?'Une règle, une raison, une case.':'Tu peux revenir au puzzle et poursuivre ta réflexion.',30);
    const text=!step||exhausted?'Revenir au jeu':affordable?`Voir l’indice · ${cost} croquettes`:`Il manque ${cost-SaveService.data.kibble} croquettes`;
-   const buy=button(this,540,1400,770,text,()=>{if(!step||exhausted){close();return;}if(!affordable||!SaveService.buyHint(levelId,step))return;onPurchased?.();this.scene.restart({step,levelId,apply,onRead,onPurchased,open:true});},C.teal);
+   const buy=button(this,540,1350,770,text,()=>{if(!step||exhausted){close();return;}if(!affordable||!SaveService.buyHint(levelId,step))return;onPurchased?.();this.scene.restart({step,levelId,apply,onRead,onPurchased,open:true});},C.teal);
    if(step&&!exhausted&&!affordable)buy.disableInteractive().setAlpha(.5);
-   button(this,540,1590,640,'Continuer à réfléchir',close,0xb398a5);
-   button(this,540,1760,540,'Consulter les règles',()=>{this.scene.stop();this.scene.start('Rules',{fromGame:true});},0xb99773);return;
+   button(this,540,1535,640,'Continuer à réfléchir',close,0xb398a5);return;
   }
   if(!step){close();return;}onRead();imageContain(this.add.image(540,535,step.value===1?'grey-cat':'orange-cat'),190,190);label(this,540,685,ruleName(step),28);label(this,540,735,`Ligne ${step.position[0]+1} · Colonne ${step.position[1]+1}`,36);
   const pages=proofPages(step);let i=0;const text=label(this,540,990,pages[0]!,34).setWordWrapWidth(780),counter=label(this,540,1260,'',28);
