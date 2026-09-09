@@ -108,3 +108,11 @@ Correction : « Edit only the background. Replace EVERY checkerboard square with
 Texte au-dessus du plateau (29 px dans le repère 1080 × 1920), largeur maximale 940. Prémisses sur fond doré pâle ; cible avec contour turquoise de 5 px. Aucun déplacement forcé du curseur, aucune case bloquée, aucune animation nouvelle. Les repères disparaissent lorsque la leçon est résolue et ne s'appliquent pas à L5. Vérifier le texte le plus long, les deux sélecteurs et le contour sur petit écran.
 
 P04 — Relecture d'une preuve : même code visuel que l'apprentissage (prémisses dorées / cible turquoise) après fermeture de l'explication achetée. Le prochain placement actualise le plateau. Une hypothèse sans prémisse directe met seulement sa cible en évidence ; la chaîne détaillée reste dans le panneau.
+
+## P04 — Contraste et états des commandes (2026-09-09)
+
+Les boutons partagés choisissent entre encre prune sombre (#35263f) et blanc selon la luminance de leur fond, y compris les échantillons de décoration. Le reflet supérieur est raccourci pour éviter la ligne du texte. Les boutons indisponibles conservent un texte lisible sur un fond neutre opaque ; leur interaction est désactivée.
+
+Dans Game, le chat sélectionné porte un fond menthe pâle, un contour soutenu et une coche vectorielle. Le quota est représenté par trois marqueurs remplis puis évidés. À épuisement, le bouton et la loupe adoptent le même état neutre. Les dimensions et zones de toucher sont conservées. Pas de nouvelle animation.
+
+Ces changements ne constituent pas une certification d'accessibilité ni une validation sur téléphone. Contrôle du rendu publié à consigner dans IMPLEMENTATION_STATUS.

@@ -163,3 +163,11 @@ Le retour matériel Android depuis Hint utilise le même chemin de fermeture que
 Contrôle local : suite complète, banque et build web réussis (40 tests). Recette web de ce lot à confirmer après publication ; aucun travail d'animation ni changement d'économie.
 
 Recette publiée du commit 01e56772b124b6eac92a8b0111e89472cdd24d57 : bundle index-BPfHo-k2.js chargé sur Netlify. Continuer ouvre L1. Geste court commencé hors de la case puis relâché dedans : aucun chat posé, cœur et quota inchangés. Petit mouvement commencé et terminé dans la case : chat accepté et guide déplacé vers la déduction suivante. CI verify, Android et iOS réussies. Ce contrôle à la souris dans le navigateur ne remplace pas les essais tactiles, multitouch et Retour matériel sur appareil.
+
+## P04 — Contraste et états des commandes — 2026-09-09
+
+Source d29e1881887a7ef84f08180e56a926f8d2769c15, bundle index-BR3cZBhe.js observé sur Netlify. Texte des boutons adapté au fond, reflet raccourci, boutons indisponibles opaques et lisibles, sélection des chats avec fond/contour/coche, loupe et marqueurs harmonisés.
+
+Recette web : accueil et grille L1 inspectés ; Nimbus puis Moka sélectionnés ; achat 1/3 à 15 puis 2/3 à 25 et placements automatiques vérifiés, portefeuille 60 → 45 → 20 ; premier puis deuxième marqueur évidés ; dernier indice indisponible avec « Il manque 20 croquettes », texte et état neutre lisibles. Le rendu exact 3/3 épuisé n'a pas été atteint dans cette recette, et reste à inspecter.
+
+Build local réussi ; CI verify (suite de 40 tests et banque), Android et iOS réussies. Pas de modification de gameplay/économie, pas de nouvelle animation. P04 reste partiel : plateau coussin, relations/santé, grands formats 8×8 et appareils physiques ouverts.
