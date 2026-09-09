@@ -24,20 +24,33 @@ Pour avancer au bloc suivant, il faut :
 
 **Règle : un bloc = un objectif mesurable.**
 
-Ne pas ouvrir le méta économique tant que le core fonctionnel **et** le polish visuel ne sont pas fermés.
+## Décision de séquencement du 9 septembre 2026
+
+Les planches artistiques validées représentent **la cible visuelle finale**, pas le chantier immédiat. Le reskin complet est volontairement reporté afin de ne pas refaire une UI premium avant d’avoir stabilisé les fonctionnalités méta et la navigation qui devront y vivre.
+
+Ordre désormais obligatoire :
+
+> **core solide → shell produit/méta → diamants → missions → boutique/inventaire → personnalisation fonctionnelle → validation fonctionnelle → total reskin/juice → playtest final → backend/daily**
+
+L’UI intermédiaire peut rester provisoire tant qu’elle est claire, fonctionnelle et ne bloque pas les tests.
 
 ---
 
 # 1. ÉTAT GLOBAL
 
 ```text
-V3-1  Conformité tentative            ✅ FERMÉ
-V3-2A Gameplay / calibration core      ✅ FERMÉ
-V3-2B Polish visuel / juice / motion   🟡 EN COURS
-V3-2C Playtest 20 premières minutes    ⬜ À FAIRE
-V3-3  Méta économique léger            ⬜ BLOQUÉ
-V3-4  Rewarded continuation            ⬜ BLOQUÉ
-V3-5  Daily / backend / Cat Day        ⬜ BLOQUÉ
+V3-1   Conformité tentative                ✅ FERMÉ
+V3-2A  Gameplay / calibration core          ✅ FERMÉ
+V3-3A  Architecture UI / shell méta         🟡 EN COURS
+V3-3B  Économie diamants                    ⬜ À FAIRE
+V3-3C  Missions                             ⬜ BLOQUÉ
+V3-3D  Boutique / inventaire                ⬜ BLOQUÉ
+V3-3E  Personnalisation fonctionnelle       ⬜ BLOQUÉ
+V3-4   Validation fonctionnelle             ⬜ BLOQUÉ
+V3-5   Total reskin / polish / juice         ⬜ REPORTÉ
+V3-6   Playtest final 20 premières minutes  ⬜ BLOQUÉ
+V3-7   Rewarded continuation                ⬜ BLOQUÉ
+V3-8   Daily / backend / Cat Day            ⬜ BLOQUÉ
 ```
 
 ---
@@ -54,7 +67,7 @@ Objectif : une tentative strictement conforme à la Bible.
 - [x] prix indices = 15 / 25 / 40 ;
 - [x] quota dur = 3 indices ;
 - [x] quota 1/3, 2/3, 3/3 visible ;
-- [x] gros cœur unique à trois états ;
+- [x] gros cœur unique ;
 - [x] confirmation avant abandon d’une tentative commencée ;
 - [x] Nouvelle partie ;
 - [x] tests ;
@@ -93,166 +106,191 @@ Le puzzle peut être joué sur téléphone avec des grilles denses sans problèm
 
 ---
 
-# 4. V3-2B — POLISH VISUEL / JUICE / MOTION — 🟡 EN COURS
+# 4. V3-3A — ARCHITECTURE UI / SHELL MÉTA — 🟡 EN COURS
 
-**C’est le chantier actif.**
+Objectif : stabiliser **où vivent les fonctionnalités finales** avant d’implémenter l’économie et avant le reskin final.
 
-Objectif : faire disparaître l’impression « UI dessinée par Phaser » et amener le jeu au niveau visuel commercial visé, tout en gardant l’interface simple, épurée et immédiatement compréhensible.
+Décisions produit :
 
-Phaser reste le moteur de rendu et d’animation. Il ne doit pas dicter l’apparence finale des composants.
+- Home = entrée légère avec le logo Meowza ;
+- l’arbre = hub principal après l’entrée ;
+- le logo n’est pas répété sur l’arbre ;
+- l’arbre reste la progression centrale et l’espace de personnalisation ;
+- Boutique, Missions et Décorer sont accessibles depuis l’arbre ;
+- les emplacements croquettes / diamants existent dans le shell avant activation de l’économie diamant ;
+- le bouton Jouer reste l’action dominante ;
+- la navigation secondaire ne doit pas prendre le dessus sur le puzzle et la progression ;
+- le bouton retour Android doit revenir au bon niveau de navigation : écrans méta → arbre → Home.
 
-## B1 — Langage visuel des composants — À FAIRE EN PREMIER
+Tâches :
 
-- [ ] inventorier les rectangles / cercles / panneaux / boutons génériques encore dessinés en primitives Phaser ;
-- [ ] définir une famille cohérente de boutons : principal, secondaire, danger, disabled, pressed ;
-- [ ] définir une famille cohérente de panneaux / cartes / modales ;
-- [ ] harmoniser coins, bordures, ombres, matières, spacing et typographie ;
-- [ ] améliorer les sélecteurs Nimbus / Moka ;
-- [ ] améliorer le HUD cœur / indices / croquettes ;
-- [ ] améliorer visuellement la grille, les cases et les contraintes sans réduire la lisibilité ;
-- [ ] supprimer les composants temporaires ou trop « debug / prototype ».
+- [x] faire de `LevelSelectScene` le hub « Mon arbre » ;
+- [x] retirer le logo de l’en-tête de l’arbre ;
+- [x] garder un emplacement visible pour croquettes et futurs diamants ;
+- [x] ajouter les entrées Décorer / Missions / Boutique ;
+- [x] ajouter un shell Missions sans logique économique ;
+- [x] transformer l’ancien Shop placeholder en shell Boutique ;
+- [x] faire revenir Missions et Boutique vers l’arbre ;
+- [x] aligner le bouton retour natif avec la hiérarchie Home → arbre → méta ;
+- [ ] CI verte ;
+- [ ] validation rapide sur téléphone de la navigation et des zones tactiles.
 
-### Critère de sortie B1
+### Critère de sortie V3-3A
 
-Sur Home, arbre, puzzle, indice, victoire et défaite, les composants importants appartiennent clairement à la même DA et aucun bouton/panneau majeur ne donne l’impression d’un simple rectangle Phaser générique.
-
----
-
-## B2 — Arbre et identité des niveaux
-
-- [ ] finaliser l’icône dédiée Extreme Timed / Coup de griffe ;
-- [ ] vérifier sa lisibilité directement dans l’arbre sur téléphone ;
-- [ ] différencier clairement Easy / Medium / Hard / Extreme / Timed sans surcharge ;
-- [ ] harmoniser nodes, supports, coussins et éléments décoratifs ;
-- [ ] vérifier la cohérence des assets avec Nimbus, Moka et la palette globale.
-
-### Critère de sortie B2
-
-En regardant l’arbre sans ouvrir un niveau, un joueur distingue immédiatement un Coup de griffe d’un Extreme normal et comprend visuellement la hiérarchie sans texte supplémentaire.
+Depuis Home, le joueur peut entrer dans l’arbre, jouer, ouvrir Décorer, Missions et Boutique, revenir systématiquement à l’arbre sans cul-de-sac, et comprendre la hiérarchie du produit même si l’UI reste provisoire.
 
 ---
 
-## B3 — Feedback gameplay / personnages
+# 5. V3-3B — ÉCONOMIE DIAMANTS — ⬜ À FAIRE
 
-- [ ] finaliser les trois états visuels du gros cœur ;
-- [ ] animation claire à chaque erreur ;
-- [ ] animation de cœur brisé à la troisième erreur ;
-- [ ] réaction Nimbus / Moka sur erreur ;
-- [ ] réaction positive discrète sur bonne séquence / ligne complète ;
-- [ ] feedback d’indice appliqué ;
-- [ ] éviter les animations permanentes inutiles.
+Objectif : créer une seconde monnaie persistante sans paiement réel.
 
-### Critère de sortie B3
-
-Une erreur, une réussite, un indice et une défaite se comprennent par le mouvement et l’expression avant même de lire du texte.
-
----
-
-## B4 — Micro-interactions et boutons
-
-- [ ] état pressed visible ;
-- [ ] rebond / squash léger sur tap ;
-- [ ] disabled clairement distinct ;
-- [ ] haptique cohérente avec le feedback visuel ;
-- [ ] apparition / disparition des modales ;
-- [ ] easing cohérent ;
-- [ ] aucun feedback qui ralentit la résolution rapide.
-
-### Critère de sortie B4
-
-Tous les boutons principaux donnent une réponse immédiate au toucher et utilisent le même langage de mouvement.
-
----
-
-## B5 — Transitions de scènes
-
-- [ ] Home → arbre ;
-- [ ] arbre → puzzle ;
-- [ ] puzzle → indice → puzzle ;
-- [ ] puzzle → victoire ;
-- [ ] puzzle → défaite ;
-- [ ] victoire → niveau suivant ;
-- [ ] retour vers l’arbre ;
-- [ ] transitions compatibles reducedMotion.
-
-### Critère de sortie B5
-
-Les changements de scène ne ressemblent plus à des écrans qui apparaissent brutalement et aucune transition ne gêne le rythme de jeu.
-
----
-
-## B6 — Victoire / défaite / moments forts
-
-- [ ] victoire plus satisfaisante sans étoiles ;
-- [ ] animation de fin de grille ;
-- [ ] réaction de chat ;
-- [ ] défaite plus émotionnelle mais courte ;
-- [ ] Coup de griffe : tension visuelle spécifique mais lisible ;
-- [ ] pas de surenchère d’effets.
-
-### Critère de sortie B6
-
-La fin d’un niveau donne une vraie récompense émotionnelle et la défaite reste claire, rapide et incite au retry.
-
----
-
-## B7 — Performance visuelle réelle
-
-- [ ] test téléphone 10–15 minutes avec animations activées ;
-- [ ] vérifier chauffe ;
-- [ ] vérifier FPS / saccades perceptibles ;
-- [ ] vérifier tactile pendant les animations ;
-- [ ] vérifier reducedMotion ;
-- [ ] alléger les effets coûteux si nécessaire.
-
-### Critère de sortie V3-2B — OBLIGATOIRE
-
-**V3-2B n’est fermé que si :**
-
-> le jeu paraît cohérent et fini sur Home + arbre + puzzle + indice + victoire + défaite, les interactions sont animées avec sobriété, les transitions sont propres, et une session réelle de 10–15 minutes sur téléphone ne montre ni régression tactile ni chauffe problématique.
-
----
-
-# 5. V3-2C — PLAYTEST DES 20 PREMIÈRES MINUTES — ⬜ BLOQUÉ PAR V3-2B
-
-Objectif : valider le produit avant d’ajouter du méta.
-
-- [ ] Nouvelle partie depuis zéro ;
-- [ ] jouer au moins les niveaux 1–5 ;
-- [ ] poursuivre jusqu’à rencontrer Medium / Hard ;
-- [ ] tester au moins un Extreme et un Coup de griffe si accessible dans le parcours prévu ;
-- [ ] observer compréhension des règles ;
-- [ ] observer probing / erreurs ;
-- [ ] observer achats d’indices ;
-- [ ] observer abandons ;
-- [ ] noter toute hésitation UI ;
-- [ ] relire instrumentation après session ;
-- [ ] corriger uniquement les problèmes réellement observés.
+- [ ] ajouter le wallet diamants au modèle de sauvegarde et aux migrations ;
+- [ ] API unique de crédit/débit avec garde-fous ;
+- [ ] journaliser les principales transactions localement ;
+- [ ] croquettes = gameplay / aides ;
+- [ ] diamants = collection / personnalisation premium ;
+- [ ] aucune conversion diamant → croquettes ;
+- [ ] aucun IAP / paiement réel dans ce bloc ;
+- [ ] tests de persistance, débit impossible sous zéro et migration de sauvegarde.
 
 ### Critère de sortie
 
-Les 20 premières minutes sont suffisamment claires, agréables et engageantes pour justifier l’ouverture du méta économique.
-
-**Sans cette validation, V3-3 reste bloqué.**
+Le jeu sait attribuer, sauvegarder, afficher et dépenser des diamants via une API contrôlée sans perturber l’économie croquettes existante.
 
 ---
 
-# 6. V3-3 — MÉTA ÉCONOMIQUE LÉGER — ⬜ BLOQUÉ
+# 6. V3-3C — MISSIONS — ⬜ BLOQUÉ PAR V3-3B
 
-Ne commencer qu’après V3-2C.
+Objectif : créer une source claire et testable de diamants.
 
+- [ ] système de missions quotidiennes ;
+- [ ] jusqu’à 3 missions actives ;
+- [ ] progression alimentée par les événements gameplay déjà instrumentés ;
+- [ ] état claimable / claimed ;
+- [ ] récompense diamant ;
+- [ ] persistance ;
+- [ ] aucun backend requis pour le prototype local ;
+- [ ] tests déterministes.
+
+### Critère de sortie
+
+Une boucle complète `jouer → progresser une mission → réclamer → recevoir des diamants` fonctionne localement et persiste après redémarrage.
+
+---
+
+# 7. V3-3D — BOUTIQUE / INVENTAIRE — ⬜ BLOQUÉ PAR V3-3C
+
+Objectif : donner aux diamants un usage concret sans paiement réel.
+
+- [ ] catalogue local versionné ;
+- [ ] prix diamants ;
+- [ ] états verrouillé / achetable / possédé / équipé ;
+- [ ] achat transactionnel ;
+- [ ] inventaire persistant ;
+- [ ] aucune loot box payante ;
+- [ ] aucun gacha payant ;
+- [ ] aucun SDK de paiement dans ce bloc.
+
+### Critère de sortie
+
+Le joueur peut gagner des diamants via Missions puis acheter un cosmétique déterministe qui apparaît dans son inventaire.
+
+---
+
+# 8. V3-3E — PERSONNALISATION FONCTIONNELLE — ⬜ BLOQUÉ PAR V3-3D
+
+Objectif : brancher inventaire, arbre et équipement sur l’UX cible de la planche validée.
+
+La planche de référence est **la cible UX appréciée**. C’est l’interface actuellement présente dans le code qui devra être remplacée lors de ce bloc puis habillée définitivement pendant le reskin.
+
+Principes :
+
+- ouverture depuis `Décorer` sur l’arbre ;
+- panneau/bottom-sheet `Personnaliser mon arbre` ;
+- catégories proches de la cible `Objets / Habitants / Fonds` ;
+- preview directement sur l’arbre ;
+- CTA `Équiper` ;
+- slots contrôlés : coussin, niche/cabane, hamac, jouet, plante, background/theme ;
+- un objet remplace le contenu d’un slot ;
+- aucun effet gameplay.
+
+### Critère de sortie
+
+Un cosmétique acheté peut être trouvé, prévisualisé puis équipé dans son slot depuis l’arbre, et le résultat persiste après redémarrage.
+
+---
+
+# 9. V3-4 — VALIDATION FONCTIONNELLE — ⬜ BLOQUÉ
+
+Objectif : vérifier les boucles avant d’investir dans la DA finale.
+
+- [ ] nouvelle partie ;
+- [ ] progression arbre ;
+- [ ] puzzle ;
+- [ ] croquettes / indices ;
 - [ ] diamants ;
-- [ ] missions quotidiennes ;
-- [ ] collection de chats ;
-- [ ] récompenses milestones ;
-- [ ] extension cosmétiques ;
-- [ ] boutique directe ;
-- [ ] aucun gacha payé ;
-- [ ] aucune conversion diamant → croquettes.
+- [ ] missions ;
+- [ ] boutique / inventaire ;
+- [ ] personnalisation ;
+- [ ] navigation complète ;
+- [ ] sauvegarde / reprise ;
+- [ ] session mobile réelle.
+
+### Critère de sortie
+
+Le produit est fonctionnellement proche de sa forme finale et aucune fonctionnalité majeure prévue avant soft launch n’impose de repenser la structure des écrans.
 
 ---
 
-# 7. V3-4 — REWARDED CONTINUATION — ⬜ BLOQUÉ
+# 10. V3-5 — TOTAL RESKIN / POLISH VISUEL / JUICE — ⬜ REPORTÉ
+
+Objectif : appliquer enfin la DA des planches validées **sans modifier les règles ou l’architecture fonctionnelle**.
+
+Les planches validées sont la cible finale : composition puzzle, accueil, arbre, personnalisation, expressions Nimbus/Moka, victoire/défaite, composants et animation.
+
+À traiter dans ce bloc :
+
+- [ ] vrais assets premium ;
+- [ ] composition puzzle proche de la planche validée ;
+- [ ] cœur quatre états positionné dans la zone basse du puzzle ;
+- [ ] sélecteur Nimbus/Moka final ;
+- [ ] arbre final sans effet sticker ;
+- [ ] Home final ;
+- [ ] personnalisation finale ;
+- [ ] Boutique / Missions cohérentes avec la même DA ;
+- [ ] feedback correct/error ;
+- [ ] réactions Nimbus/Moka ;
+- [ ] victoire / défaite ;
+- [ ] transitions et micro-interactions ;
+- [ ] reducedMotion ;
+- [ ] performance téléphone 10–15 minutes.
+
+### Critère de sortie
+
+Au premier coup d’œil, les écrans appartiennent clairement à la DA des planches validées et ne donnent plus l’impression d’un prototype Phaser ou d’un ancien Meowza repeint.
+
+---
+
+# 11. V3-6 — PLAYTEST FINAL DES 20 PREMIÈRES MINUTES — ⬜ BLOQUÉ
+
+Objectif : tester l’expérience telle qu’elle sera réellement présentée au joueur.
+
+- [ ] Nouvelle partie depuis zéro ;
+- [ ] niveaux 1–5 ;
+- [ ] Medium / Hard ;
+- [ ] Extreme / Coup de griffe si accessible ;
+- [ ] compréhension des règles ;
+- [ ] probing / erreurs ;
+- [ ] achats d’indices ;
+- [ ] navigation arbre / Missions / Boutique / Décorer ;
+- [ ] compréhension diamants / croquettes ;
+- [ ] relire instrumentation ;
+- [ ] corriger uniquement les problèmes observés.
+
+---
+
+# 12. V3-7 — REWARDED CONTINUATION — ⬜ BLOQUÉ
 
 - [ ] abstraction provider ;
 - [ ] mock avant SDK réel ;
@@ -263,7 +301,7 @@ Ne commencer qu’après V3-2C.
 
 ---
 
-# 8. V3-5 — DAILY / BACKEND / CAT DAY — ⬜ BLOQUÉ
+# 13. V3-8 — DAILY / BACKEND / CAT DAY — ⬜ BLOQUÉ
 
 Dernier grand chantier.
 
@@ -282,7 +320,7 @@ Ne pas bloquer un soft launch solo avec ce chantier.
 
 ---
 
-# 9. BASES À NE PAS RECONSTRUIRE
+# 14. BASES À NE PAS RECONSTRUIRE
 
 Conserver et améliorer uniquement :
 
@@ -292,12 +330,13 @@ Conserver et améliorer uniquement :
 - progression `trail-*` ;
 - architecture Timed ;
 - économie croquettes de base ;
-- personnalisation d’arbre existante.
+- instrumentation ;
+- optimisations tactiles déjà validées.
 
 ---
 
-# 10. PROCHAINE ACTION UNIQUE
+# 15. PROCHAINE ACTION UNIQUE
 
-> **Terminer V3-2B / B1 : langage visuel des composants.**
+> **Fermer V3-3A : CI verte puis validation rapide de la navigation Home → Mon arbre → Décorer / Missions / Boutique → retour arbre sur téléphone.**
 
-Ne pas ouvrir diamants, missions, collection, rewarded ads ou backend avant fermeture explicite de V3-2B puis V3-2C.
+Ne pas commencer les diamants tant que ce gate n’est pas fermé.
