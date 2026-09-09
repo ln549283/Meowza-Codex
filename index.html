@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <meta name="theme-color" content="#fff6ee" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Meowza" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./pwa-icon.svg" type="image/svg+xml" />
   <title>Meowza</title>
   <style>
     #startup{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:#fff6ee;color:#51425f;text-align:center;font-family:system-ui,sans-serif}
@@ -21,6 +27,7 @@
       retry.addEventListener('click',()=>location.reload());
       window.addEventListener('error',()=>show('Le jeu n’a pas pu démarrer. Vérifie ta connexion, puis réessaie.'));
       setTimeout(()=>show('Le chargement prend un peu de temps. Tu peux patienter ou réessayer.'),20000);
+      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{}));}
     })();
   </script>
   <script type="module" src="/src/main.ts"></script>
