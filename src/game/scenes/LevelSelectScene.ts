@@ -5,7 +5,7 @@ import { cosmetics } from '../../core/cosmetics';
 import { loadSummit } from '../../services/JourneyService';
 import { SaveService } from '../../services/SaveService';
 import { GameRegistry } from '../registry';
-import { button,cozyBackground,imageContain,label,panel,press,roundButton } from '../ui';
+import { button,cozyBackground,imageContain,label,panel,press } from '../ui';
 import { C } from '../theme';
 export class LevelSelectScene extends Phaser.Scene {
  private busy=false;private decorating=false;private slot=0;private offset=0;private current=1;
@@ -19,23 +19,29 @@ export class LevelSelectScene extends Phaser.Scene {
   this.offset=this.pendingOffset??treeFocus(current);
   this.mist=this.add.container(0,0,[imageContain(this.add.image(540,0,'cloud-v5'),1050,350)]).setDepth(20);
   this.refreshRows();
-  const play=async(n:number)=>{if(this.busy||this.decorating)return;this.busy=true;ctaLabel.setText('Préparation…');try{const l=await loadSummit(n);if(!this.scene.isActive())return;if(SaveService.data.session?.id!==l.id||SaveService.data.session.failed||SaveService.data.session.errors>=3)SaveService.restartAttempt();GameRegistry.selected=l;this.scene.start('Game');}catch{if(this.scene.isActive()){ctaLabel.setText('Réessayer');this.busy=false;}}};
+  const play=async(n:number)=>{if(this.busy||this.decorating)return;this.busy=true;try{const l=await loadSummit(n);if(!this.scene.isActive())return;if(SaveService.data.session?.id!==l.id||SaveService.data.session.failed||SaveService.data.session.errors>=3)SaveService.restartAttempt();GameRegistry.selected=l;this.scene.start('Game');}catch{this.busy=false;}};
   this.events.on('play-level',play);
-  panel(this,540,125,1000,220).setDepth(100);
-  label(this,540,72,'Mon arbre',46,C.ink,0).setDepth(101);
-  label(this,540,132,`${current-1} niveau${current>2?'x':''} réussi${current>2?'s':''}`,25,C.ink,0).setDepth(101);
-  label(this,345,190,'◇ Diamants · bientôt',23,C.ink,0).setDepth(101);
-  label(this,735,190,`${SaveService.data.kibble} croquettes`,23,C.ink,0).setDepth(101);
-  roundButton(this,100,105,'‹',()=>this.scene.start('Home')).setDepth(101);
-  roundButton(this,980,105,'?',()=>this.scene.start('Rules')).setDepth(101);
 
-  panel(this,540,1740,1000,390).setDepth(100);
-  const cta=button(this,540,1605,680,`Jouer · niveau ${current}`,()=>{void play(current);},C.teal).setDepth(101);
-  const ctaLabel=cta.list.find(o=>o.type==='Text') as Phaser.GameObjects.Text;
-  button(this,150,1790,225,'Décorer',()=>this.scene.restart({offset:this.offset,decorating:true}),0xb77ca0).setDepth(101);
-  button(this,410,1790,225,'Missions',()=>this.scene.start('Missions'),0xb99773).setDepth(101);
-  button(this,670,1790,225,'Boutique',()=>this.scene.start('Shop'),0xb99773).setDepth(101);
-  button(this,930,1790,225,'Centrer',()=>{this.offset=treeFocus(current);this.velocity=0;this.refreshRows();},0xb99773).setDepth(101);
+  const currency=(x:number,key:string,value:string)=>{
+   const c=this.add.container(x,92).setDepth(101),skin=this.add.image(0,0,'button-secondary').setDisplaySize(245,92),icon=imageContain(this.add.image(-76,0,key),58,58),txt=label(this,38,-1,value,31,C.ink,0);c.add([skin,icon,txt]);return c;
+  };
+  const iconButton=(x:number,y:number,key:string,onClick:()=>void,size=112)=>{
+   const c=this.add.container(x,y).setDepth(103),skin=this.add.image(0,0,'button-square').setDisplaySize(size,size),icon=imageContain(this.add.image(0,-2,key),size*.58,size*.58);c.add([skin,icon]);return press(this,c,size,size,onClick);
+  };
+  const bottomAction=(x:number,w:number,key:string,text:string,onClick:()=>void)=>{
+   const c=this.add.container(x,1815).setDepth(103),skin=this.add.image(0,0,'button-secondary').setDisplaySize(w,112),icon=imageContain(this.add.image(-w*.30,0,key),58,58),txt=label(this,25,-1,text,30,C.ink,0);c.add([skin,icon,txt]);return press(this,c,w,112,onClick);
+  };
+
+  currency(245,'hub-diamond','0');
+  currency(520,'hub-kibble',String(SaveService.data.kibble));
+  iconButton(960,92,'hub-settings',()=>this.scene.start('Settings'),108);
+
+  iconButton(88,780,'hub-missions',()=>this.scene.start('Missions'),104);
+  iconButton(88,920,'hub-shop',()=>this.scene.start('Shop'),104);
+
+  panel(this,540,1815,930,155,.97).setDepth(100);
+  bottomAction(330,390,'hub-decorate','Décorer',()=>this.scene.restart({offset:this.offset,decorating:true}));
+  bottomAction(750,390,'hub-locate','Me retrouver',()=>{this.offset=treeFocus(current);this.velocity=0;this.refreshRows();});
 
   if(this.decorating){
    panel(this,540,1620,1060,595).setScrollFactor(0).setDepth(110);
@@ -53,7 +59,7 @@ export class LevelSelectScene extends Phaser.Scene {
   }
 
   let previous=0,previousTime=0;
-  this.input.on('pointerdown',(p:Phaser.Input.Pointer)=>{this.registry.set('mapDragging',false);this.velocity=0;previous=p.y;previousTime=p.event.timeStamp;this.dragging=p.y>245&&p.y<(this.decorating?1290:1490);});
+  this.input.on('pointerdown',(p:Phaser.Input.Pointer)=>{this.registry.set('mapDragging',false);this.velocity=0;previous=p.y;previousTime=p.event.timeStamp;this.dragging=p.y>170&&p.y<(this.decorating?1290:1690);});
   this.input.on('pointermove',(p:Phaser.Input.Pointer)=>{if(!p.isDown||!this.dragging)return;if(p.getDistance()>18)this.registry.set('mapDragging',true);const dy=p.y-previous;this.velocity=Phaser.Math.Clamp(dy/Math.max(16,p.event.timeStamp-previousTime),-2.5,2.5);this.offset=Phaser.Math.Clamp(this.offset+dy,0,treeLimit(current));previous=p.y;previousTime=p.event.timeStamp;this.refreshRows();});
   this.input.on('pointerup',()=>{this.dragging=false;});
   this.input.on('wheel',(_p:unknown,_o:unknown,_x:number,dy:number)=>{if(this.decorating)return;this.velocity=0;this.offset=Phaser.Math.Clamp(this.offset-dy,0,treeLimit(current));this.refreshRows();});
@@ -82,7 +88,7 @@ export class LevelSelectScene extends Phaser.Scene {
   bg.lineStyle(n===this.current?8:4,n===this.current?C.teal:0xe2bc83).strokeCircle(0,0,99);
   const badge=spec.timed?imageContain(this.add.image(0,-10,'extreme-timed'),168,168):imageContain(this.add.image(0,-17,'atlas-v3',spec.difficulty),150,132);
   node.add([bg,badge,label(this,0,65,String(n),34,C.ink,0)]);
-  press(this,node,210,210,()=>{if(this.input.activePointer.y>245&&this.input.activePointer.y<1490)this.events.emit('play-level',n);});add(node);
+  press(this,node,210,210,()=>{if(this.input.activePointer.y>170&&this.input.activePointer.y<1690)this.events.emit('play-level',n);});add(node);
   if(done)add(label(this,x+115,-90,'✓',43,'#348e84'));
   if(n===this.current)add(label(this,x,213,'À toi de jouer',29,'#397972',0));
   return row;
