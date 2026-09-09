@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { EMPTY,GREY,ORANGE,cloneGrid,type CellValue,type Grid,type Level,type Position } from '../core/model';
+import { EMPTY,GREY,cloneGrid,type CellValue,type Grid,type Level,type Position } from '../core/model';
 import { includesPosition,validateGrid } from '../core/validator';
 import { AudioService } from '../services/AudioService';
 import { HapticsService } from '../services/HapticsService';
