@@ -10,7 +10,6 @@ export class PreloadScene extends Phaser.Scene{
   this.add.text(540,1080,'Un petit instant, les chats arrivent…',{fontFamily:FONT,fontSize:'30px',color:C.ink}).setOrigin(.5);
   this.load.on('progress',(v:number)=>bar.clear().fillStyle(C.pink).fillRoundedRect(220,990,640*v,18,9));
 
-  // Existing production assets kept as fallbacks / legacy content.
   for(const key of ['logo-v5','tree-modules-v5','room-v5','cloud-v5'])this.load.image(key,`assets/${key}.webp`);
   this.load.image('home-mascots-v4','assets/home-mascots-v4.webp');
   this.load.image('atlas-v3','assets/atlas-v3.webp');
@@ -18,7 +17,6 @@ export class PreloadScene extends Phaser.Scene{
   this.load.image('grey-cat','assets/cats/nimbus.webp');
   this.load.image('orange-cat','assets/cats/moka.webp');
 
-  // Accueil / arbre V2.
   this.load.image('home-art-v2','assets/accueil.png');
   const treeAssets={
    'tree-base-v2':'base.png','tree-cloud-v2':'cloud.png','tree-cubby-cream':'cubby_cream.png','tree-cubby-wood':'cubby_wood.png',
@@ -27,7 +25,6 @@ export class PreloadScene extends Phaser.Scene{
   } as const;
   Object.entries(treeAssets).forEach(([key,file])=>this.load.image(key,`assets/tree/${file}`));
 
-  // UI / icons from the extracted asset pack. PNG only on runtime paths: Android-safe.
   const uiAssets={
    'heart-full':'heart-full.png','heart-crack-1':'heart-crack-1.png','heart-crack-2':'heart-crack-2.png','heart-broken':'heart-broken.png',
    'hub-diamond':'diamond.png','hub-kibble':'kibble.png','hub-settings':'settings.png','hub-missions':'missions.png','hub-shop':'gift.png',
@@ -36,14 +33,12 @@ export class PreloadScene extends Phaser.Scene{
   } as const;
   Object.entries(uiAssets).forEach(([key,file])=>this.load.image(key,`assets/ui/${file}`));
 
-  // New board / progression skins.
   this.load.image('puzzle-board-frame','assets/board/board-frame-blue.png');
   const nodes={
    'node-current':'level_current.png','node-completed':'level_completed.png','node-locked':'level_locked.png','node-extreme':'level_extreme.png','node-timed':'level_timed.png','node-plaque':'level_plaque.png'
   } as const;
   Object.entries(nodes).forEach(([key,file])=>this.load.image(key,`assets/board_nodes/${file}`));
 
-  // Nimbus + Moka animation library. Each sheet is authored on a 384x384 grid.
   const catAnimations=['idle','blink','happy','jump','walk','surprise','victory','sad'] as const;
   for(const cat of ['nimbus','moka'] as const)for(const anim of catAnimations)this.load.spritesheet(`${cat}-${anim}`,`assets/animations/${cat}/${anim}.png`,{frameWidth:384,frameHeight:384});
  }
@@ -51,7 +46,6 @@ export class PreloadScene extends Phaser.Scene{
  private makeRoundedTexture(key:string,w:number,h:number,fill:string,stroke:string,r:number,highlight?:string){const tex=this.textures.createCanvas(key,w,h);if(!tex)return;const ctx=tex.context;ctx.clearRect(0,0,w,h);ctx.fillStyle='rgba(111,81,72,.14)';this.rounded(ctx,8,14,w-16,h-18,r);ctx.fill();ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=6;this.rounded(ctx,8,6,w-16,h-18,r);ctx.fill();ctx.stroke();if(highlight){ctx.fillStyle=highlight;ctx.globalAlpha=.42;this.rounded(ctx,22,18,w-44,Math.max(22,h*.28),Math.max(12,r*.55));ctx.fill();ctx.globalAlpha=1;}tex.refresh();}
  private makeCell(key:string,fill:string,stroke:string,paw=false){const tex=this.textures.createCanvas(key,192,192);if(!tex)return;const ctx=tex.context;ctx.clearRect(0,0,192,192);ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=6;this.rounded(ctx,8,8,176,176,28);ctx.fill();ctx.stroke();if(paw){ctx.fillStyle='#d9b98f';ctx.globalAlpha=.5;ctx.beginPath();ctx.ellipse(96,108,24,20,0,0,Math.PI*2);ctx.fill();for(const [x,y] of [[72,76],[91,68],[111,70],[126,84]] as const){ctx.beginPath();ctx.arc(x,y,9,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;}tex.refresh();}
  create(){
-  // Components that do not yet have final raster skins remain mobile-safe CanvasTextures.
   this.makeRoundedTexture('puzzle-panel',1000,260,'#fff8ee','#d8ad83',44,'#ffffff');
   this.makeRoundedTexture('button-primary',640,180,'#42c99b','#18836f',50,'#a8f0d9');
   this.makeRoundedTexture('button-secondary',640,180,'#fff7ed','#c99463',50,'#ffffff');
@@ -61,7 +55,7 @@ export class PreloadScene extends Phaser.Scene{
   const rates:Record<string,number>={idle:16,blink:16,happy:24,jump:24,walk:20,surprise:24,victory:24,sad:20};
   for(const cat of ['nimbus','moka'] as const)for(const anim of ['idle','blink','happy','jump','walk','surprise','victory','sad'] as const){
    const source=`${cat}-${anim}`,key=`anim-${cat}-${anim}`;
-   if(!this.anims.exists(key))this.anims.create({key,frames:this.anims.generateFrameNumbers(source),frameRate:rates[anim],repeat:anim==='idle'||anim==='walk'?-1:0});
+   if(!this.anims.exists(key))this.anims.create({key,frames:this.anims.generateFrameNumbers(source),frameRate:rates[anim]??20,repeat:anim==='idle'||anim==='walk'?-1:0});
   }
 
   const modules=this.textures.get('tree-modules-v5');for(const [name,x,y,w,h] of [['peach',0,270,430,290],['teal',430,270,425,290],['house',860,120,390,465],['hammock',0,690,510,390],['post',550,600,150,490],['base',760,740,494,350]] as const)modules.add(name,0,x,y,w,h);
