@@ -24,11 +24,12 @@
     (()=>{
       const retry=document.getElementById('startup-retry');const startup=document.getElementById('startup');
       const show=(message)=>{const status=document.getElementById('startup-status');if(status){status.textContent=message;retry.hidden=false;}};
-      retry.addEventListener('click',async()=>{retry.disabled=true;try{const registration=await navigator.serviceWorker?.getRegistration();await registration?.update();}catch{}location.reload();});
+      retry.addEventListener('click',()=>location.reload());
       window.addEventListener('error',()=>show('Le jeu n’a pas pu démarrer. Vérifie ta connexion, puis réessaie.'));
       window.addEventListener('meowza-ready',()=>{startup?.classList.add('ready');setTimeout(()=>startup?.remove(),220);},{once:true});
-      setTimeout(()=>{if(document.body.contains(startup))show('Le chargement prend plus de temps que prévu. Tu peux patienter ou réessayer.');},12000);
-      if('serviceWorker' in navigator){window.addEventListener('load',async()=>{try{const registration=await navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'});void registration.update();}catch{}});}
+      setTimeout(()=>{if(document.body.contains(startup))show('Le chargement prend plus de temps que prévu. Tu peux patienter ou réessayer.');},30000);
+      if('serviceWorker' in navigator){window.addEventListener('load',async()=>{try{for(const registration of await navigator.serviceWorker.getRegistrations())await registration.unregister();}catch{}});}
+      if('caches' in window){window.addEventListener('load',async()=>{try{for(const key of await caches.keys())if(key.startsWith('meowza-pwa-'))await caches.delete(key);}catch{}});}
     })();
   </script>
   <script type="module" src="/src/main.ts"></script>
