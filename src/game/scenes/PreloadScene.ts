@@ -63,5 +63,5 @@ export class PreloadScene extends Phaser.Scene{
   for(const cat of ['noisette','domino','astre','opale','orion','perle'])img(`collection-${cat}`,`collection/cats/cat_${cat}.png`);
   preloadMotion(this);
  }
- create(){registerMotion(this);this.scene.start('Home');}
+ create(){registerMotion(this);window.dispatchEvent(new Event('meowza-ready'));this.scene.start('Home');}
 }
