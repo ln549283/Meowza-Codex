@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { SaveService } from '../../services/SaveService';
 import { fadeIn,imageContain,label,press } from '../ui';
-import { C } from '../theme';
 
 export class HomeScene extends Phaser.Scene {
  constructor(){super('Home');}
@@ -21,17 +20,11 @@ export class HomeScene extends Phaser.Scene {
    this.scene.start('LevelSelect');
   });
 
-  const tree=this.add.container(380,1690).setDepth(20);
-  const treeSkin=this.add.image(0,0,'button-secondary').setDisplaySize(430,105);
-  const treeText=label(this,0,-1,'Mon arbre',29,C.ink);
-  tree.add([treeSkin,treeText]);
-  press(this,tree,440,112,()=>this.scene.start('LevelSelect'));
-
-  const settings=this.add.container(825,1690).setDepth(20);
-  const settingsSkin=this.add.image(0,0,'button-square').setDisplaySize(108,108);
-  const settingsIcon=imageContain(this.add.image(0,0,'hub-settings'),58,58);
+  const settings=this.add.container(540,1695).setDepth(20);
+  const settingsSkin=this.add.image(0,0,'button-square').setDisplaySize(100,100);
+  const settingsIcon=imageContain(this.add.image(0,0,'hub-settings'),54,54);
   settings.add([settingsSkin,settingsIcon]);
-  press(this,settings,116,116,()=>this.scene.start('Settings'));
+  press(this,settings,110,110,()=>this.scene.start('Settings'));
 
   document.getElementById('startup')?.remove();
  }
