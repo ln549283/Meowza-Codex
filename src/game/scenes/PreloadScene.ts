@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { preloadMotion,registerMotion } from '../motion';
 import { C,FONT } from '../theme';
 
 export class PreloadScene extends Phaser.Scene{
@@ -25,13 +26,13 @@ export class PreloadScene extends Phaser.Scene{
   img('nimbus-reading','characters/illustrations/nimbus_reading.png');
   img('nimbus-sleeping','characters/illustrations/nimbus_sleeping.png');
   img('moka-playing','characters/illustrations/moka_playing.png');
-  img('grey-cat','characters/nimbus/animations/idle/000.png');
-  img('orange-cat','characters/moka/animations/idle/000.png');
+  img('grey-cat','characters/nimbus/static/nimbus_token.png');
+  img('orange-cat','characters/moka/static/moka_token.png');
 
   const ui:Record<string,string>={
    'button-primary':'ui/button_primary.png','button-secondary':'ui/button_secondary.png','button-disabled':'ui/button_disabled.png',
    'puzzle-panel':'ui/panel.png','button-square':'ui/tile_ivory.png','tile-peach':'ui/tile_peach.png','tile-lilac':'ui/tile_lilac.png','ui-circle':'ui/circle.png',
-   'cell-empty':'ui/tile_ivory.png','cell-selected':'ui/tile_lilac.png','cell-hint':'ui/tile_peach.png','cell-error':'ui/tile_peach.png',
+   'cell-empty':'puzzle/cell_outline_peach.png','cell-selected':'puzzle/cell_outline_teal.png','cell-hint':'ui/tile_peach.png','cell-error':'ui/tile_peach.png',
    'heart-full':'ui/icons/heart.png','heart-crack-1':'ui/icons/heart_cracked.png','heart-crack-2':'ui/icons/heart_damaged.png','heart-broken':'ui/icons/heart_broken.png',
    'hub-diamond':'ui/diamond.png','hub-kibble':'ui/kibble.png','hub-settings':'ui/gear.png','hub-missions':'ui/missions.png','hub-shop':'ui/shop.png','hub-decorate':'ui/decorate.png','hub-daily':'ui/daily.png',
    'hub-locate':'ui/icons/play.png','ui-back':'ui/back.png','ui-close':'ui/close.png','ui-check':'ui/check.png','ui-lock':'ui/icons/lock.png','ui-play':'ui/icons/play.png','ui-pause':'ui/pause.png','ui-clock':'ui/icons/clock.png',
@@ -60,6 +61,7 @@ export class PreloadScene extends Phaser.Scene{
   Object.entries(tree).forEach(([key,path])=>img(key,path));
 
   for(const cat of ['noisette','domino','astre','opale','orion','perle'])img(`collection-${cat}`,`collection/cats/cat_${cat}.png`);
+  preloadMotion(this);
  }
- create(){this.scene.start('Home');}
+ create(){registerMotion(this);this.scene.start('Home');}
 }
