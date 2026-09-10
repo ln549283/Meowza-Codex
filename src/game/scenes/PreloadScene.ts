@@ -31,6 +31,7 @@ export class PreloadScene extends Phaser.Scene{
   const ui:Record<string,string>={
    'button-primary':'ui/button_primary.png','button-secondary':'ui/button_secondary.png','button-disabled':'ui/button_disabled.png',
    'puzzle-panel':'ui/panel.png','button-square':'ui/tile_ivory.png','tile-peach':'ui/tile_peach.png','tile-lilac':'ui/tile_lilac.png','ui-circle':'ui/circle.png',
+   'cell-empty':'ui/tile_ivory.png','cell-selected':'ui/tile_lilac.png','cell-hint':'ui/tile_peach.png','cell-error':'ui/tile_peach.png',
    'heart-full':'ui/icons/heart.png','heart-crack-1':'ui/icons/heart_cracked.png','heart-crack-2':'ui/icons/heart_damaged.png','heart-broken':'ui/icons/heart_broken.png',
    'hub-diamond':'ui/diamond.png','hub-kibble':'ui/kibble.png','hub-settings':'ui/gear.png','hub-missions':'ui/missions.png','hub-shop':'ui/shop.png','hub-decorate':'ui/decorate.png','hub-daily':'ui/daily.png',
    'hub-locate':'ui/icons/play.png','ui-back':'ui/back.png','ui-close':'ui/close.png','ui-check':'ui/check.png','ui-lock':'ui/icons/lock.png','ui-play':'ui/icons/play.png','ui-pause':'ui/pause.png','ui-clock':'ui/icons/clock.png',
