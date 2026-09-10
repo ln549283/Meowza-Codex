@@ -1,15 +1,13 @@
 import Phaser from 'phaser';
 import { SaveService } from '../../services/SaveService';
-import { fadeIn,imageContain,label,press } from '../ui';
+import { fadeIn,label,press } from '../ui';
 
 export class HomeScene extends Phaser.Scene {
  constructor(){super('Home');}
  create(){
   fadeIn(this);
+  // The welcome artwork already contains the logo and both cats: never overlay them here.
   this.add.image(540,960,'home-background').setDisplaySize(1080,1920);
-
-  imageContain(this.add.image(540,245,'meowza-logo'),670,260).setDepth(10);
-  imageContain(this.add.image(540,925,'duo-home'),700,700).setDepth(9);
 
   const cta=this.add.container(540,1510).setDepth(20);
   const skin=this.add.image(0,0,'button-primary').setDisplaySize(760,132);
@@ -22,7 +20,7 @@ export class HomeScene extends Phaser.Scene {
 
   const settings=this.add.container(540,1695).setDepth(20);
   const settingsSkin=this.add.image(0,0,'button-square').setDisplaySize(100,100);
-  const settingsIcon=imageContain(this.add.image(0,0,'hub-settings'),54,54);
+  const settingsIcon=this.add.image(0,0,'hub-settings').setDisplaySize(54,54);
   settings.add([settingsSkin,settingsIcon]);
   press(this,settings,110,110,()=>this.scene.start('Settings'));
 
