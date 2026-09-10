@@ -5,6 +5,7 @@ import { cosmetics } from '../../core/cosmetics';
 import { loadSummit } from '../../services/JourneyService';
 import { SaveService } from '../../services/SaveService';
 import { GameRegistry } from '../registry';
+import { addAmbientCat,playFx } from '../motion';
 import { button,imageContain,label,panel,press } from '../ui';
 import { C } from '../theme';
 
@@ -20,7 +21,7 @@ export class LevelSelectScene extends Phaser.Scene {
   this.registry.set('mapDragging',false);
   this.current=nextSummit(SaveService.data.progress);const current=this.current;
   this.offset=this.pendingOffset??treeFocus(current);
-  this.mist=this.add.container(0,0,[imageContain(this.add.image(540,0,'tree-cloud'),1080,470)]).setDepth(25);
+  this.mist=this.add.container(0,0,[imageContain(this.add.image(540,0,'tree-cloud'),930,405)]).setDepth(25);
   this.refreshRows();
 
   const play=async(n:number)=>{if(this.busy||this.decorating)return;this.busy=true;try{const l=await loadSummit(n);if(!this.scene.isActive())return;if(SaveService.data.session?.id!==l.id||SaveService.data.session.failed||SaveService.data.session.errors>=3)SaveService.restartAttempt();GameRegistry.selected=l;this.scene.start('Game');}catch{this.busy=false;}};
@@ -30,14 +31,15 @@ export class LevelSelectScene extends Phaser.Scene {
   const iconButton=(x:number,y:number,key:string,onClick:()=>void,size=96)=>{const c=this.add.container(x,y).setDepth(103),skin=this.add.image(0,0,'button-square').setDisplaySize(size,size),icon=imageContain(this.add.image(0,0,key),size*.54,size*.54);c.add([skin,icon]);return press(this,c,size,size,onClick);};
   currency(215,'hub-kibble',String(SaveService.data.kibble));currency(485,'hub-diamond','0');iconButton(970,86,'hub-settings',()=>this.scene.start('Settings'),94);
 
-  panel(this,540,1818,1040,160,.98).setDepth(100);
+  const navSkin=this.add.image(540,1814,'button-secondary').setDisplaySize(1010,150).setDepth(100);
+  navSkin.setAlpha(.99);
   const nav=[
-   {x:150,key:'hub-decorate',text:'Décorer',go:()=>this.scene.restart({offset:this.offset,decorating:true})},
-   {x:410,key:'hub-missions',text:'Missions',go:()=>this.scene.start('Missions')},
-   {x:670,key:'hub-daily',text:'Défi du jour',go:()=>{}},
-   {x:930,key:'hub-shop',text:'Boutique',go:()=>this.scene.start('Shop')}
+   {x:165,key:'hub-decorate',go:()=>this.scene.restart({offset:this.offset,decorating:true})},
+   {x:415,key:'hub-missions',go:()=>this.scene.start('Missions')},
+   {x:665,key:'hub-daily',go:()=>{}},
+   {x:915,key:'hub-shop',go:()=>this.scene.start('Shop')}
   ];
-  nav.forEach(item=>{const c=this.add.container(item.x,1805).setDepth(104),icon=imageContain(this.add.image(0,-22,item.key),62,62),txt=label(this,0,42,item.text,20,C.ink,0);c.add([icon,txt]);press(this,c,210,130,item.go);});
+  nav.forEach(item=>{const c=this.add.container(item.x,1812).setDepth(104),icon=imageContain(this.add.image(0,0,item.key),94,94);c.add(icon);press(this,c,180,126,item.go);});
 
   if(this.decorating){
    const shade=this.add.rectangle(540,960,1080,1920,0x4c3344,.28).setDepth(108).setInteractive();
@@ -51,7 +53,7 @@ export class LevelSelectScene extends Phaser.Scene {
     const y=1440+j*125;
     panel(this,540,y,850,105).setDepth(110);
     label(this,300,y,item.name,26,C.ink,0).setDepth(111);
-    const b=button(this,760,y,300,equipped?'✓ Équipé':owned?'Équiper':'Verrouillé',()=>{if(!owned)return;SaveService.data.equipped[slot]=item.id;void SaveService.persist();this.scene.restart({offset:this.offset,decorating:true,slot:this.slot});},equipped?C.teal:C.orange).setDepth(111);
+    const b=button(this,760,y,300,equipped?'✓ Équipé':owned?'Équiper':'Verrouillé',()=>{if(!owned)return;SaveService.data.equipped[slot]=item.id;void SaveService.persist();playFx(this,'objet_debloque',540,1180,170,130);this.scene.restart({offset:this.offset,decorating:true,slot:this.slot});},equipped?C.teal:C.orange).setDepth(111);
     if(!owned)b.setAlpha(.55);
    });
    shade.on('pointerup',()=>{});
@@ -65,27 +67,32 @@ export class LevelSelectScene extends Phaser.Scene {
   this.events.once('shutdown',()=>{this.input.removeAllListeners();this.events.off('play-level',play);this.rows.clear();this.registry.set('mapDragging',false);});
  }
  update(_time:number,delta:number){if(this.dragging||Math.abs(this.velocity)<.02||this.decorating)return;const dt=Math.min(delta,50);this.offset=Phaser.Math.Clamp(this.offset+this.velocity*dt,0,treeLimit(this.current));this.velocity*=Math.pow(.90,dt/16.67);if(this.offset===0||this.offset===treeLimit(this.current))this.velocity=0;this.refreshRows();}
- private refreshRows(){const visible=visibleTreeLevels(this.current,this.offset);for(const [n,row] of this.rows)if(!visible.includes(n)){row.destroy();this.rows.delete(n);}for(const n of visible){let row=this.rows.get(n);if(!row){row=this.makeRow(n);this.rows.set(n,row);}row.y=treeY(n,this.offset);}this.mist.y=treeY(this.current,this.offset)-365;}
+ private refreshRows(){const visible=visibleTreeLevels(this.current,this.offset);for(const [n,row] of this.rows)if(!visible.includes(n)){row.destroy();this.rows.delete(n);}for(const n of visible){let row=this.rows.get(n);if(!row){row=this.makeRow(n);this.rows.set(n,row);}row.y=treeY(n,this.offset);}this.mist.y=treeY(this.current,this.offset)-385;}
  private makeRow(n:number){
   const row=this.add.container(0,0).setDepth(10),x=[355,690,395,675,345,710,410,660][(n-1)%8]!,progress=SaveService.data.progress[journeyId(n)],done=!!progress?.completed,spec=journeySpec(n);
   const add=(o:Phaser.GameObjects.GameObject)=>{row.add(o);return o;};
   const supportKey=n%2===0?'tree-support-cream':'tree-support-peach';
-  if(n>1)add(imageContain(this.add.image(540,TREE_STEP/2+50,'tree-post'),105,TREE_STEP+100));
-  else {add(imageContain(this.add.image(540,145,'tree-post'),105,300));add(imageContain(this.add.image(540,285,'tree-base'),590,270));}
+  if(n>1)add(imageContain(this.add.image(540,TREE_STEP/2+50,'tree-post'),90,TREE_STEP+100));
+  else {add(imageContain(this.add.image(540,145,'tree-post'),90,300));add(imageContain(this.add.image(540,285,'tree-base'),520,240));}
 
-  add(imageContain(this.add.image(x,88,supportKey),330,160));
+  add(imageContain(this.add.image(x,96,supportKey),285,135));
   const side=x<540?790:290;
-  if(n%4===0)add(imageContain(this.add.image(side,130,'tree-hammock'),230,170));
-  else if(n%3===0)add(imageContain(this.add.image(side,112,'tree-cubby'),180,180));
-  else if(n%5===0)add(imageContain(this.add.image(side,125,'tree-plant'),135,155));
+  if(n%4===0)add(imageContain(this.add.image(side,132,'tree-hammock'),205,150));
+  else if(n%3===0)add(imageContain(this.add.image(side,112,'tree-cubby'),155,155));
+  else if(n%5===0)add(imageContain(this.add.image(side,125,'tree-plant'),115,135));
 
   const badgeKey=spec.timed?'badge-timed':spec.difficulty==='easy'?'badge-easy':spec.difficulty==='medium'?'badge-medium':spec.difficulty==='hard'?'badge-hard':'badge-extreme';
-  const badge=this.add.container(x,-45),skin=imageContain(this.add.image(0,0,badgeKey),205,92),number=label(this,0,-2,String(n),34,'#4b3149',0);badge.add([skin,number]);
-  if(n===this.current&&!done){const ring=imageContain(this.add.image(0,0,'badge-current'),230,104).setAlpha(.88);badge.addAt(ring,0);}
-  press(this,badge,225,110,()=>{if(this.input.activePointer.y>155&&this.input.activePointer.y<1690)this.events.emit('play-level',n);});add(badge);
+  const badge=this.add.container(x,-58),skin=imageContain(this.add.image(0,0,badgeKey),245,104),number=label(this,0,-2,String(n),38,'#4b3149',0);badge.add([skin,number]);
+  if(n===this.current&&!done){const ring=imageContain(this.add.image(0,0,'badge-current'),270,116).setAlpha(.9);badge.addAt(ring,0);if(!SaveService.data.settings.reducedMotion)this.tweens.add({targets:ring,alpha:.55,duration:900,yoyo:true,repeat:-1,ease:'Sine.InOut'});}
+  press(this,badge,270,122,()=>{if(this.input.activePointer.y>155&&this.input.activePointer.y<1690)this.events.emit('play-level',n);});add(badge);
 
-  if(done){const stars=progress.bestErrors===0?3:progress.bestErrors===1?2:1;add(imageContain(this.add.image(x,34,`stars-${stars}`),135,52));}
-  else if(n===this.current){add(label(this,x,30,spec.timed?'Coup de griffe':'À toi de jouer',22,spec.timed?'#7a3e8e':'#397972',0));}
+  if(done){const stars=progress.bestErrors===0?3:progress.bestErrors===1?2:1;add(imageContain(this.add.image(x,16,`stars-${stars}`),190,70));}
+
+  if(n===this.current&&!this.decorating){
+   const catX=x<540?side:side;
+   const ambient=addAmbientCat(this,n%2===0?'moka':'nimbus',catX,98,145,n%3===0?'sleep':'idle',14);
+   if(ambient)add(ambient);
+  }
   return row;
  }
 }
