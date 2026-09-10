@@ -1,4 +1,3 @@
-import { GameRegistry } from '../registry';
 import Phaser from 'phaser';
 import { SaveService } from '../../services/SaveService';
 import { backButton,button,cozyBackground,imageContain,label,panel,title } from '../ui';
