@@ -5,61 +5,60 @@ export class PreloadScene extends Phaser.Scene{
  constructor(){super('Preload');}
  preload(){
   this.cameras.main.setBackgroundColor(C.cream);
-  this.add.text(540,800,'meowza',{fontFamily:FONT,fontSize:'100px',fontStyle:'bold',color:C.ink}).setOrigin(.5);
+  this.add.text(540,820,'MEOWZA',{fontFamily:FONT,fontSize:'82px',fontStyle:'bold',color:C.ink}).setOrigin(.5);
   const bar=this.add.graphics();
-  this.add.text(540,1080,'Un petit instant, les chats arrivent…',{fontFamily:FONT,fontSize:'30px',color:C.ink}).setOrigin(.5);
-  this.load.on('progress',(v:number)=>bar.clear().fillStyle(C.pink).fillRoundedRect(220,990,640*v,18,9));
+  this.add.text(540,1060,'Les chats préparent leur arbre…',{fontFamily:FONT,fontSize:'30px',fontStyle:'bold',color:C.ink}).setOrigin(.5);
+  this.load.on('progress',(v:number)=>bar.clear().fillStyle(C.teal).fillRoundedRect(220,970,640*v,20,10));
 
-  for(const key of ['logo-v5','tree-modules-v5','room-v5','cloud-v5'])this.load.image(key,`assets/${key}.webp`);
-  this.load.image('home-mascots-v4','assets/home-mascots-v4.webp');
-  this.load.image('atlas-v3','assets/atlas-v3.webp');
-  this.load.image('extreme-timed','assets/extreme-timed-cat.svg');
-  this.load.image('grey-cat','assets/cats/nimbus.webp');
-  this.load.image('orange-cat','assets/cats/moka.webp');
+  const img=(key:string,path:string)=>this.load.image(key,`assets/${path}`);
 
-  this.load.image('home-art-v2','assets/accueil.png');
-  const treeAssets={
-   'tree-base-v2':'base.png','tree-cloud-v2':'cloud.png','tree-cubby-cream':'cubby_cream.png','tree-cubby-wood':'cubby_wood.png',
-   'tree-hammock-lilac':'hammock_lilac.png','tree-hammock-peach':'hammock_peach.png','tree-platform-lilac':'platform_lilac.png',
-   'tree-platform-peach':'platform_peach.png','tree-post-long':'post_long.png','tree-post-short':'post_short.png','tree-round-platform':'round_platform.png','tree-shelf':'shelf.png'
-  } as const;
-  Object.entries(treeAssets).forEach(([key,file])=>this.load.image(key,`assets/tree/${file}`));
+  img('home-background','backgrounds/home/home_background.png');
+  img('room-background','backgrounds/home/room_background.png');
+  img('background-salon','backgrounds/home/home_background.png');
+  img('background-serre','backgrounds/home/background_serre.png');
+  img('background-night','backgrounds/home/background_nuit.png');
+  img('meowza-logo','branding/logo.png');
 
-  const uiAssets={
-   'heart-full':'heart-full.png','heart-crack-1':'heart-crack-1.png','heart-crack-2':'heart-crack-2.png','heart-broken':'heart-broken.png',
-   'hub-diamond':'diamond.png','hub-kibble':'kibble.png','hub-settings':'settings.png','hub-missions':'missions.png','hub-shop':'gift.png',
-   'hub-decorate':'brush.png','hub-locate':'magnifier.png','ui-back':'back.png','ui-close':'close.png','ui-check':'check.png','ui-lock':'lock.png',
-   'ui-play':'play.png','ui-pause':'pause.png','ui-clock':'clock.png','ui-relation-heart':'relation-heart.png','ui-relation-claws':'relation-claws.png'
-  } as const;
-  Object.entries(uiAssets).forEach(([key,file])=>this.load.image(key,`assets/ui/${file}`));
+  img('duo-home','characters/illustrations/duo_home.png');
+  img('duo-retry','characters/illustrations/duo_retry.png');
+  img('duo-victory','characters/illustrations/duo_victory.png');
+  img('nimbus-reading','characters/illustrations/nimbus_reading.png');
+  img('nimbus-sleeping','characters/illustrations/nimbus_sleeping.png');
+  img('moka-playing','characters/illustrations/moka_playing.png');
+  img('grey-cat','characters/nimbus/animations/idle/000.png');
+  img('orange-cat','characters/moka/animations/idle/000.png');
 
-  this.load.image('puzzle-board-frame','assets/board/board-frame-blue.png');
-  const nodes={
-   'node-current':'level_current.png','node-completed':'level_completed.png','node-locked':'level_locked.png','node-extreme':'level_extreme.png','node-timed':'level_timed.png','node-plaque':'level_plaque.png'
-  } as const;
-  Object.entries(nodes).forEach(([key,file])=>this.load.image(key,`assets/board_nodes/${file}`));
+  const ui:Record<string,string>={
+   'button-primary':'ui/button_primary.png','button-secondary':'ui/button_secondary.png','button-disabled':'ui/button_disabled.png',
+   'puzzle-panel':'ui/panel.png','button-square':'ui/tile_ivory.png','tile-peach':'ui/tile_peach.png','tile-lilac':'ui/tile_lilac.png','ui-circle':'ui/circle.png',
+   'heart-full':'ui/icons/heart.png','heart-crack-1':'ui/icons/heart_cracked.png','heart-crack-2':'ui/icons/heart_damaged.png','heart-broken':'ui/icons/heart_broken.png',
+   'hub-diamond':'ui/diamond.png','hub-kibble':'ui/kibble.png','hub-settings':'ui/gear.png','hub-missions':'ui/missions.png','hub-shop':'ui/shop.png','hub-decorate':'ui/decorate.png','hub-daily':'ui/daily.png',
+   'hub-locate':'ui/icons/play.png','ui-back':'ui/back.png','ui-close':'ui/close.png','ui-check':'ui/check.png','ui-lock':'ui/icons/lock.png','ui-play':'ui/icons/play.png','ui-pause':'ui/pause.png','ui-clock':'ui/icons/clock.png',
+   'ui-relation-heart':'ui/same.png','ui-relation-claws':'ui/different.png','ui-hint':'ui/hint.png','ui-calendar':'ui/calendar.png','ui-medal':'ui/medal.png','ui-gift':'ui/gift.png','ui-gift-open':'ui/gift_open.png',
+   'ui-confetti':'ui/confetti.png','diamond-pile':'ui/diamonds_pile.png','diamond-pouch':'ui/diamonds_pouch.png','diamond-chest':'ui/diamonds_chest.png'
+  };
+  Object.entries(ui).forEach(([key,path])=>img(key,path));
 
-  const catAnimations=['idle','blink','happy','jump','walk','surprise','victory','sad'] as const;
-  for(const cat of ['nimbus','moka'] as const)for(const anim of catAnimations)this.load.spritesheet(`${cat}-${anim}`,`assets/animations/${cat}/${anim}.png`,{frameWidth:384,frameHeight:384});
+  img('puzzle-board-frame','puzzle/board_frame_cream.png');
+  img('puzzle-board-frame-wood','puzzle/board_frame_wood.png');
+  img('cell-outline-peach','puzzle/cell_outline_peach.png');
+  img('cell-outline-teal','puzzle/cell_outline_teal.png');
+  img('tutorial-arrow','puzzle/tutorial_arrow.png');
+
+  const plaques:Record<string,string>={
+   'badge-easy':'progression/plaques/vert.png','badge-medium':'progression/plaques/bleu.png','badge-hard':'progression/plaques/orange.png','badge-extreme':'progression/plaques/rouge.png','badge-timed':'progression/plaques/violet.png','badge-current':'progression/plaques/selection.png',
+   'stars-1':'progression/stars/stars_1.png','stars-2':'progression/stars/stars_2.png','stars-3':'progression/stars/stars_3.png','star-empty':'progression/stars/star_empty.png','star-full':'progression/stars/star_full.png'
+  };
+  Object.entries(plaques).forEach(([key,path])=>img(key,path));
+
+  const tree:Record<string,string>={
+   'tree-base':'tree/base.png','tree-cloud':'tree/cloud.png','tree-post':'tree/post_repeat.png','tree-post-long':'tree/connectors/post_long.png','tree-post-short':'tree/connectors/post_short.png',
+   'tree-support-cream':'tree/support_fin_ivoire.png','tree-support-peach':'tree/support_fin_peche.png','tree-hammock-bar':'tree/traverse_hamac.png','tree-hammock':'tree/hammock.png','tree-cubby':'tree/niche_collection.png',
+   'tree-hammock-lilac':'tree/decor/hamac_lilas.png','tree-hammock-peach':'tree/decor/hamac_peche.png','tree-cubby-cream':'tree/decor/niche_creme.png','tree-cubby-wood':'tree/decor/niche_bois.png','tree-plant':'tree/decor/potted_plant.png','tree-hanging-plant':'tree/decor/hanging_plant.png','tree-yarn':'tree/decor/yarn_peach.png'
+  };
+  Object.entries(tree).forEach(([key,path])=>img(key,path));
+
+  for(const cat of ['noisette','domino','astre','opale','orion','perle'])img(`collection-${cat}`,`collection/cats/cat_${cat}.png`);
  }
- private rounded(ctx:CanvasRenderingContext2D,x:number,y:number,w:number,h:number,r:number){const rr=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+rr,y);ctx.arcTo(x+w,y,x+w,y+h,rr);ctx.arcTo(x+w,y+h,x,y+h,rr);ctx.arcTo(x,y+h,x,y,rr);ctx.arcTo(x,y,x+w,y,rr);ctx.closePath();}
- private makeRoundedTexture(key:string,w:number,h:number,fill:string,stroke:string,r:number,highlight?:string){const tex=this.textures.createCanvas(key,w,h);if(!tex)return;const ctx=tex.context;ctx.clearRect(0,0,w,h);ctx.fillStyle='rgba(111,81,72,.14)';this.rounded(ctx,8,14,w-16,h-18,r);ctx.fill();ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=6;this.rounded(ctx,8,6,w-16,h-18,r);ctx.fill();ctx.stroke();if(highlight){ctx.fillStyle=highlight;ctx.globalAlpha=.42;this.rounded(ctx,22,18,w-44,Math.max(22,h*.28),Math.max(12,r*.55));ctx.fill();ctx.globalAlpha=1;}tex.refresh();}
- private makeCell(key:string,fill:string,stroke:string,paw=false){const tex=this.textures.createCanvas(key,192,192);if(!tex)return;const ctx=tex.context;ctx.clearRect(0,0,192,192);ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=6;this.rounded(ctx,8,8,176,176,28);ctx.fill();ctx.stroke();if(paw){ctx.fillStyle='#d9b98f';ctx.globalAlpha=.5;ctx.beginPath();ctx.ellipse(96,108,24,20,0,0,Math.PI*2);ctx.fill();for(const [x,y] of [[72,76],[91,68],[111,70],[126,84]] as const){ctx.beginPath();ctx.arc(x,y,9,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;}tex.refresh();}
- create(){
-  this.makeRoundedTexture('puzzle-panel',1000,260,'#fff8ee','#d8ad83',44,'#ffffff');
-  this.makeRoundedTexture('button-primary',640,180,'#42c99b','#18836f',50,'#a8f0d9');
-  this.makeRoundedTexture('button-secondary',640,180,'#fff7ed','#c99463',50,'#ffffff');
-  this.makeRoundedTexture('button-square',180,180,'#fff7ed','#c99463',42,'#ffffff');
-  this.makeCell('cell-empty','#fff8ed','#c99363',true);this.makeCell('cell-selected','#e9f8ff','#4ebcf2');this.makeCell('cell-hint','#fff0b8','#f2b84b');this.makeCell('cell-error','#ffd8d8','#ee6666');
-
-  const rates:Record<string,number>={idle:16,blink:16,happy:24,jump:24,walk:20,surprise:24,victory:24,sad:20};
-  for(const cat of ['nimbus','moka'] as const)for(const anim of ['idle','blink','happy','jump','walk','surprise','victory','sad'] as const){
-   const source=`${cat}-${anim}`,key=`anim-${cat}-${anim}`;
-   if(!this.anims.exists(key))this.anims.create({key,frames:this.anims.generateFrameNumbers(source),frameRate:rates[anim]??20,repeat:anim==='idle'||anim==='walk'?-1:0});
-  }
-
-  const modules=this.textures.get('tree-modules-v5');for(const [name,x,y,w,h] of [['peach',0,270,430,290],['teal',430,270,425,290],['house',860,120,390,465],['hammock',0,690,510,390],['post',550,600,150,490],['base',760,740,494,350]] as const)modules.add(name,0,x,y,w,h);
-  const t=this.textures.get('atlas-v3');['easy','medium','hard','extreme'].forEach((key,i)=>t.add(key,0,i*313,260,313,360));['platform','house','hammock','bridge'].forEach((key,i)=>t.add(key,0,i*313,630,313,400));
-  this.scene.start('Home');
- }
+ create(){this.scene.start('Home');}
 }
