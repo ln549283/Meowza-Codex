@@ -52,7 +52,7 @@ export class GameScene extends Phaser.Scene {
 
   const usedHints=new Set<string>(saved?.id===level.id?saved.hintPositions:[]);const footerY=Math.min(1790,selectorY+185);
   const heart=this.add.image(845,footerY-15,'heart-full').setDisplaySize(102,102);
-  const kibbleIcon=imageContain(this.add.image(770,footerY+55,'hub-kibble'),38,38);const kibble=label(this,860,footerY+56,'',23,C.ink,0);
+  imageContain(this.add.image(770,footerY+55,'hub-kibble'),38,38);const kibble=label(this,860,footerY+56,'',23,C.ink,0);
   const status=label(this,540,footerY-115,'',25);const hintQuota=this.add.container(0,0);
   let previousErrors=board.errors;
   const setHeart=()=>heart.setTexture(board.errors<=0?'heart-full':board.errors===1?'heart-crack-1':board.errors===2?'heart-crack-2':'heart-broken');
