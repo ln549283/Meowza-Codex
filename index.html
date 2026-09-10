@@ -12,8 +12,8 @@
   <link rel="icon" href="./assets/branding/logo.png" type="image/png" />
   <title>Meowza</title>
   <style>
-    #startup{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:#fff6ee;color:#51425f;text-align:center;font-family:system-ui,sans-serif}
-    #startup h1{font-size:48px;margin:0 0 16px}#startup p{font-size:17px;line-height:1.5;max-width:340px}#startup button{padding:14px 24px;border:0;border-radius:20px;background:#9972ac;color:white;font-size:17px;margin-top:16px}
+    #startup{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:#fff6ee;color:#51425f;text-align:center;font-family:system-ui,sans-serif;transition:opacity .2s ease}#startup.ready{opacity:0;pointer-events:none}
+    #startup p{font-size:17px;line-height:1.5;max-width:340px}#startup button{padding:14px 24px;border:0;border-radius:20px;background:#9972ac;color:white;font-size:17px;margin-top:16px}
   </style>
 </head>
 <body>
@@ -22,12 +22,13 @@
   <noscript>JavaScript est nécessaire pour jouer à Meowza.</noscript>
   <script>
     (()=>{
-      const retry=document.getElementById('startup-retry');
+      const retry=document.getElementById('startup-retry');const startup=document.getElementById('startup');
       const show=(message)=>{const status=document.getElementById('startup-status');if(status){status.textContent=message;retry.hidden=false;}};
-      retry.addEventListener('click',()=>location.reload());
+      retry.addEventListener('click',async()=>{retry.disabled=true;try{const registration=await navigator.serviceWorker?.getRegistration();await registration?.update();}catch{}location.reload();});
       window.addEventListener('error',()=>show('Le jeu n’a pas pu démarrer. Vérifie ta connexion, puis réessaie.'));
-      setTimeout(()=>show('Le chargement prend un peu de temps. Tu peux patienter ou réessayer.'),20000);
-      if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{}));}
+      window.addEventListener('meowza-ready',()=>{startup?.classList.add('ready');setTimeout(()=>startup?.remove(),220);},{once:true});
+      setTimeout(()=>{if(document.body.contains(startup))show('Le chargement prend plus de temps que prévu. Tu peux patienter ou réessayer.');},12000);
+      if('serviceWorker' in navigator){window.addEventListener('load',async()=>{try{const registration=await navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'});void registration.update();}catch{}});}
     })();
   </script>
   <script type="module" src="/src/main.ts"></script>
