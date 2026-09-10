@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { SaveService } from '../../services/SaveService';
+import { playCatOnce } from '../motion';
 import { backButton,button,cozyBackground,imageContain,label,panel,title } from '../ui';
 import { C } from '../theme';
 
@@ -9,7 +10,8 @@ export class LostScene extends Phaser.Scene {
   cozyBackground(this);
   panel(this,540,1000,900,1180);
   title(this,'Chat alors…',410,72);
-  imageContain(this.add.image(540,760,'duo-retry'),650,560);
+  playCatOnce(this,'nimbus','sad',390,875,320,30);
+  playCatOnce(this,'moka','sad',690,875,320,30,100);
   label(this,540,1060,reason==='time'?'Le temps est écoulé.':'Trois erreurs mettent fin à cette tentative.',35);
   label(this,540,1160,'Tu peux recommencer gratuitement.\nLa grille, le cœur, le chrono et les indices repartent de zéro.',27);
   button(this,540,1390,690,'Recommencer',()=>{SaveService.restartAttempt();this.scene.start('Game');},C.teal);
