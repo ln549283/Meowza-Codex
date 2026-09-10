@@ -31,32 +31,16 @@ export class LevelSelectScene extends Phaser.Scene {
   const iconButton=(x:number,y:number,key:string,onClick:()=>void,size=96)=>{const c=this.add.container(x,y).setDepth(103),skin=this.add.image(0,0,'button-square').setDisplaySize(size,size),icon=imageContain(this.add.image(0,0,key),size*.54,size*.54);c.add([skin,icon]);return press(this,c,size,size,onClick);};
   currency(215,'hub-kibble',String(SaveService.data.kibble));currency(485,'hub-diamond','0');iconButton(970,86,'hub-settings',()=>this.scene.start('Settings'),94);
 
-  const navSkin=this.add.image(540,1814,'button-secondary').setDisplaySize(1010,150).setDepth(100);
-  navSkin.setAlpha(.99);
-  const nav=[
-   {x:165,key:'hub-decorate',go:()=>this.scene.restart({offset:this.offset,decorating:true})},
-   {x:415,key:'hub-missions',go:()=>this.scene.start('Missions')},
-   {x:665,key:'hub-daily',go:()=>{}},
-   {x:915,key:'hub-shop',go:()=>this.scene.start('Shop')}
-  ];
+  const navSkin=this.add.image(540,1814,'button-secondary').setDisplaySize(1010,150).setDepth(100);navSkin.setAlpha(.99);
+  const nav=[{x:165,key:'hub-decorate',go:()=>this.scene.restart({offset:this.offset,decorating:true})},{x:415,key:'hub-missions',go:()=>this.scene.start('Missions')},{x:665,key:'hub-daily',go:()=>{}},{x:915,key:'hub-shop',go:()=>this.scene.start('Shop')}];
   nav.forEach(item=>{const c=this.add.container(item.x,1812).setDepth(104),icon=imageContain(this.add.image(0,0,item.key),94,94);c.add(icon);press(this,c,180,126,item.go);});
 
   if(this.decorating){
-   const shade=this.add.rectangle(540,960,1080,1920,0x4c3344,.28).setDepth(108).setInteractive();
-   panel(this,540,1480,1010,790).setDepth(109);
-   label(this,540,1160,'Décorer',44).setDepth(111);
+   const shade=this.add.rectangle(540,960,1080,1920,0x4c3344,.28).setDepth(108).setInteractive();panel(this,540,1480,1010,790).setDepth(109);label(this,540,1160,'Décorer',44).setDepth(111);
    const close=iconButton(950,1158,'ui-close',()=>this.scene.restart({offset:this.offset}),72);close.setDepth(112);
    const slots=['background','cushion','wood'] as const,slot=slots[this.slot]!;
    ['Fonds','Décors','Structure'].forEach((name,i)=>button(this,210+i*330,1265,290,name,()=>this.scene.restart({offset:this.offset,decorating:true,slot:i}),i===this.slot?C.teal:C.orange).setDepth(111));
-   cosmetics.filter(c=>c.slot===slot).slice(0,3).forEach((item,j)=>{
-    const owned=SaveService.data.ownedCosmetics.includes(item.id),equipped=SaveService.data.equipped[slot]===item.id;
-    const y=1440+j*125;
-    panel(this,540,y,850,105).setDepth(110);
-    label(this,300,y,item.name,26,C.ink,0).setDepth(111);
-    const b=button(this,760,y,300,equipped?'✓ Équipé':owned?'Équiper':'Verrouillé',()=>{if(!owned)return;SaveService.data.equipped[slot]=item.id;void SaveService.persist();playFx(this,'objet_debloque',540,1180,170,130);this.scene.restart({offset:this.offset,decorating:true,slot:this.slot});},equipped?C.teal:C.orange).setDepth(111);
-    if(!owned)b.setAlpha(.55);
-   });
-   shade.on('pointerup',()=>{});
+   cosmetics.filter(c=>c.slot===slot).slice(0,3).forEach((item,j)=>{const owned=SaveService.data.ownedCosmetics.includes(item.id),equipped=SaveService.data.equipped[slot]===item.id,y=1440+j*125;panel(this,540,y,850,105).setDepth(110);label(this,300,y,item.name,26,C.ink,0).setDepth(111);const b=button(this,760,y,300,equipped?'✓ Équipé':owned?'Équiper':'Verrouillé',()=>{if(!owned)return;SaveService.data.equipped[slot]=item.id;void SaveService.persist();playFx(this,'objet_debloque',540,1180,170,130);this.scene.restart({offset:this.offset,decorating:true,slot:this.slot});},equipped?C.teal:C.orange).setDepth(111);if(!owned)b.setAlpha(.55);});shade.on('pointerup',()=>{});
   }
 
   let previous=0,previousTime=0;
@@ -70,29 +54,21 @@ export class LevelSelectScene extends Phaser.Scene {
  private refreshRows(){const visible=visibleTreeLevels(this.current,this.offset);for(const [n,row] of this.rows)if(!visible.includes(n)){row.destroy();this.rows.delete(n);}for(const n of visible){let row=this.rows.get(n);if(!row){row=this.makeRow(n);this.rows.set(n,row);}row.y=treeY(n,this.offset);}this.mist.y=treeY(this.current,this.offset)-385;}
  private makeRow(n:number){
   const row=this.add.container(0,0).setDepth(10),x=[355,690,395,675,345,710,410,660][(n-1)%8]!,progress=SaveService.data.progress[journeyId(n)],done=!!progress?.completed,spec=journeySpec(n);
-  const add=(o:Phaser.GameObjects.GameObject)=>{row.add(o);return o;};
-  const supportKey=n%2===0?'tree-support-cream':'tree-support-peach';
-  if(n>1)add(imageContain(this.add.image(540,TREE_STEP/2+50,'tree-post'),90,TREE_STEP+100));
-  else {add(imageContain(this.add.image(540,145,'tree-post'),90,300));add(imageContain(this.add.image(540,285,'tree-base'),520,240));}
-
+  const add=(o:Phaser.GameObjects.GameObject)=>{row.add(o);return o;},supportKey=n%2===0?'tree-support-cream':'tree-support-peach';
+  // One continuous trunk. Side furniture is attached to it with the connector assets instead of floating.
+  if(n>1)add(imageContain(this.add.image(540,TREE_STEP/2+50,'tree-post-long'),96,TREE_STEP+120));
+  else {add(imageContain(this.add.image(540,145,'tree-post-short'),96,310));add(imageContain(this.add.image(540,285,'tree-base'),520,240));}
   add(imageContain(this.add.image(x,96,supportKey),285,135));
-  const side=x<540?790:290;
-  if(n%4===0)add(imageContain(this.add.image(side,132,'tree-hammock'),205,150));
-  else if(n%3===0)add(imageContain(this.add.image(side,112,'tree-cubby'),155,155));
-  else if(n%5===0)add(imageContain(this.add.image(side,125,'tree-plant'),115,135));
+  const side=x<540?790:290,dir=side>540?1:-1,bridgeX=540+dir*125;
+  const attachSide=(key:string,y:number,w:number,h:number)=>{add(imageContain(this.add.image(bridgeX,y+5,'tree-hammock-bar'),275,62));add(imageContain(this.add.image(side,y,key),w,h));};
+  if(n%4===0)attachSide('tree-hammock',132,205,150);else if(n%3===0)attachSide('tree-cubby',112,155,155);else if(n%5===0)attachSide('tree-plant',125,115,135);
 
   const badgeKey=spec.timed?'badge-timed':spec.difficulty==='easy'?'badge-easy':spec.difficulty==='medium'?'badge-medium':spec.difficulty==='hard'?'badge-hard':'badge-extreme';
   const badge=this.add.container(x,-58),skin=imageContain(this.add.image(0,0,badgeKey),245,104),number=label(this,0,-2,String(n),38,'#4b3149',0);badge.add([skin,number]);
   if(n===this.current&&!done){const ring=imageContain(this.add.image(0,0,'badge-current'),270,116).setAlpha(.9);badge.addAt(ring,0);if(!SaveService.data.settings.reducedMotion)this.tweens.add({targets:ring,alpha:.55,duration:900,yoyo:true,repeat:-1,ease:'Sine.InOut'});}
   press(this,badge,270,122,()=>{if(this.input.activePointer.y>155&&this.input.activePointer.y<1690)this.events.emit('play-level',n);});add(badge);
-
   if(done){const stars=progress.bestErrors===0?3:progress.bestErrors===1?2:1;add(imageContain(this.add.image(x,16,`stars-${stars}`),190,70));}
-
-  if(n===this.current&&!this.decorating){
-   const catX=x<540?side:side;
-   const ambient=addAmbientCat(this,n%2===0?'moka':'nimbus',catX,98,145,n%3===0?'sleep':'idle',14);
-   if(ambient)add(ambient);
-  }
+  if(n===this.current&&!this.decorating){const ambient=addAmbientCat(this,n%2===0?'moka':'nimbus',side,98,145,n%3===0?'sleep':'idle',14);if(ambient)add(ambient);}
   return row;
  }
 }
