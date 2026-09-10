@@ -59,7 +59,7 @@ export class GameScene extends Phaser.Scene {
   const status=label(this,540,footerY-128,'',25);const hintQuota=this.add.graphics();
   let previousErrors=board.errors;
   const setHeart=()=>heart.setTexture(board.errors<=0?'heart-full':board.errors===1?'heart-crack-1':board.errors===2?'heart-crack-2':'heart-broken');
-  const drawHintQuota=()=>{hintQuota.clear();for(let i=0;i<MAX_HINTS_PER_ATTEMPT;i++){const used=i<SaveService.data.attemptPurchases;hintQuota.fillStyle(used?0xc3b5bd:0x5a4a62,used?.55:1).fillCircle(525+i*30,footerY+55,8);}};
+  const drawHintQuota=()=>{hintQuota.clear();for(let i=0;i<MAX_HINTS_PER_ATTEMPT;i++){const used=i<SaveService.data.attemptPurchases;hintQuota.fillStyle(used?0xc3b5bd:0x5a4a62,used?0.55:1).fillCircle(525+i*30,footerY+55,8);}};
   const hintLabel=()=>SaveService.data.attemptPurchases>=MAX_HINTS_PER_ATTEMPT?'Indices épuisés':'Indice';
   const openHint=()=>{if(this.won||SaveService.data.attemptPurchases>=MAX_HINTS_PER_ATTEMPT)return;const found=humanHint(board.grid,level.constraints,1);this.scene.pause();this.scene.launch('Hint',{step:found,levelId:level.id,onPurchased:()=>{markStarted();SaveService.trackHint(level.id);SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);},onRead:()=>{const key=found?found.position.join(','):'';if(key&&!usedHints.has(key)){usedHints.add(key);this.hints++;SaveService.remember(level.id,board.grid,board.errors,this.hints,remaining,started,false,[...usedHints]);}},apply:()=>{if(this.won||!found)return;board.reveal(found.position,found.value);AudioService.play('hint');}});};
   const hint=artButton(300,footerY,390,hintLabel(),openHint,true);imageContain(this.add.image(150,footerY,'ui-hint'),56,56).setDepth(5);
