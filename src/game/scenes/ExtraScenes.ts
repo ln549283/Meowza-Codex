@@ -7,35 +7,45 @@ import { C } from '../theme';
 export class LostScene extends Phaser.Scene {
  constructor(){super('Lost');}
  create({reason='errors'}:{reason?:string}={}){
-  cozyBackground(this);this.add.circle(540,760,310,0xf6dde5,.7);title(this,'Chat alors…',355,80);
-  const nimbus=this.add.sprite(420,820,'nimbus-sad',0).setOrigin(.5,.85).setDisplaySize(300,300);nimbus.play('anim-nimbus-sad');
-  const moka=this.add.sprite(665,825,'moka-sad',0).setOrigin(.5,.85).setDisplaySize(300,300);moka.play('anim-moka-sad');
-  label(this,540,1110,reason==='time'?'Le temps est écoulé. On réessaie ?':'Trois erreurs. Une nouvelle tentative ?',36);
-  label(this,540,1210,'Nouvelle tentative : cœur, chrono et indices repartent de zéro.',28);
-  button(this,540,1430,720,'Recommencer',()=>{SaveService.restartAttempt();this.scene.start('Game');},C.pink);
-  if(GameRegistry.selected?.timed&&(SaveService.data.failures[GameRegistry.selected.id]??0)>=3)button(this,540,1790,720,'Réessayer · temps +50 % offert',()=>{const l=GameRegistry.selected!;SaveService.restartAttempt();SaveService.remember(l.id,l.initial,0,0,(l.timeLimit??360)*1.5,false);this.scene.start('Game');},C.orange);
-  button(this,540,1610,720,'Retour à l’arbre',()=>this.scene.start('LevelSelect'),C.teal);
+  cozyBackground(this);
+  panel(this,540,1000,900,1180);
+  title(this,'Chat alors…',410,72);
+  imageContain(this.add.image(540,760,'duo-retry'),650,560);
+  label(this,540,1060,reason==='time'?'Le temps est écoulé.':'Trois erreurs mettent fin à cette tentative.',35);
+  label(this,540,1160,'Tu peux recommencer gratuitement.\nLa grille, le cœur, le chrono et les indices repartent de zéro.',27);
+  button(this,540,1390,690,'Recommencer',()=>{SaveService.restartAttempt();this.scene.start('Game');},C.teal);
+  button(this,540,1550,690,'Retour à l’arbre',()=>this.scene.start('LevelSelect'),C.orange);
  }
 }
 
 export class ShopScene extends Phaser.Scene {
  constructor(){super('Shop');}
  create(){
-  cozyBackground(this);backButton(this,()=>this.scene.start('LevelSelect'));title(this,'Boutique',300,60);
-  this.add.circle(540,560,150,0xffead4,.75);imageContain(this.add.image(540,560,'hub-shop'),190,190);
-  panel(this,540,1110,920,880);label(this,540,790,'Cosmétiques pour ton arbre\net tes chats',38);label(this,540,930,`${SaveService.data.kibble} croquettes`,38);
-  label(this,540,1110,'Le catalogue arrive avec les diamants.\nIci, pas de hasard : tu choisis ce que tu achètes.',31);
-  button(this,540,1420,650,'Personnaliser mon arbre',()=>this.scene.start('LevelSelect',{decorating:true}),C.orange);button(this,540,1580,650,'Retour à mon arbre',()=>this.scene.start('LevelSelect'),C.teal);
+  cozyBackground(this);backButton(this,()=>this.scene.start('LevelSelect'));title(this,'Boutique',145,50);
+  label(this,540,245,'De nouveaux compagnons',31);
+  const offers=[
+   {name:'Domino',key:'collection-domino',currency:'Croquettes'},
+   {name:'Orion',key:'collection-orion',currency:'Diamants'},
+   {name:'Opale',key:'collection-opale',currency:'Diamants'}
+  ];
+  offers.forEach((offer,i)=>{const y=500+i*330;panel(this,540,y,900,275);imageContain(this.add.image(285,y,offer.key),180,180);label(this,570,y-55,offer.name,36);label(this,570,y+5,offer.currency,25,'#775f68',22);button(this,700,y+80,330,'Découvrir',()=>{},C.teal);});
+  panel(this,540,1570,720,100);label(this,540,1570,'Chats  ·  Décors  ·  Diamants',26);
+  button(this,540,1745,650,'Retour à mon arbre',()=>this.scene.start('LevelSelect'),C.orange);
  }
 }
 
 export class MissionsScene extends Phaser.Scene {
  constructor(){super('Missions');}
  create(){
-  cozyBackground(this);backButton(this,()=>this.scene.start('LevelSelect'));title(this,'Missions',300,60);
-  this.add.circle(540,555,150,0xe2f2ee,.78);imageContain(this.add.image(540,555,'hub-missions'),190,190);
-  panel(this,540,1110,920,880);label(this,540,800,'Tes prochains objectifs',40);label(this,540,940,'Jouer · progresser · collectionner',32);
-  label(this,540,1120,'Les missions quotidiennes seront branchées\nsur tes actions de jeu et récompenseront\ndes diamants à collectionner.',31);
-  button(this,540,1540,650,'Retour à mon arbre',()=>this.scene.start('LevelSelect'),C.teal);
+  cozyBackground(this);backButton(this,()=>this.scene.start('LevelSelect'));title(this,'Missions du jour',145,48);
+  imageContain(this.add.image(540,300,'hub-missions'),120,120);label(this,540,410,'Trois rendez-vous avec tes chats',29);
+  const missions=[
+   {title:'Terminer des grilles',progress:'2 / 3',done:false},
+   {title:'Réussir sans erreur',progress:'1 / 1',done:true},
+   {title:'Jouer le Défi du jour',progress:'0 / 1',done:false}
+  ];
+  missions.forEach((m,i)=>{const y=650+i*300;panel(this,540,y,920,235);label(this,320,y-45,m.title,31);label(this,250,y+35,m.progress,27,'#775f68',22);imageContain(this.add.image(650,y+20,'hub-diamond'),70,70);button(this,820,y+25,240,m.done?'Recevoir':'Voir',()=>{},m.done?C.teal:C.orange);});
+  label(this,540,1650,'De nouvelles missions chaque jour',23,'#775f68',20);
+  button(this,540,1775,650,'Retour à mon arbre',()=>this.scene.start('LevelSelect'),C.orange);
  }
 }
