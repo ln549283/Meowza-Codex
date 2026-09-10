@@ -1,9 +1,0 @@
-{
-  "version": "1.1",
-  "runtime": {
-    "tree-bg": "backgrounds/cat-tree.webp",
-    "grey-cat": "cats/nimbus.webp",
-    "orange-cat": "cats/moka.webp"
-  },
-  "notes": "Only these three raster assets are loaded. UI, grid, relation markers, platforms and cloud masks are Phaser objects. Older PNG assets are retained but not loaded."
-}
