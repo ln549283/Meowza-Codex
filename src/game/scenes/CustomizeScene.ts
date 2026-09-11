@@ -45,7 +45,7 @@ export class CustomizeScene extends Phaser.Scene{
    const owned=key==='cats'?(isActual?catSlots[i]!.owned:false):(isActual?SaveService.data.ownedCosmetics.includes(regular[i]!.id):false);
    const selected=isActual&&owned&&i===this.selected;
    const equipped=key!=='cats'&&isActual&&SaveService.data.equipped[key]===regular[i]!.id;
-   const bg=this.add.rectangle(x,y,cell,cell,owned?0xfff3e7:0x565353,1).setStrokeStyle(selected?7:2,selected?C.teal:0xe7d5c7,1);
+   this.add.rectangle(x,y,cell,cell,owned?0xfff3e7:0x565353,1).setStrokeStyle(selected?7:2,selected?C.teal:0xe7d5c7,1);
    if(owned&&isActual){
     if(key==='background'){
      const item=regular[i]!,texture=item.id==='night'?'background-night':item.id==='mint'?'background-serre':'room-background';
@@ -68,7 +68,7 @@ export class CustomizeScene extends Phaser.Scene{
   const detailY=1690;this.add.rectangle(540,detailY,1032,310,0xfff1e6,1).setStrokeStyle(2,0xe7d5c7,1);
   if(key==='cats'){
    const cat=catSlots[this.selected];
-   if(cat?.owned){imageContain(this.add.image(150,detailY,cat.texture),150,150);label(this,280,detailY-34,cat.name,31,C.ink,20).setOrigin(0,.5);label(this,280,detailY+22,cat.description,22,'#78647d',18).setOrigin(0,.5);label(this,845,detailY,'Disponible',25,'#ffffff',18);this.add.rectangle(845,detailY,270,96,C.teal,.72).setDepth(-1);}
+   if(cat?.owned){imageContain(this.add.image(150,detailY,cat.texture),150,150);label(this,280,detailY-34,cat.name,31,C.ink,20).setOrigin(0,.5);label(this,280,detailY+22,cat.description,22,'#78647d',18).setOrigin(0,.5);this.add.rectangle(845,detailY,270,96,C.teal,.72);label(this,845,detailY,'Disponible',25,'#ffffff',18);}
    else{label(this,540,detailY,'Continue à jouer pour découvrir de nouveaux compagnons.',27,'#78647d',20).setWordWrapWidth(760);}
   }else{
    const item=regular[this.selected],owned=item&&SaveService.data.ownedCosmetics.includes(item.id);
