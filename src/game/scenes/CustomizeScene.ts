@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { cosmetics,type Slot } from '../../core/cosmetics';
-import { collectionCats,habitatMilestones,habitatLevel } from '../../core/cats';
+import { collectionCats,habitatMilestones,habitatLevel,habitatStyleForLevel } from '../../core/cats';
 import { SaveService } from '../../services/SaveService';
 import { imageContain,label,press } from '../ui';
 import { C } from '../theme';
@@ -14,16 +14,16 @@ const tabs:{key:TabKey;label:string}[]=[
 ];
 
 export class CustomizeScene extends Phaser.Scene{
- private tab=0;private selected=0;
+ private tab=0;private selected=0;private targetLevel:number|undefined;
  constructor(){super('Customize');}
- init(data:{tab?:number;selected?:number}={}){this.tab=Phaser.Math.Clamp(data.tab??0,0,tabs.length-1);this.selected=Math.max(0,data.selected??0);}
+ init(data:{tab?:number;selected?:number;targetLevel?:number}={}){this.tab=Phaser.Math.Clamp(data.tab??0,0,tabs.length-1);this.selected=Math.max(0,data.selected??0);this.targetLevel=data.targetLevel;}
  create(){
   this.cameras.main.setBackgroundColor(0xfff7ef);
   const back=this.add.container(72,86).setDepth(20),backSkin=this.add.image(0,0,'button-square').setDisplaySize(96,96),backIcon=imageContain(this.add.image(0,0,'ui-back'),46,46);back.add([backSkin,backIcon]);press(this,back,100,100,()=>this.scene.start('LevelSelect'));
   label(this,540,76,'Ma collection',58,C.ink,24);label(this,540,140,'Personnalise ton arbre',28,'#78647d',20);
 
   const tabY=252,tabH=118,tabW=270;
-  tabs.forEach((tab,i)=>{const active=i===this.tab,c=this.add.container(i*tabW+tabW/2,tabY),skin=this.add.image(0,0,active?'button-primary':'button-secondary').setDisplaySize(tabW+4,tabH),txt=label(this,0,0,tab.label,30,active?'#ffffff':C.ink,20);c.add([skin,txt]);if(!active)c.setAlpha(.9);press(this,c,tabW,tabH,()=>this.scene.restart({tab:i,selected:0}));});
+  tabs.forEach((tab,i)=>{const active=i===this.tab,c=this.add.container(i*tabW+tabW/2,tabY),skin=this.add.image(0,0,active?'button-primary':'button-secondary').setDisplaySize(tabW+4,tabH),txt=label(this,0,0,tab.label,30,active?'#ffffff':C.ink,20);c.add([skin,txt]);if(!active)c.setAlpha(.9);press(this,c,tabW,tabH,()=>this.scene.restart({tab:i,selected:0,targetLevel:i===3?this.targetLevel:undefined}));});
 
   const key=tabs[this.tab]!.key,gridTop=342,gridX=20,cell=(1080-gridX*2)/4,totalSlots=16;
   const regular=key==='cats'?[]:cosmetics.filter(item=>item.slot===key),count=key==='cats'?collectionCats.length:regular.length;
@@ -38,18 +38,22 @@ export class CustomizeScene extends Phaser.Scene{
     else if(key==='cushion'){const item=regular[i]!;imageContain(this.add.image(x,y,'tree-flower-cushion'),cell*.73,cell*.6).setTint(item.color);}
     else if(key==='wood'){const item=regular[i]!,texture=item.id==='birch'?'tree-cubby-cream':item.id==='walnut'?'tree-cubby':'tree-cubby-wood';imageContain(this.add.image(x,y,texture),cell*.72,cell*.72);}
     if(equipped||selected)imageContain(this.add.image(x+cell*.34,y-cell*.34,'ui-check'),48,48).setDepth(5);
-    const hit=this.add.container(x,y).setDepth(8);press(this,hit,cell,cell,()=>this.scene.restart({tab:this.tab,selected:i}));
+    const hit=this.add.container(x,y).setDepth(8);press(this,hit,cell,cell,()=>this.scene.restart({tab:this.tab,selected:i,targetLevel:this.targetLevel}));
    }else{imageContain(this.add.image(x,y-18,'ui-lock'),54,54).setAlpha(.66).setDepth(2);label(this,x,y+54,'???',25,'#ffffff',18).setDepth(3);}
    cellSkin.setDepth(-1);
   }
 
   const detailY=1680,detail=this.add.image(540,detailY,'puzzle-panel').setDisplaySize(1030,260).setAlpha(.98);detail.setDepth(-1);
   if(key==='cats'){
-   const cat=collectionCats[this.selected],owned=cat&&SaveService.data.ownedCats.includes(cat.id),assigned=cat?Object.entries(SaveService.data.refuges).find(([,id])=>id===cat.id):undefined,supports=habitatMilestones(SaveService.data.stats.levelsCompleted),freeLevel=Array.from({length:supports},(_,i)=>habitatLevel(i)).find(level=>!SaveService.data.refuges[String(level)]);
+   const cat=collectionCats[this.selected],owned=cat&&SaveService.data.ownedCats.includes(cat.id),assigned=cat?Object.entries(SaveService.data.refuges).find(([,id])=>id===cat.id):undefined,completed=SaveService.trailCompletedCount(),supports=habitatMilestones(completed),levels=Array.from({length:supports},(_,i)=>habitatLevel(i)),target=this.targetLevel&&levels.includes(this.targetLevel)?this.targetLevel:undefined,targetCat=target?SaveService.data.refuges[String(target)]:undefined,freeLevel=levels.find(level=>!SaveService.data.refuges[String(level)]),placementLevel=target??freeLevel;
    if(cat&&owned){
-    imageContain(this.add.image(150,detailY,cat.texture),150,150);label(this,280,detailY-34,cat.name,32,C.ink,20).setOrigin(0,.5);label(this,280,detailY+22,assigned?`Installé au support du niveau ${assigned[0]}`:supports?`${supports} support${supports>1?'s':''} débloqué${supports>1?'s':''}`:'Premier support au niveau 10',22,'#78647d',18).setOrigin(0,.5);
-    const canPlace=!!freeLevel,action=this.add.container(855,detailY),skin=this.add.image(0,0,assigned?'button-disabled':canPlace?'button-primary':'button-disabled').setDisplaySize(270,100),txt=label(this,0,0,assigned?'Retirer':canPlace?'Placer':'Aucune place',25,assigned||!canPlace?C.ink:'#ffffff',18);action.add([skin,txt]);press(this,action,270,100,()=>{if(assigned)SaveService.assignCat(Number(assigned[0]),null);else if(freeLevel)SaveService.assignCat(freeLevel,cat.id);this.scene.restart({tab:this.tab,selected:this.selected});});
-   }else{label(this,540,detailY-22,'Les compagnons restent secrets jusqu’à leur découverte.',27,'#78647d',20).setWordWrapWidth(760);label(this,540,detailY+38,'Tous les 10 niveaux, ton arbre gagne une nouvelle place pour accueillir un chat.',21,'#95869e',18).setWordWrapWidth(820);}
+    imageContain(this.add.image(150,detailY,cat.texture),150,150);label(this,280,detailY-42,cat.name,32,C.ink,20).setOrigin(0,.5);
+    if(target){const style=habitatStyleForLevel(target);label(this,280,detailY+6,`${style.name} · niveau ${target}`,22,'#78647d',18).setOrigin(0,.5);label(this,280,detailY+45,targetCat&&targetCat!==cat.id?'Remplacera le chat actuellement installé.':assigned?.[0]===String(target)?'Installé ici':'Choisis ce support pour ce chat.',19,'#95869e',16).setOrigin(0,.5);}
+    else label(this,280,detailY+22,assigned?`Installé au support du niveau ${assigned[0]}`:supports?`${supports} support${supports>1?'s':''} disponible${supports>1?'s':''}`:'Premier support au niveau 10',22,'#78647d',18).setOrigin(0,.5);
+    const sameTarget=!!target&&assigned?.[0]===String(target),canPlace=!!placementLevel,action=this.add.container(855,detailY),skin=this.add.image(0,0,sameTarget?'button-disabled':canPlace?'button-primary':'button-disabled').setDisplaySize(270,100),txt=label(this,0,0,sameTarget?'Retirer':target?'Installer ici':assigned?'Déplacer':'Placer',25,sameTarget||!canPlace?C.ink:'#ffffff',18);action.add([skin,txt]);
+    if(sameTarget)press(this,action,270,100,()=>{SaveService.assignCat(target!,null);this.scene.start('LevelSelect');});
+    else if(canPlace)press(this,action,270,100,()=>{SaveService.assignCat(placementLevel!,cat.id);this.scene.start('LevelSelect');});
+   }else{label(this,540,detailY-22,'Les compagnons restent secrets jusqu’à leur découverte.',27,'#78647d',20).setWordWrapWidth(760);label(this,540,detailY+38,target?`Ce support du niveau ${target} attend un chat débloqué.`:'Tous les 10 niveaux, ton arbre gagne une nouvelle place pour accueillir un chat.',21,'#95869e',18).setWordWrapWidth(820);}
   }else{
    const item=regular[this.selected],owned=item&&SaveService.data.ownedCosmetics.includes(item.id);
    if(item&&owned){
