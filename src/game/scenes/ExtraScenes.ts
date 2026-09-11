@@ -26,6 +26,14 @@ export class ShopScene extends Phaser.Scene {
 }
 
 type MissionTab='daily'|'global';
+type GlobalDef={id:string;title:string;icon:string;value:()=>number;thresholds:number[];collection?:boolean};
+const globalDefs:GlobalDef[]=[
+ {id:'climb',title:'Grimpe toujours plus haut',icon:'ui-play',value:()=>SaveService.data.stats.levelsCompleted,thresholds:[10,20,30,50,75,100,150,200,300,500]},
+ {id:'perfect',title:'Maître des étoiles',icon:'star-full',value:()=>Object.values(SaveService.data.progress).filter(p=>p.completed&&p.bestErrors===0).length,thresholds:[5,10,25,50,100,150,250]},
+ {id:'claw',title:'Coup de griffe',icon:'ui-clock',value:()=>Object.entries(SaveService.data.progress).filter(([id,p])=>p.completed&&SaveService.data.journeyLevels[id]?.timed).length,thresholds:[1,3,5,10,20,30,50,75,100]},
+ {id:'collection',title:'Collectionneur',icon:'hub-decorate',value:()=>SaveService.data.ownedCosmetics.length,thresholds:[3,5,10,15,20,30],collection:true},
+];
+
 export class MissionsScene extends Phaser.Scene {
  private tab:MissionTab='daily';
  constructor(){super('Missions');}
@@ -35,18 +43,17 @@ export class MissionsScene extends Phaser.Scene {
   const tabY=270,tabW=520;[{key:'daily' as const,name:'Missions du jour',skin:'button-primary'},{key:'global' as const,name:'Missions globales',skin:'tile-lilac'}].forEach((t,i)=>{const c=this.add.container(20+tabW/2+i*tabW,tabY),skin=this.add.image(0,0,this.tab===t.key?'button-primary':t.skin).setDisplaySize(tabW+4,118),txt=label(this,0,0,t.name,29,'#ffffff',20);c.add([skin,txt]);if(this.tab!==t.key)c.setAlpha(.78);press(this,c,tabW,118,()=>this.scene.restart({tab:t.key}));});
   if(this.tab==='daily')this.daily();else this.global();
  }
- private missionRow(y:number,icon:string,name:string,subtitle:string,current:number,target:number,reward:number,rewardKey='hub-diamond'){
-  panel(this,540,y,1000,230);imageContain(this.add.image(135,y,icon),100,100);label(this,230,y-54,name,29,C.ink,18).setOrigin(0,.5);label(this,230,y-8,subtitle,21,'#78647d',17).setOrigin(0,.5);const ratio=Phaser.Math.Clamp(current/target,0,1),track=this.add.image(430,y+65,'button-disabled').setDisplaySize(400,42),fill=this.add.image(230+200*ratio,y+65,'button-primary').setDisplaySize(Math.max(8,400*ratio),42);track.setAlpha(.7);fill.setOrigin(1,.5);label(this,430,y+65,`${Math.min(current,target)} / ${target}`,20,'#ffffff',16);imageContain(this.add.image(820,y-8,rewardKey),56,56);label(this,875,y-8,String(reward),27,C.ink,18).setOrigin(0,.5);const status=this.add.image(860,y+68,current>=target?'button-primary':'button-disabled').setDisplaySize(220,72);label(this,860,y+68,current>=target?'Terminé':'En cours',21,'#ffffff',16);status.setAlpha(current>=target?1:.9);
+ private missionRow(y:number,icon:string,name:string,subtitle:string,current:number,target:number,rewardText:string,ready:boolean,claimed:boolean,onClaim?:()=>void){
+  panel(this,540,y,1000,230);imageContain(this.add.image(135,y,icon),100,100);label(this,230,y-54,name,29,C.ink,18).setOrigin(0,.5);label(this,230,y-8,subtitle,21,'#78647d',17).setOrigin(0,.5);const ratio=Phaser.Math.Clamp(current/target,0,1),track=this.add.image(430,y+65,'button-disabled').setDisplaySize(400,42),fill=this.add.image(230+200*ratio,y+65,'button-primary').setDisplaySize(Math.max(8,400*ratio),42);track.setAlpha(.7);fill.setOrigin(1,.5);label(this,430,y+65,`${Math.min(current,target)} / ${target}`,20,'#ffffff',16);label(this,825,y-15,rewardText,23,C.ink,18).setOrigin(0,.5);const action=this.add.container(855,y+68),skin=this.add.image(0,0,ready&&!claimed?'button-primary':'button-disabled').setDisplaySize(240,72),txt=label(this,0,0,claimed?'Récupéré':ready?'Récupérer':'En cours',20,'#ffffff',16);action.add([skin,txt]);if(ready&&!claimed&&onClaim)press(this,action,240,72,onClaim);
  }
  private daily(){
-  imageContain(this.add.image(205,455,'hub-missions'),150,150);label(this,600,420,'3 missions aujourd’hui',34,C.ink,20);label(this,600,475,'Elles se renouvellent chaque jour.',23,'#78647d',18);
-  const completed=SaveService.data.stats.levelsCompleted,perfect=Object.values(SaveService.data.progress).filter(p=>p.completed&&p.bestErrors===0).length,hints=SaveService.data.stats.totalHints;
-  this.missionRow(720,'ui-play','Termine 3 niveaux','Avance dans ton arbre',completed%3,3,1);this.missionRow(980,'star-full','Réussis 2 niveaux parfaits','Aucune erreur',perfect%2,2,1);this.missionRow(1240,'ui-hint','Utilise 2 indices','Demande un coup de patte',hints%2,2,1);
-  const bonus=this.add.image(540,1580,'puzzle-panel').setDisplaySize(1000,230);imageContain(this.add.image(155,1580,'ui-gift'),120,120);label(this,310,1545,'Récompense du jour',31,C.ink,18).setOrigin(0,.5);label(this,310,1600,'Termine les 3 missions pour gagner le bonus.',22,'#78647d',18).setOrigin(0,.5);imageContain(this.add.image(855,1580,'hub-diamond'),64,64);label(this,910,1580,'3',30,C.ink,18);bonus.setDepth(-1);
+  const daily=SaveService.ensureDailyMissions();
+  daily.missions.forEach((m,i)=>this.missionRow(560+i*300,m.family==='challenge'?'ui-clock':m.family==='mastery'?'star-full':'ui-play',m.title,m.subtitle,m.progress,m.target,'◆ 1 diamant',m.progress>=m.target,m.claimed,()=>{if(SaveService.claimDaily(m.id))this.scene.restart({tab:'daily'});}));
+  const claimed=daily.missions.filter(m=>m.claimed).length;label(this,540,1510,`${claimed} / 3 récompenses récupérées`,25,'#78647d',18);imageContain(this.add.image(790,1510,'hub-diamond'),52,52);label(this,835,1510,String(SaveService.data.missions.diamonds),28,C.ink,18).setOrigin(0,.5);
  }
  private global(){
-  const completed=SaveService.data.stats.levelsCompleted,perfect=Object.values(SaveService.data.progress).filter(p=>p.completed&&p.bestErrors===0).length,timed=Object.entries(SaveService.data.progress).filter(([id,p])=>p.completed&&SaveService.data.journeyLevels[id]?.timed).length,collection=SaveService.data.ownedCosmetics.length;
-  this.missionRow(520,'ui-play','Grimpe plus haut !','Termine 50 niveaux',completed,50,50);this.missionRow(770,'star-full','Maître des étoiles','Réussis 100 niveaux parfaits',perfect,100,100);this.missionRow(1020,'ui-clock','Coup de griffe','Réussis 10 Coups de griffe',timed,10,75);this.missionRow(1270,'hub-decorate','Collectionneur','Découvre 10 objets',collection,10,30);this.missionRow(1520,'ui-medal','Légende de l’arbre','Termine 200 niveaux',completed,200,200);
-  label(this,540,1780,'Les missions globales restent actives jusqu’à leur réussite.',23,'#78647d',18);
+  const maxCollection=cosmetics.length;
+  globalDefs.forEach((def,i)=>{const value=def.value(),claimed=SaveService.data.missions.globalClaimed[def.id]??0,thresholds=def.collection?[...def.thresholds.filter(n=>n<maxCollection),maxCollection]:def.thresholds,next=thresholds.find(n=>n>claimed),y=500+i*310;if(!next){this.missionRow(y,def.icon,def.title,'Tous les paliers sont terminés',value,Math.max(1,thresholds.at(-1)??1),'✓ Terminé',true,true);return;}const milestoneIndex=thresholds.indexOf(next),diamonds=(milestoneIndex+1)%4===0?2:0,kibble=50+milestoneIndex*25,rewardText=diamonds?`${kibble} croq. + ${diamonds} ◆`:`${kibble} croquettes`;this.missionRow(y,def.icon,def.title,def.collection?`Découvre ${next} objets`:`Atteins le palier ${next}`,value,next,rewardText,value>=next,false,()=>{if(SaveService.claimGlobal(def.id,next,kibble,diamonds))this.scene.restart({tab:'global'});});});
+  imageContain(this.add.image(790,1745,'hub-diamond'),52,52);label(this,835,1745,String(SaveService.data.missions.diamonds),28,C.ink,18).setOrigin(0,.5);
  }
 }
