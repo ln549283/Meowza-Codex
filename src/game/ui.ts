@@ -28,7 +28,7 @@ export function press(scene:Phaser.Scene,c:Phaser.GameObjects.Container,w:number
 export function button(scene:Phaser.Scene,x:number,y:number,w:number,text:string,onClick:()=>void,color=C.teal){
  const primary=color===C.teal||color===C.pink;
  const c=scene.add.container(x,y),skin=scene.add.image(0,0,primary?'button-primary':'button-secondary').setDisplaySize(w,116);
- c.add([skin,label(scene,0,-1,text,32,primary?'#24445a':C.ink)]);
+ c.add([skin,label(scene,0,-1,text,32,'#ffffff')]);
  return press(scene,c,w,116,onClick);
 }
 
