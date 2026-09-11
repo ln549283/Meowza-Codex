@@ -1,5 +1,6 @@
 import { cosmetics,starterCosmetics,unlockAt } from '../core/cosmetics';
 import { collectionCats,habitatMilestones } from '../core/cats';
+import { journeyId,nextSummit } from '../core/journey';
 import { STARTING_KIBBLE,rewardFor,hintCost,MAX_HINTS_PER_ATTEMPT } from '../core/economy';
 import type { HumanStep } from '../core/humanSolver';
 import type { Difficulty } from '../core/model';
@@ -77,6 +78,16 @@ export class SaveServiceImpl {
   claimGlobal(id:string,threshold:number,kibble:number,diamonds=0){const claimed=this.data.missions.globalClaimed[id]??0;if(threshold<=claimed)return false;this.data.missions.globalClaimed[id]=threshold;this.data.kibble+=kibble;this.data.missions.diamonds+=diamonds;void this.persist();return true;}
   assignCat(level:number,catId:string|null){if(level%10!==0||level>this.trailCompletedCount())return false;if(catId===null){delete this.data.refuges[String(level)];void this.persist();return true;}if(!this.data.ownedCats.includes(catId))return false;for(const[key,id]of Object.entries(this.data.refuges))if(id===catId&&key!==String(level))delete this.data.refuges[key];this.data.refuges[String(level)]=catId;void this.persist();return true;}
   private updateDailyOnWin(level:Level,errors:number,hints:number){const d=this.ensureDailyMissions();d.perfectStreak=errors===0?d.perfectStreak+1:0;for(const m of d.missions){if(m.progress>=m.target)continue;let ok=false;switch(m.metric){case'complete':ok=true;break;case'max_one_error':ok=errors<=1;break;case'no_hint':ok=hints===0;break;case'medium_plus':ok=level.difficulty!=='easy';break;case'perfect':ok=errors===0;break;case'perfect_streak':m.progress=Math.max(m.progress,Math.min(m.target,d.perfectStreak));continue;case'clean':ok=errors===0&&hints===0;break;case'error_budget':if(errors<=2-m.progress){ok=true;}break;case'timed':ok=!!level.timed;break;case'hard_plus':ok=level.difficulty==='hard'||level.difficulty==='extreme';break;case'extreme_no_hint':ok=level.difficulty==='extreme'&&hints===0;break;case'hard_extreme_perfect':ok=(level.difficulty==='hard'||level.difficulty==='extreme')&&errors===0;break;case'timed_perfect':ok=!!level.timed&&errors===0;break;}if(ok)m.progress=Math.min(m.target,m.progress+1);}}
+
+  addTestKibble(amount=1000){this.data.kibble+=Math.max(0,Math.floor(amount));void this.persist();}
+  addTestDiamonds(amount=500){this.data.missions.diamonds+=Math.max(0,Math.floor(amount));void this.persist();}
+  async skipTestLevels(count=10){
+   const before=this.trailCompletedCount(),start=nextSummit(this.data.progress),safeCount=Math.max(0,Math.floor(count));let added=0,n=start;
+   while(added<safeCount){const id=journeyId(n);if(!this.data.progress[id]?.completed){this.data.progress[id]={completed:true,bestErrors:0,bestHints:0};added++;}n++;}
+   this.data.stats.levelsCompleted+=added;const after=this.trailCompletedCount();
+   for(let cleared=before+1;cleared<=after;cleared++){if(cleared%10!==0)continue;const unlock=unlockAt(cleared,this.data.ownedCosmetics,this.data.cosmeticSeed^Math.imul(cleared,2654435761));if(unlock&&!this.data.ownedCosmetics.includes(unlock))this.data.ownedCosmetics.push(unlock);}
+   this.data.session=null;this.data.attemptPurchases=0;this.data.purchasedHints={};await this.persist();return added;
+  }
 
   restartAttempt(){this.data.session=null;this.data.attemptPurchases=0;this.data.purchasedHints={};void this.persist();}
   async newGame(){const settings={...this.data.settings};this.data=defaults();this.data.settings=settings;await this.persist();}
