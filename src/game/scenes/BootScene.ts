@@ -1,2 +1,13 @@
-import Phaser from 'phaser';import { SaveService } from '../../services/SaveService';import { C } from '../theme';
-export class BootScene extends Phaser.Scene{constructor(){super('Boot')}create(){this.cameras.main.setBackgroundColor(C.cream);const load=SaveService.load().catch(()=>undefined);void Promise.race([load,new Promise(resolve=>setTimeout(resolve,2500))]).then(()=>this.scene.start('Preload'));}}
+import Phaser from 'phaser';
+import { SaveService } from '../../services/SaveService';
+import { C } from '../theme';
+
+export class BootScene extends Phaser.Scene{
+ constructor(){super('Boot');}
+ preload(){this.load.image('meowza-logo','assets/branding/logo.png');}
+ create(){
+  this.cameras.main.setBackgroundColor(C.cream);
+  const load=SaveService.load().catch(()=>undefined);
+  void Promise.race([load,new Promise(resolve=>setTimeout(resolve,2500))]).then(()=>this.scene.start('Preload'));
+ }
+}
