@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { journeyId,journeySpec,nextSummit } from '../../core/journey';
 import { treeY,treeFocus,treeLimit,visibleTreeLevels,TREE_STEP } from '../../core/treeLayout';
-import { catById } from '../../core/cats';
+import { catById,collectionCats,habitatStyleForLevel } from '../../core/cats';
 import { loadSummit } from '../../services/JourneyService';
 import { SaveService } from '../../services/SaveService';
 import { GameRegistry } from '../registry';
@@ -33,9 +33,13 @@ export class LevelSelectScene extends Phaser.Scene {
   const side=x<540?790:290,sideBeamMid=(540+side)/2,sideBeamWidth=Math.abs(side-540)+70;
   const attachSide=(key:string,y:number,w:number,h:number,alpha=1)=>{add(imageContain(this.add.image(sideBeamMid,y,'tree-hammock-bar'),sideBeamWidth,54).setAlpha(alpha));add(imageContain(this.add.image(540,y,'tree-junction-t'),82,82).setAlpha(alpha));add(imageContain(this.add.image(side,y,'tree-junction-round'),64,64).setAlpha(alpha));return add(imageContain(this.add.image(side,y+18,key),w,h).setAlpha(alpha));};
   if(n%10===0){
-   const unlocked=SaveService.data.stats.levelsCompleted>=n,slot=(n/10-1)%4,habitat=[{key:'tree-hammock',w:220,h:155},{key:'tree-cubby',w:175,h:175},{key:'tree-support-cream',w:235,h:120},{key:'tree-flower-cushion',w:180,h:145}][slot]!;attachSide(habitat.key,132,habitat.w,habitat.h,unlocked?1:.42);
-   if(unlocked){const catId=SaveService.data.refuges[String(n)],cat=catId?catById(catId):undefined;if(cat) add(imageContain(this.add.image(side,120,cat.texture),150,150).setDepth(4));else{const plus=this.add.image(side,118,'ui-circle').setDisplaySize(78,78).setAlpha(.72);add(plus);add(label(this,side,118,'+',42,C.ink,18));}}
-   else add(imageContain(this.add.image(side,120,'ui-lock'),62,62).setAlpha(.8).setDepth(5));
+   const unlocked=SaveService.trailCompletedCount()>=n,habitat=habitatStyleForLevel(n),support=attachSide(habitat.texture,132,habitat.w,habitat.h,unlocked?1:.36),catId=SaveService.data.refuges[String(n)],cat=catId?catById(catId):undefined;
+   if(unlocked){
+    if(cat)add(imageContain(this.add.image(side,116+habitat.catY,cat.texture),150,150).setDepth(4));
+    else{const plus=this.add.image(side,112,'ui-circle').setDisplaySize(82,82).setAlpha(.78);add(plus);add(label(this,side,112,'+',42,C.ink,18));}
+    const hit=this.add.container(side,128).setDepth(8),selected=catId?Math.max(0,collectionCats.findIndex(c=>c.id===catId)):0;add(hit);press(this,hit,250,190,()=>{if(this.registry.get('mapDragging'))return;this.scene.start('Customize',{tab:3,selected,targetLevel:n});});
+    support.setAlpha(1);
+   }else add(imageContain(this.add.image(side,116,'ui-lock'),62,62).setAlpha(.82).setDepth(5));
   }else if(n%4===0)attachSide('tree-hammock',142,190,138);else if(n%3===0)attachSide('tree-cubby',128,145,145);else if(n%5===0)attachSide('tree-plant',138,105,125);
   const badgeKey=spec.timed?'badge-timed':spec.difficulty==='easy'?'badge-easy':spec.difficulty==='medium'?'badge-medium':spec.difficulty==='hard'?'badge-hard':'badge-extreme',badge=this.add.container(x,-58),skin=imageContain(this.add.image(0,0,badgeKey),245,104),number=label(this,0,-2,String(n),38,'#ffffff',0);badge.add([skin,number]);
   if(n===this.current&&!done){const ring=imageContain(this.add.image(0,0,'badge-current'),270,116).setAlpha(.9);badge.addAt(ring,0);if(!SaveService.data.settings.reducedMotion)this.tweens.add({targets:ring,alpha:.55,duration:900,yoyo:true,repeat:-1,ease:'Sine.InOut'});}press(this,badge,270,122,()=>{if(this.input.activePointer.y>165&&this.input.activePointer.y<1690)this.events.emit('play-level',n);});add(badge);
