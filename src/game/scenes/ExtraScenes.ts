@@ -40,13 +40,19 @@ export class MissionsScene extends Phaser.Scene {
  init(data:{tab?:MissionTab}={}){this.tab=data.tab??'daily';}
  create(){
   this.cameras.main.setBackgroundColor(0xfff7ef);backButton(this,()=>this.scene.start('LevelSelect'));title(this,'Missions',90,58);label(this,540,150,'Relève des défis et fais grandir ta collection',26,'#78647d',18);
-  const tabY=270,tabW=520;[{key:'daily' as const,name:'Missions du jour',skin:'button-primary'},{key:'global' as const,name:'Missions globales',skin:'tile-lilac'}].forEach((t,i)=>{const active=this.tab===t.key,c=this.add.container(20+tabW/2+i*tabW,tabY),skin=this.add.image(0,0,active?'button-primary':t.skin).setDisplaySize(tabW+4,118),txt=label(this,0,0,t.name,29,active?'#ffffff':C.ink,20);c.add([skin,txt]);if(!active)c.setAlpha(.78);press(this,c,tabW,118,()=>this.scene.restart({tab:t.key}));});
+  const tabY=270,tabW=478,gap=24,startX=50;
+  ([{key:'daily' as const,name:'Missions du jour'},{key:'global' as const,name:'Missions globales'}]).forEach((t,i)=>{
+   const active=this.tab===t.key,x=startX+tabW/2+i*(tabW+gap),activeSkin=t.key==='daily'?'button-primary':'tile-lilac',skinKey=active?activeSkin:'button-secondary',c=this.add.container(x,tabY),skin=this.add.image(0,0,skinKey).setDisplaySize(tabW,112),txt=label(this,0,0,t.name,29,active&&t.key==='daily'?'#ffffff':C.ink,20);c.add([skin,txt]);if(!active)c.setAlpha(.88);press(this,c,tabW,112,()=>this.scene.restart({tab:t.key}));
+  });
   if(this.tab==='daily')this.daily();else this.global();
  }
  private missionRow(y:number,icon:string,name:string,subtitle:string,current:number,target:number,rewardText:string,ready:boolean,claimed:boolean,onClaim?:()=>void){
-  panel(this,540,y,1000,230);imageContain(this.add.image(135,y,icon),100,100);label(this,230,y-54,name,29,C.ink,18).setOrigin(0,.5);label(this,230,y-8,subtitle,21,'#78647d',17).setOrigin(0,.5);
-  const ratio=Phaser.Math.Clamp(current/target,0,1),barX=230,barY=y+65,barW=400,barH=42;const track=this.add.image(barX+barW/2,barY,'button-disabled').setDisplaySize(barW,barH).setAlpha(.7);if(ratio>0){const fillW=Math.max(12,barW*ratio);this.add.image(barX+fillW/2,barY,'button-primary').setDisplaySize(fillW,barH).setCrop(0,0,Math.max(1,Math.round(512*ratio)),128);}label(this,barX+barW/2,barY,`${Math.min(current,target)} / ${target}`,20,ratio>.55?'#ffffff':C.ink,16);
-  label(this,825,y-15,rewardText,23,C.ink,18).setOrigin(0,.5);const action=this.add.container(855,y+68),light=claimed||!ready,skin=this.add.image(0,0,ready&&!claimed?'button-primary':'button-disabled').setDisplaySize(240,72),txt=label(this,0,0,claimed?'Récupéré':ready?'Récupérer':'En cours',20,light?C.ink:'#ffffff',16);action.add([skin,txt]);if(ready&&!claimed&&onClaim)press(this,action,240,72,onClaim);
+  panel(this,540,y,980,224);imageContain(this.add.image(135,y,icon),96,96);label(this,230,y-52,name,29,C.ink,18).setOrigin(0,.5);label(this,230,y-8,subtitle,21,'#78647d',17).setOrigin(0,.5);
+  const ratio=Phaser.Math.Clamp(current/target,0,1),barX=230,barY=y+62,barW=400,barH=40,barCenter=barX+barW/2;
+  this.add.image(barCenter,barY,'button-disabled').setDisplaySize(barW,barH).setAlpha(.72);
+  if(ratio>0){const fill=this.add.image(barCenter,barY,'button-primary').setDisplaySize(barW,barH),maskShape=this.make.graphics({x:0,y:0,add:false});maskShape.fillStyle(0xffffff,1).fillRect(barX,barY-barH/2,barW*ratio,barH);fill.setMask(maskShape.createGeometryMask());}
+  label(this,barCenter,barY,`${Math.min(current,target)} / ${target}`,20,ratio>.56?'#ffffff':C.ink,16);
+  label(this,815,y-15,rewardText,22,C.ink,18).setOrigin(0,.5);const action=this.add.container(850,y+64),light=claimed||!ready,skin=this.add.image(0,0,ready&&!claimed?'button-primary':'button-disabled').setDisplaySize(230,70),txt=label(this,0,0,claimed?'Récupéré':ready?'Récupérer':'En cours',20,light?C.ink:'#ffffff',16);action.add([skin,txt]);if(ready&&!claimed&&onClaim)press(this,action,230,70,onClaim);
  }
  private daily(){
   const daily=SaveService.ensureDailyMissions();
@@ -54,6 +60,6 @@ export class MissionsScene extends Phaser.Scene {
  }
  private global(){
   const maxCollection=cosmetics.length;
-  globalDefs.forEach((def,i)=>{const value=def.value(),claimed=SaveService.data.missions.globalClaimed[def.id]??0,thresholds=def.collection?[...def.thresholds.filter(n=>n<maxCollection),maxCollection]:def.thresholds,next=thresholds.find(n=>n>claimed),y=500+i*310;if(!next){this.missionRow(y,def.icon,def.title,'Tous les paliers sont terminés',value,Math.max(1,thresholds.at(-1)??1),'✓ Terminé',true,true);return;}const milestoneIndex=thresholds.indexOf(next),diamonds=(milestoneIndex+1)%4===0?2:0,kibble=50+milestoneIndex*25,rewardText=diamonds?`${kibble} croq. + ${diamonds} ◆`:`${kibble} croquettes`;this.missionRow(y,def.icon,def.title,def.collection?`Découvre ${next} objets`:`Atteins le palier ${next}`,value,next,rewardText,value>=next,false,()=>{if(SaveService.claimGlobal(def.id,next,kibble,diamonds))this.scene.restart({tab:'global'});});});
+  globalDefs.forEach((def,i)=>{const value=def.value(),claimed=SaveService.data.missions.globalClaimed[def.id]??0,thresholds=def.collection?[...def.thresholds.filter(n=>n<maxCollection),maxCollection]:def.thresholds,next=thresholds.find(n=>n>claimed),y=500+i*300;if(!next){this.missionRow(y,def.icon,def.title,'Tous les paliers sont terminés',value,Math.max(1,thresholds.at(-1)??1),'✓ Terminé',true,true);return;}const milestoneIndex=thresholds.indexOf(next),diamonds=(milestoneIndex+1)%4===0?2:0,kibble=50+milestoneIndex*25,rewardText=diamonds?`${kibble} croq. + ${diamonds} ◆`:`${kibble} croquettes`;this.missionRow(y,def.icon,def.title,def.collection?`Découvre ${next} objets`:`Atteins le palier ${next}`,value,next,rewardText,value>=next,false,()=>{if(SaveService.claimGlobal(def.id,next,kibble,diamonds))this.scene.restart({tab:'global'});});});
  }
 }
