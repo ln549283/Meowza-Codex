@@ -11,6 +11,7 @@ import { BootScene } from './game/scenes/BootScene';
 import { PreloadScene } from './game/scenes/PreloadScene';
 import { HomeScene } from './game/scenes/HomeScene';
 import { LevelSelectScene } from './game/scenes/LevelSelectScene';
+import { CustomizeScene } from './game/scenes/CustomizeScene';
 import { GameScene } from './game/scenes/GameScene';
 import { RulesScene } from './game/scenes/RulesScene';
 import { SettingsScene } from './game/scenes/SettingsScene';
@@ -20,7 +21,7 @@ import { SaveService } from './services/SaveService';
 
 function start(){
  void Promise.all([document.fonts.load('700 32px Nunito'),document.fonts.load('800 32px Nunito')]).catch(()=>undefined);
- const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#fff6ee',transparent:false,antialias:true,pixelArt:false,roundPixels:true,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[BootScene,PreloadScene,HomeScene,LevelSelectScene,GameScene,RulesScene,SettingsScene,VictoryScene,LostScene,ShopScene,MissionsScene,ArchiveScene,HintScene],fps:{target:30,limit:30},render:{powerPreference:'low-power'}});
+ const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#fff6ee',transparent:false,antialias:true,pixelArt:false,roundPixels:true,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[BootScene,PreloadScene,HomeScene,LevelSelectScene,CustomizeScene,GameScene,RulesScene,SettingsScene,VictoryScene,LostScene,ShopScene,MissionsScene,ArchiveScene,HintScene],fps:{target:30,limit:30},render:{powerPreference:'low-power'}});
  const visibility=(active:boolean)=>{if(active){game.loop.wake();AudioService.resume();}else{game.loop.sleep();AudioService.suspend();void SaveService.persist();}};
  document.addEventListener('visibilitychange',()=>visibility(!document.hidden));
  void App.addListener('appStateChange',({isActive})=>visibility(isActive));
