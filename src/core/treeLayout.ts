@@ -1,4 +1,4 @@
-export const TREE_STEP=370;
+export const TREE_STEP=310;
 export const treeY=(level:number,offset:number)=>1080-(level-1)*TREE_STEP+offset;
 export const treeLimit=(current:number)=>Math.max(0,(current-1)*TREE_STEP+120);
 export const treeFocus=(current:number)=>Math.max(0,(current-1)*TREE_STEP);
