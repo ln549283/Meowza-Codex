@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { cosmetics,type Slot } from '../../core/cosmetics';
 import { collectionCats,habitatMilestones,habitatLevel,habitatStyleForLevel } from '../../core/cats';
 import { SaveService } from '../../services/SaveService';
-import { imageContain,label,press } from '../ui';
+import { backgroundTextureForId,imageContain,label,press } from '../ui';
 import { C } from '../theme';
 
 type TabKey=Slot|'cats';
@@ -34,7 +34,7 @@ export class CustomizeScene extends Phaser.Scene{
    const cellSkin=this.add.image(x,y,owned?'button-square':'tile-lilac').setDisplaySize(cell+2,cell+2).setAlpha(owned?1:.42);
    if(owned&&isActual){
     if(key==='cats')imageContain(this.add.image(x,y,collectionCats[i]!.texture),cell*.78,cell*.78);
-    else if(key==='background'){const item=regular[i]!,texture=item.id==='night'?'background-night':item.id==='mint'?'background-serre':'room-background';imageContain(this.add.image(x,y,texture),cell*.84,cell*.84);}
+    else if(key==='background'){const item=regular[i]!;imageContain(this.add.image(x,y,backgroundTextureForId(item.id)),cell*.84,cell*.84);}
     else if(key==='cushion'){const item=regular[i]!;imageContain(this.add.image(x,y,'tree-flower-cushion'),cell*.73,cell*.6).setTint(item.color);}
     else if(key==='wood'){const item=regular[i]!,texture=item.id==='birch'?'tree-cubby-cream':item.id==='walnut'?'tree-cubby':'tree-cubby-wood';imageContain(this.add.image(x,y,texture),cell*.72,cell*.72);}
     if(equipped||selected)imageContain(this.add.image(x+cell*.34,y-cell*.34,'ui-check'),48,48).setDepth(5);
@@ -61,9 +61,9 @@ export class CustomizeScene extends Phaser.Scene{
   }else{
    const item=regular[this.selected],owned=item&&SaveService.data.ownedCosmetics.includes(item.id);
    if(item&&owned){
-    if(key==='background'){const texture=item.id==='night'?'background-night':item.id==='mint'?'background-serre':'room-background';imageContain(this.add.image(145,detailY,texture),125,125);}else if(key==='cushion'){imageContain(this.add.image(145,detailY,'tree-flower-cushion'),130,110).setTint(item.color);}else{const texture=item.id==='birch'?'tree-cubby-cream':item.id==='walnut'?'tree-cubby':'tree-cubby-wood';imageContain(this.add.image(145,detailY,texture),125,125);}
+    if(key==='background')imageContain(this.add.image(145,detailY,backgroundTextureForId(item.id)),125,125);else if(key==='cushion')imageContain(this.add.image(145,detailY,'tree-flower-cushion'),130,110).setTint(item.color);else{const texture=item.id==='birch'?'tree-cubby-cream':item.id==='walnut'?'tree-cubby':'tree-cubby-wood';imageContain(this.add.image(145,detailY,texture),125,125);}
     label(this,265,detailY-28,item.name,30,C.ink,20).setOrigin(0,.5);label(this,265,detailY+20,SaveService.data.equipped[key]===item.id?'Sélection actuelle':'Débloqué',20,'#78647d',17).setOrigin(0,.5);
-    const equipped=SaveService.data.equipped[key]===item.id,action=this.add.container(855,detailY),skin=this.add.image(0,0,equipped?'button-disabled':'button-primary').setDisplaySize(270,92),txt=label(this,0,0,equipped?'Équipé':'Équiper',25,equipped?C.ink:'#ffffff',18);action.add([skin,txt]);if(!equipped)press(this,action,270,92,()=>{SaveService.data.equipped[key]=item.id;void SaveService.persist();this.scene.restart({tab:this.tab,selected:this.selected});});
+    const equipped=SaveService.data.equipped[key]===item.id,action=this.add.container(855,detailY),skin=this.add.image(0,0,equipped?'button-disabled':'button-primary').setDisplaySize(270,92),txt=label(this,0,0,equipped?'Équipé':'Équiper',25,equipped?C.ink:'#ffffff',18);action.add([skin,txt]);if(!equipped)press(this,action,270,92,()=>{SaveService.data.equipped[key]=item.id;void SaveService.persist();this.scene.start('LevelSelect');});
    }else label(this,540,detailY,'Cet objet reste caché jusqu’à sa découverte.',24,'#78647d',18);
   }
  }
