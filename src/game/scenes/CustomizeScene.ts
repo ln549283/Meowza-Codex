@@ -47,7 +47,7 @@ export class CustomizeScene extends Phaser.Scene{
 
   const detailY=1695,detail=this.add.image(540,detailY,'puzzle-panel').setDisplaySize(1030,205).setAlpha(.98);detail.setDepth(-1);
   if(key==='cats'){
-   const cat=collectionCats[this.selected],owned=cat&&SaveService.data.ownedCats.includes(cat.id),assigned=cat?Object.entries(SaveService.data.refuges).find(([,id])=>id===cat.id):undefined,completed=SaveService.trailCompletedCount(),supports=habitatMilestones(completed),levels=Array.from({length:supports},(_,i)=>habitatLevel(i)),target=this.targetLevel&&levels.includes(this.targetLevel)?this.targetLevel:undefined,targetCat=target?SaveService.data.refuges[String(target)]:undefined,freeLevel=levels.find(level=>!SaveService.data.refuges[String(level)]),placementLevel=target??freeLevel;
+   const cat=collectionCats[this.selected],owned=cat&&SaveService.data.ownedCats.includes(cat.id),assigned=cat?Object.entries(SaveService.data.refuges).find(([,id])=>id===cat.id):undefined,completed=SaveService.trailCompletedCount(),supports=habitatMilestones(completed),levels=Array.from({length:supports},(_,i)=>habitatLevel(i)),target=this.targetLevel&&levels.includes(this.targetLevel)?this.targetLevel:undefined,freeLevel=levels.find(level=>!SaveService.data.refuges[String(level)]),placementLevel=target??freeLevel;
    if(cat&&owned){
     imageContain(this.add.image(150,detailY,cat.texture),128,128);label(this,280,detailY-30,cat.name,31,C.ink,20).setOrigin(0,.5);
     if(target){const style=habitatStyleForLevel(target);label(this,280,detailY+13,`${style.name} · niveau ${target}`,21,'#78647d',17).setOrigin(0,.5);}
