@@ -63,7 +63,7 @@ export class CustomizeScene extends Phaser.Scene{
    if(item&&owned){
     if(key==='background')imageContain(this.add.image(145,detailY,backgroundTextureForId(item.id)),112,112);else if(key==='cushion')imageContain(this.add.image(145,detailY,'tree-flower-cushion'),120,102).setTint(item.color);else{const texture=item.id==='birch'?'tree-cubby-cream':item.id==='walnut'?'tree-cubby':'tree-cubby-wood';imageContain(this.add.image(145,detailY,texture),112,112);}
     label(this,265,detailY-24,item.name,29,C.ink,20).setOrigin(0,.5);label(this,265,detailY+18,SaveService.data.equipped[key]===item.id?'Sélection actuelle':'Débloqué',20,'#78647d',17).setOrigin(0,.5);
-    const equipped=SaveService.data.equipped[key]===item.id,action=this.add.container(855,detailY),skin=this.add.image(0,0,equipped?'button-disabled':'button-primary').setDisplaySize(270,86),txt=label(this,0,0,equipped?'Équipé':'Équiper',25,equipped?C.ink:'#ffffff',18);action.add([skin,txt]);if(!equipped)press(this,action,270,86,()=>{SaveService.data.equipped[key]=item.id;void SaveService.persist();this.scene.start('LevelSelect');});
+    const equipped=SaveService.data.equipped[key]===item.id,action=this.add.container(855,detailY),skin=this.add.image(0,0,equipped?'button-disabled':'button-primary').setDisplaySize(270,86),txt=label(this,0,0,equipped?'Équipé':'Équiper',25,equipped?C.ink:'#ffffff',18);action.add([skin,txt]);if(!equipped)press(this,action,270,86,()=>{SaveService.data.equipped[key]=item.id;void SaveService.persist().then(()=>this.scene.start('LevelSelect'));});
    }else label(this,540,detailY,'Cet objet reste caché jusqu’à sa découverte.',23,'#78647d',18);
   }
  }
