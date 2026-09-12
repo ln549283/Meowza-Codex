@@ -7,7 +7,7 @@ import { SaveService } from '../services/SaveService';
 export function label(scene:Phaser.Scene,x:number,y:number,text:string,size=32,color=C.ink,minimum=22){return scene.add.text(x,y,text,{fontFamily:FONT,fontSize:`${Math.max(minimum,size)}px`,fontStyle:'900',color,align:'center',wordWrap:{width:980},lineSpacing:5,stroke:'#fff7ee',strokeThickness:size>=42?2:0}).setOrigin(.5);}
 
 export function backgroundTextureForId(id:string){
- const map:Record<string,string>={cream:'room-background',mint:'background-serre',night:'background-night',forest:'background-forest',blossom:'background-blossom',autumn:'background-autumn',winter:'background-winter',beach:'background-beach',garden:'background-garden'};
+ const map:Record<string,string>={cream:'room-background',mint:'background-serre',night:'background-night',forest:'background-forest',blossom:'background-blossom',autumn:'background-autumn',winter:'background-winter',beach:'background-beach',garden:'background-garden',sunset:'background-sunset',rain:'background-rain','moon-garden':'background-moon-garden'};
  return map[id]??'room-background';
 }
 export function equippedBackgroundKey(){const theme=cosmetics.find(c=>c.id===SaveService.data.equipped.background);return backgroundTextureForId(theme?.id??'cream');}
