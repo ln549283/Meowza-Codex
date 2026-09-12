@@ -26,13 +26,14 @@ export class CustomizeScene extends Phaser.Scene{
   tabs.forEach((tab,i)=>{const active=i===this.tab,c=this.add.container(i*tabW+tabW/2,tabY),skin=this.add.image(0,0,active?'button-primary':'button-secondary').setDisplaySize(tabW+4,tabH),txt=label(this,0,0,tab.label,29,active?'#ffffff':C.ink,20);c.add([skin,txt]);if(!active)c.setAlpha(.9);press(this,c,tabW,tabH,()=>this.scene.restart({tab:i,selected:0,targetLevel:i===3?this.targetLevel:undefined}));});
 
   const key=tabs[this.tab]!.key,gridTop=338,gridX=20,cell=(1080-gridX*2)/4;
-  const regular=key==='cats'?[]:cosmetics.filter(item=>item.slot===key),count=key==='cats'?collectionCats.length:regular.length,totalSlots=Math.max(12,Math.ceil(count/4)*4);
+  const regular=key==='cats'?[]:cosmetics.filter(item=>item.slot===key),count=key==='cats'?collectionCats.length:regular.length,totalSlots=Math.ceil(count/4)*4;
   this.selected=Math.min(this.selected,Math.max(0,count-1));
   for(let i=0;i<totalSlots;i++){
    const col=i%4,row=Math.floor(i/4),x=gridX+cell/2+col*cell,y=gridTop+cell/2+row*cell,isActual=i<count;
-   const owned=key==='cats'?(isActual?SaveService.data.ownedCats.includes(collectionCats[i]!.id):false):(isActual?SaveService.data.ownedCosmetics.includes(regular[i]!.id):false),selected=isActual&&owned&&i===this.selected,equipped=key!=='cats'&&isActual&&SaveService.data.equipped[key]===regular[i]!.id;
-   const cellSkin=this.add.image(x,y,owned?'button-square':'tile-lilac').setDisplaySize(cell+2,cell+2).setAlpha(owned?1:.28);
-   if(owned&&isActual){
+   if(!isActual)continue;
+   const owned=key==='cats'?SaveService.data.ownedCats.includes(collectionCats[i]!.id):SaveService.data.ownedCosmetics.includes(regular[i]!.id),selected=owned&&i===this.selected,equipped=key!=='cats'&&owned&&SaveService.data.equipped[key]===regular[i]!.id;
+   const cellSkin=this.add.image(x,y,owned?'button-square':'tile-lilac').setDisplaySize(cell+2,cell+2).setAlpha(owned?1:.26).setDepth(-1);
+   if(owned){
     if(key==='cats')imageContain(this.add.image(x,y,collectionCats[i]!.texture),cell*.78,cell*.78);
     else if(key==='background'){const item=regular[i]!;imageContain(this.add.image(x,y,backgroundTextureForId(item.id)),cell*.84,cell*.84);}
     else if(key==='cushion'){const item=regular[i]!;imageContain(this.add.image(x,y,'tree-flower-cushion'),cell*.73,cell*.6).setTint(item.color);}
@@ -40,9 +41,8 @@ export class CustomizeScene extends Phaser.Scene{
     if(equipped||selected)imageContain(this.add.image(x+cell*.34,y-cell*.34,'ui-check'),48,48).setDepth(5);
     const hit=this.add.container(x,y).setDepth(8);press(this,hit,cell,cell,()=>this.scene.restart({tab:this.tab,selected:i,targetLevel:this.targetLevel}));
    }else{
-    imageContain(this.add.image(x,y-4,'ui-lock'),28,28).setAlpha(.34).setDepth(2);label(this,x,y+34,'???',19,'#9c90a3',15).setAlpha(.68).setDepth(3);
+    imageContain(this.add.image(x,y-4,'ui-lock'),27,27).setAlpha(.3).setDepth(2);label(this,x,y+32,'???',18,'#9c90a3',15).setAlpha(.62).setDepth(3);
    }
-   cellSkin.setDepth(-1);
   }
 
   const detailY=1698,detail=this.add.image(540,detailY,'puzzle-panel').setDisplaySize(1030,180).setAlpha(.98);detail.setDepth(-1);
