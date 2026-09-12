@@ -4,7 +4,7 @@ import {generateJourneyLevel,journeySpec} from './journey';
 import {humanSolve} from './humanSolver';
 import {SaveServiceImpl} from '../services/SaveService';
 import {hintCost,rewardFor,STARTING_KIBBLE} from './economy';
-import {starterCosmetics,unlockAt} from './cosmetics';
+import {cosmetics,starterCosmetics,unlockAt} from './cosmetics';
 test('first hundred authored puzzles have bounded human proofs including every timed challenge',()=>{
  const counts:Record<string,number>={};
  for(let n=1;n<=100;n++){
@@ -35,7 +35,7 @@ test('onboarding progressively removes clues and introduces one concept at a tim
  assert.ok(levels[3]!.constraints.every(c=>c.type==='different'));
  assert.ok(levels[4]!.constraints.some(c=>c.type==='same')&&levels[4]!.constraints.some(c=>c.type==='different'));
 });
-test('cosmetics are earned only at milestones without duplicates',()=>{const owned=[...starterCosmetics];assert.equal(unlockAt(9,owned,1),null);for(let n=10;n<=60;n+=10){const id=unlockAt(n,owned,1234+n);assert.ok(id);assert.ok(!owned.includes(id));owned.push(id);}assert.equal(unlockAt(70,owned,1),null);});
+test('cosmetics are earned only at milestones without duplicates',()=>{const owned=[...starterCosmetics];assert.equal(unlockAt(9,owned,1),null);const remaining=cosmetics.length-starterCosmetics.length;for(let i=1;i<=remaining;i++){const n=i*10,id=unlockAt(n,owned,1234+n);assert.ok(id);assert.ok(!owned.includes(id));owned.push(id);}assert.equal(unlockAt((remaining+1)*10,owned,1),null);});
 test('timed reward, failed attempts and timer survive reload without charging a life',async()=>{
  let stored:string|null=null;const storage={get:async()=>({value:stored}),set:async({value}:{value:string})=>{stored=value;}};
  const s=new SaveServiceImpl(storage),l=generateJourneyLevel(33);assert.equal(l.timed,true);s.data.journeyLevels[l.id]=l;
