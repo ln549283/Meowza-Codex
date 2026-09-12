@@ -31,8 +31,9 @@ export class CustomizeScene extends Phaser.Scene{
   for(let i=0;i<totalSlots;i++){
    const col=i%4,row=Math.floor(i/4),x=gridX+cell/2+col*cell,y=gridTop+cell/2+row*cell,isActual=i<count;
    if(!isActual)continue;
-   const owned=key==='cats'?SaveService.data.ownedCats.includes(collectionCats[i]!.id):SaveService.data.ownedCosmetics.includes(regular[i]!.id),selected=owned&&i===this.selected,equipped=key!=='cats'&&owned&&SaveService.data.equipped[key]===regular[i]!.id;
-   const cellSkin=this.add.image(x,y,owned?'button-square':'tile-lilac').setDisplaySize(cell+2,cell+2).setAlpha(owned?1:.26).setDepth(-1);
+   const owned=key==='cats'?SaveService.data.ownedCats.includes(collectionCats[i]!.id):SaveService.data.ownedCosmetics.includes(regular[i]!.id),selected=owned&&i===this.selected;
+   const equipped=key==='cats'?false:owned&&SaveService.data.equipped[key]===regular[i]!.id;
+   this.add.image(x,y,owned?'button-square':'tile-lilac').setDisplaySize(cell+2,cell+2).setAlpha(owned?1:.26).setDepth(-1);
    if(owned){
     if(key==='cats')imageContain(this.add.image(x,y,collectionCats[i]!.texture),cell*.78,cell*.78);
     else if(key==='background'){const item=regular[i]!;imageContain(this.add.image(x,y,backgroundTextureForId(item.id)),cell*.84,cell*.84);}
