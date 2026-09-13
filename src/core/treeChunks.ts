@@ -15,7 +15,7 @@ const CHUNKS:TreeChunkSpec[]=[
  {id:'hammock-right',levels:[7,8,9],silhouette:'right',variant:0,decor:['tree-hammock-lilac']},
  {id:'milestone-10',levels:[10],silhouette:'wide',variant:2,decor:['tree-plant'],habitatSide:'right'},
  {id:'breather-right',levels:[11,12,13],silhouette:'right',variant:1,decor:['tree-hanging-plant']},
- {id:'branch-left-2',levels:[14,15,16],silhouette:'left',variant:2,decor:['tree-yarn','tree-plant']},
+ {id:'branch-left-2',levels:[14,15,16],silhouette:'left',variant:2,decor:['tree-yarn']},
  {id:'split',levels:[17,18,19],silhouette:'split',variant:0,decor:['tree-hammock-peach']},
  {id:'milestone-20',levels:[20],silhouette:'wide',variant:1,decor:['tree-hanging-plant'],habitatSide:'left'},
  {id:'outro-21',levels:[21],silhouette:'vertical',variant:2,decor:[]},
@@ -27,11 +27,11 @@ export function chunkSlot(level:number){
  const chunk=chunkForLevel(level);if(!chunk)return undefined;
  const i=chunk.levels.indexOf(level),count=chunk.levels.length;
  const slotsBySilhouette:Record<ChunkSilhouette,Array<{x:number;y:number}>>={
-  vertical:[{x:390,y:0},{x:690,y:14},{x:390,y:28},{x:690,y:42}],
-  left:[{x:300,y:0},{x:430,y:10},{x:285,y:22},{x:450,y:34}],
-  right:[{x:780,y:0},{x:650,y:10},{x:795,y:22},{x:630,y:34}],
-  wide:[{x:330,y:0},{x:750,y:0},{x:540,y:14},{x:540,y:28}],
-  split:[{x:315,y:0},{x:765,y:0},{x:540,y:16},{x:540,y:30}],
+  vertical:[{x:395,y:0},{x:685,y:6},{x:395,y:12},{x:685,y:18}],
+  left:[{x:300,y:0},{x:430,y:6},{x:300,y:12},{x:440,y:18}],
+  right:[{x:780,y:0},{x:650,y:6},{x:780,y:12},{x:640,y:18}],
+  wide:[{x:330,y:0},{x:750,y:0},{x:540,y:10},{x:540,y:18}],
+  split:[{x:320,y:0},{x:760,y:0},{x:540,y:10},{x:540,y:18}],
  };
  const slots=slotsBySilhouette[chunk.silhouette];
  return {...slots[Math.min(i,slots.length-1)]!,chunk,index:i,count};
