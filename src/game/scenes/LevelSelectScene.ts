@@ -59,7 +59,7 @@ export class LevelSelectScene extends Phaser.Scene {
    const deco=slot.chunk.decor[0];
    if(deco){
     const dx=c==='left'?760:c==='right'?320:c==='split'?820:slot.chunk.variant===1?330:750;
-    const dims=deco.includes('hammock')?[205,110]:deco==='tree-yarn'?[46,46]:[66,82];
+    const dims:[number,number]=deco.includes('hammock')?[205,110]:deco==='tree-yarn'?[46,46]:[66,82];
     add(imageContain(this.add.image(dx,160,deco),dims[0],dims[1]).setAlpha(.58));
    }
   }
