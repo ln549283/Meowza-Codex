@@ -34,54 +34,73 @@ export class LevelSelectScene extends Phaser.Scene {
   const row=this.add.container(0,0).setDepth(10),x=slot?.x??fallbackX,progress=SaveService.data.progress[journeyId(n)],done=!!progress?.completed,spec=journeySpec(n),add=<T extends Phaser.GameObjects.GameObject>(o:T)=>{row.add(o);return o;};
   const isSlice=!!slot,chunkFirst=isSlice&&slot.index===0;
   const silhouette=slot?.chunk.silhouette;
-  if(n>1){
-   const postScale=isSlice&&silhouette!=='vertical'?.74:1;
-   add(imageContain(this.add.image(540,TREE_STEP/2+16,'tree-post-long'),90*postScale,(TREE_STEP+52)*postScale));
-  }else{add(imageContain(this.add.image(540,116,'tree-post-short'),90,250));add(imageContain(this.add.image(540,218,'tree-base'),390,176));}
 
-  const supportY=isSlice?90:84;
-  const branchReach=Math.abs(540-x)+(isSlice?76:178);
-  const branchH=isSlice?44:62;
-  add(imageContain(this.add.image((540+x)/2,supportY,'tree-hammock-bar'),branchReach,branchH));
-  add(imageContain(this.add.image(540,supportY,'tree-junction-t'),isSlice?66:84,isSlice?66:84));
-  add(imageContain(this.add.image(x,supportY,'tree-junction-round'),isSlice?52:66,isSlice?52:66));
-  add(imageContain(this.add.image(x,supportY+14,x<540?'tree-support-cream':'tree-support-peach'),isSlice?286:382,isSlice?62:82));
+  const addPost=(px:number,py:number,w:number,h:number,key='tree-post-long',alpha=1)=>add(imageContain(this.add.image(px,py,key),w,h).setAlpha(alpha));
+  const addBeam=(x1:number,x2:number,y:number,h=42,alpha=1)=>add(imageContain(this.add.image((x1+x2)/2,y,'tree-hammock-bar'),Math.abs(x2-x1)+52,h).setAlpha(alpha));
+  const addPlatform=(px:number,y:number,left:boolean,w=286,alpha=1)=>add(imageContain(this.add.image(px,y,left?'tree-support-cream':'tree-support-peach'),w,62).setAlpha(alpha));
+
+  if(n===1){addPost(540,128,90,274,'tree-post-short');add(imageContain(this.add.image(540,228,'tree-base'),390,176));}
+  else if(!isSlice){addPost(540,TREE_STEP/2+12,90,TREE_STEP+58);}
+  else if(chunkFirst&&slot){
+   const c=slot.chunk.silhouette;
+   if(c==='vertical'){
+    addPost(540,TREE_STEP/2+24,82,TREE_STEP+96);
+   }else if(c==='left'){
+    addPost(570,TREE_STEP/2+20,78,TREE_STEP+62);
+    addBeam(570,300,118,44,.94);
+    addPlatform(305,132,true,250,.92);
+   }else if(c==='right'){
+    addPost(510,TREE_STEP/2+20,78,TREE_STEP+62);
+    addBeam(510,785,118,44,.94);
+    addPlatform(780,132,false,250,.92);
+   }else if(c==='wide'){
+    addPost(540,TREE_STEP/2+18,84,TREE_STEP+76);
+    addBeam(320,760,126,46,.94);
+    addPlatform(330,140,true,240,.9);addPlatform(750,140,false,240,.9);
+   }else if(c==='split'){
+    addPost(540,TREE_STEP/2+20,82,TREE_STEP+74);
+    addBeam(540,330,122,44,.92);addBeam(540,750,122,44,.92);
+    addPlatform(330,136,true,224,.88);addPlatform(750,136,false,224,.88);
+   }
+  }else if(isSlice){
+   // Les lignes secondaires du chunk n'ajoutent plus un poteau complet : juste un raccord léger.
+   addBeam(540,x,92,40,.9);
+  }
+
+  const supportY=isSlice?94:84;
+  addBeam(540,x,supportY,isSlice?40:62,isSlice?.92:1);
+  add(imageContain(this.add.image(x,supportY,'tree-junction-round'),isSlice?50:66,isSlice?50:66).setAlpha(isSlice?.86:1));
+  addPlatform(x,supportY+15,x<540,isSlice?270:382,isSlice?.94:1);
 
   if(isSlice&&chunkFirst&&slot){
    const c=slot.chunk.silhouette;
-   if(c==='split'){
-    add(imageContain(this.add.image(540,156,'tree-hammock-bar'),470,44).setAlpha(.78));
-    add(imageContain(this.add.image(344,156,'tree-support-cream'),205,50).setAlpha(.74));
-    add(imageContain(this.add.image(736,156,'tree-support-peach'),205,50).setAlpha(.74));
-   }else if(c==='wide'){
-    add(imageContain(this.add.image(540,154,'tree-hammock-bar'),430,44).setAlpha(.76));
-   }
    const deco=slot.chunk.decor[0];
    if(deco){
     const isHammock=deco.includes('hammock');
-    const dx=c==='left'?760:c==='right'?320:c==='split'?825:slot.chunk.variant===1?330:750;
-    const dy=isHammock?188:162;
-    const dims:[number,number]=isHammock?[180,92]:deco==='tree-yarn'?[42,42]:[60,74];
-    add(imageContain(this.add.image(dx,dy,deco),dims[0],dims[1]).setAlpha(isHammock?.62:.52));
+    const dx=c==='left'?770:c==='right'?310:c==='split'?840:slot.chunk.variant===1?310:770;
+    const dy=isHammock?214:174;
+    const dims:[number,number]=isHammock?[150,76]:deco==='tree-yarn'?[40,40]:[56,70];
+    // Décor placé hors de la zone plaque/étoiles, jamais devant le niveau.
+    add(imageContain(this.add.image(dx,dy,deco),dims[0],dims[1]).setAlpha(isHammock?.56:.48));
    }
   }
 
-  const side=isSlice&&slot?.chunk.habitatSide?(slot.chunk.habitatSide==='left'?285:795):(x<540?795:285),sideBeamMid=(540+side)/2,sideBeamWidth=Math.abs(side-540)+58;
-  const attachSide=(key:string,y:number,w:number,h:number,alpha=1)=>{add(imageContain(this.add.image(sideBeamMid,y,'tree-hammock-bar'),sideBeamWidth,44).setAlpha(alpha));add(imageContain(this.add.image(540,y,'tree-junction-t'),70,70).setAlpha(alpha));add(imageContain(this.add.image(side,y,'tree-junction-round'),54,54).setAlpha(alpha));return add(imageContain(this.add.image(side,y+12,key),w,h).setAlpha(alpha));};
+  const side=isSlice&&slot?.chunk.habitatSide?(slot.chunk.habitatSide==='left'?270:810):(x<540?805:275),sideBeamMid=(540+side)/2,sideBeamWidth=Math.abs(side-540)+52;
+  const attachSide=(key:string,y:number,w:number,h:number,alpha=1)=>{add(imageContain(this.add.image(sideBeamMid,y,'tree-hammock-bar'),sideBeamWidth,42).setAlpha(alpha));add(imageContain(this.add.image(side,y,'tree-junction-round'),50,50).setAlpha(alpha));return add(imageContain(this.add.image(side,y+12,key),w,h).setAlpha(alpha));};
   if(n%10===0){
-   const unlocked=SaveService.trailCompletedCount()>=n,habitat=habitatStyleForLevel(n);attachSide(habitat.texture,122,habitat.w*.84,habitat.h*.84,unlocked?1:.24);const catId=SaveService.data.refuges[String(n)],cat=catId?catById(catId):undefined;
+   const unlocked=SaveService.trailCompletedCount()>=n,habitat=habitatStyleForLevel(n);attachSide(habitat.texture,126,habitat.w*.8,habitat.h*.8,unlocked?1:.24);const catId=SaveService.data.refuges[String(n)],cat=catId?catById(catId):undefined;
    if(unlocked){
-    if(cat)add(imageContain(this.add.image(side,106+habitat.catY,cat.texture),142,142).setDepth(4));
-    else{add(this.add.image(side,104,'ui-circle').setDisplaySize(58,58).setAlpha(.8));add(label(this,side,104,'+',29,C.ink,18));}
-    const hit=this.add.container(side,122).setDepth(8),selected=catId?Math.max(0,collectionCats.findIndex(c=>c.id===catId)):0;add(hit);press(this,hit,212,160,()=>{if(this.registry.get('mapDragging'))return;this.scene.start('Customize',{tab:3,selected,targetLevel:n});});
-   }else add(imageContain(this.add.image(side,108,'ui-lock'),40,40).setAlpha(.64).setDepth(5));
+    if(cat)add(imageContain(this.add.image(side,110+habitat.catY,cat.texture),136,136).setDepth(4));
+    else{add(this.add.image(side,108,'ui-circle').setDisplaySize(56,56).setAlpha(.8));add(label(this,side,108,'+',28,C.ink,18));}
+    const hit=this.add.container(side,126).setDepth(8),selected=catId?Math.max(0,collectionCats.findIndex(c=>c.id===catId)):0;add(hit);press(this,hit,204,154,()=>{if(this.registry.get('mapDragging'))return;this.scene.start('Customize',{tab:3,selected,targetLevel:n});});
+   }else add(imageContain(this.add.image(side,112,'ui-lock'),38,38).setAlpha(.64).setDepth(5));
   }else if(!isSlice&&n%3===0){
    const decoX=x<540?610:470,key=n%9===0?'tree-hanging-plant':n%6===0?'tree-plant':'tree-yarn',w=key==='tree-yarn'?48:68,h=key==='tree-yarn'?48:86;add(imageContain(this.add.image(decoX,104,key),w,h).setAlpha(.62));
   }
 
-  const badgeKey=spec.timed?'badge-timed':spec.difficulty==='easy'?'badge-easy':spec.difficulty==='medium'?'badge-medium':spec.difficulty==='hard'?'badge-hard':'badge-extreme',badge=this.add.container(x,-46),skin=imageContain(this.add.image(0,0,badgeKey),204,84),number=label(this,0,-2,String(n),33,'#ffffff',0);badge.add([skin,number]);
-  if(n===this.current&&!done){const ring=imageContain(this.add.image(0,0,'badge-current'),230,96).setAlpha(.92);badge.addAt(ring,0);if(!SaveService.data.settings.reducedMotion)this.tweens.add({targets:ring,alpha:.6,duration:900,yoyo:true,repeat:-1,ease:'Sine.InOut'});}press(this,badge,232,102,()=>{if(this.input.activePointer.y>165&&this.input.activePointer.y<1645)this.events.emit('play-level',n);});add(badge);
-  if(done){const stars=progress.bestErrors===0?3:progress.bestErrors===1?2:1;add(imageContain(this.add.image(x,12,`stars-${stars}`),146,52));}
+  const badgeKey=spec.timed?'badge-timed':spec.difficulty==='easy'?'badge-easy':spec.difficulty==='medium'?'badge-medium':spec.difficulty==='hard'?'badge-hard':'badge-extreme',badge=this.add.container(x,-48),skin=imageContain(this.add.image(0,0,badgeKey),202,82),number=label(this,0,-2,String(n),32,'#ffffff',0);badge.add([skin,number]);
+  if(n===this.current&&!done){const ring=imageContain(this.add.image(0,0,'badge-current'),228,94).setAlpha(.92);badge.addAt(ring,0);if(!SaveService.data.settings.reducedMotion)this.tweens.add({targets:ring,alpha:.6,duration:900,yoyo:true,repeat:-1,ease:'Sine.InOut'});}press(this,badge,230,100,()=>{if(this.input.activePointer.y>165&&this.input.activePointer.y<1645)this.events.emit('play-level',n);});add(badge);
+  if(done){const stars=progress.bestErrors===0?3:progress.bestErrors===1?2:1;add(imageContain(this.add.image(x,10,`stars-${stars}`),144,50));}
   return row;
  }
 }
