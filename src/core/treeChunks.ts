@@ -23,18 +23,23 @@ const CHUNKS:TreeChunkSpec[]=[
 
 export const chunkForLevel=(level:number):TreeChunkSpec|undefined=>CHUNKS.find(c=>c.levels.includes(level));
 
+const levelX:Record<string,number[]>={
+ 'intro-vertical':[365,705,365],
+ 'branch-left':[285,430,300],
+ 'hammock-right':[790,650,790],
+ 'milestone-10':[330],
+ 'breather-right':[780,640,790],
+ 'branch-left-2':[300,445,300],
+ split:[315,765,540],
+ 'milestone-20':[750],
+ 'outro-21':[405],
+};
+
 export function chunkSlot(level:number){
  const chunk=chunkForLevel(level);if(!chunk)return undefined;
  const i=chunk.levels.indexOf(level),count=chunk.levels.length;
- const slotsBySilhouette:Record<ChunkSilhouette,Array<{x:number;y:number}>>={
-  vertical:[{x:395,y:0},{x:685,y:0},{x:395,y:0},{x:685,y:0}],
-  left:[{x:300,y:0},{x:430,y:0},{x:300,y:0},{x:440,y:0}],
-  right:[{x:780,y:0},{x:650,y:0},{x:780,y:0},{x:640,y:0}],
-  wide:[{x:330,y:0},{x:750,y:0},{x:540,y:0},{x:540,y:0}],
-  split:[{x:320,y:0},{x:760,y:0},{x:540,y:0},{x:540,y:0}],
- };
- const slots=slotsBySilhouette[chunk.silhouette];
- return {...slots[Math.min(i,slots.length-1)]!,chunk,index:i,count};
+ const xs=levelX[chunk.id]??[540];
+ return {x:xs[Math.min(i,xs.length-1)]??540,y:0,chunk,index:i,count};
 }
 
 export const TREE_SLICE_MAX=21;
