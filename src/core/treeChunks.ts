@@ -27,11 +27,11 @@ export function chunkSlot(level:number){
  const chunk=chunkForLevel(level);if(!chunk)return undefined;
  const i=chunk.levels.indexOf(level),count=chunk.levels.length;
  const slotsBySilhouette:Record<ChunkSilhouette,Array<{x:number;y:number}>>={
-  vertical:[{x:430,y:0},{x:650,y:78},{x:420,y:156},{x:660,y:210}],
-  left:[{x:325,y:12},{x:465,y:92},{x:300,y:170},{x:455,y:220}],
-  right:[{x:755,y:12},{x:615,y:92},{x:780,y:170},{x:625,y:220}],
-  wide:[{x:370,y:28},{x:710,y:28},{x:540,y:136},{x:540,y:212}],
-  split:[{x:335,y:22},{x:745,y:22},{x:540,y:154},{x:540,y:220}],
+  vertical:[{x:390,y:0},{x:690,y:14},{x:390,y:28},{x:690,y:42}],
+  left:[{x:300,y:0},{x:430,y:10},{x:285,y:22},{x:450,y:34}],
+  right:[{x:780,y:0},{x:650,y:10},{x:795,y:22},{x:630,y:34}],
+  wide:[{x:330,y:0},{x:750,y:0},{x:540,y:14},{x:540,y:28}],
+  split:[{x:315,y:0},{x:765,y:0},{x:540,y:16},{x:540,y:30}],
  };
  const slots=slotsBySilhouette[chunk.silhouette];
  return {...slots[Math.min(i,slots.length-1)]!,chunk,index:i,count};
