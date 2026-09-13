@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { journeyId,journeySpec,nextSummit } from '../../core/journey';
 import { treeY,treeFocus,treeLimit,visibleTreeLevels,TREE_STEP } from '../../core/treeLayout';
+import { chunkSlot,TREE_SLICE_MAX } from '../../core/treeChunks';
 import { catById,collectionCats,habitatStyleForLevel } from '../../core/cats';
 import { loadSummit } from '../../services/JourneyService';
 import { SaveService } from '../../services/SaveService';
@@ -26,26 +27,40 @@ export class LevelSelectScene extends Phaser.Scene {
   let previous=0,previousTime=0;this.input.on('pointerdown',(p:Phaser.Input.Pointer)=>{this.registry.set('mapDragging',false);this.velocity=0;previous=p.y;previousTime=p.event.timeStamp;this.dragging=p.y>165&&p.y<1645;});this.input.on('pointermove',(p:Phaser.Input.Pointer)=>{if(!p.isDown||!this.dragging)return;if(p.getDistance()>18)this.registry.set('mapDragging',true);const dy=p.y-previous;this.velocity=Phaser.Math.Clamp(dy/Math.max(16,p.event.timeStamp-previousTime),-2.5,2.5);this.offset=Phaser.Math.Clamp(this.offset+dy,0,treeLimit(current));previous=p.y;previousTime=p.event.timeStamp;this.refreshRows();});this.input.on('pointerup',()=>{this.dragging=false;});this.input.on('wheel',(_p:unknown,_o:unknown,_x:number,dy:number)=>{this.velocity=0;this.offset=Phaser.Math.Clamp(this.offset-dy,0,treeLimit(current));this.refreshRows();});this.events.once('shutdown',()=>{this.input.removeAllListeners();this.events.off('play-level',play);this.rows.clear();this.registry.set('mapDragging',false);});
  }
  update(_time:number,delta:number){if(this.dragging||Math.abs(this.velocity)<.02)return;const dt=Math.min(delta,50);this.offset=Phaser.Math.Clamp(this.offset+this.velocity*dt,0,treeLimit(this.current));this.velocity*=Math.pow(.90,dt/16.67);if(this.offset===0||this.offset===treeLimit(this.current))this.velocity=0;this.refreshRows();}
- private refreshRows(){const visible=visibleTreeLevels(this.current,this.offset);for(const [n,row] of this.rows)if(!visible.includes(n)){row.destroy();this.rows.delete(n);}for(const n of visible){let row=this.rows.get(n);if(!row){row=this.makeRow(n);this.rows.set(n,row);}const y=treeY(n,this.offset);row.y=y;row.setAlpha(y>1570?Phaser.Math.Clamp((1670-y)/100,.08,1):y<210?Phaser.Math.Clamp((y-120)/90,.15,1):1);}this.mist.y=treeY(this.current,this.offset)-225;}
+ private refreshRows(){const visible=visibleTreeLevels(this.current,this.offset);for(const [n,row] of this.rows)if(!visible.includes(n)){row.destroy();this.rows.delete(n);}for(const n of visible){let row=this.rows.get(n);if(!row){row=this.makeRow(n);this.rows.set(n,row);}const baseY=treeY(n,this.offset),slot=n<=TREE_SLICE_MAX?chunkSlot(n):undefined;row.y=baseY-(slot?.y??0);row.setAlpha(row.y>1570?Phaser.Math.Clamp((1670-row.y)/100,.08,1):row.y<210?Phaser.Math.Clamp((row.y-120)/90,.15,1):1);}this.mist.y=treeY(this.current,this.offset)-225;}
  private makeRow(n:number){
-  const row=this.add.container(0,0).setDepth(10),x=[365,690,405,675,370,700,410,670][(n-1)%8]!,progress=SaveService.data.progress[journeyId(n)],done=!!progress?.completed,spec=journeySpec(n),add=<T extends Phaser.GameObjects.GameObject>(o:T)=>{row.add(o);return o;};
+  const slot=n<=TREE_SLICE_MAX?chunkSlot(n):undefined;
+  const fallbackX=[365,690,405,675,370,700,410,670][(n-1)%8]!;
+  const row=this.add.container(0,0).setDepth(10),x=slot?.x??fallbackX,progress=SaveService.data.progress[journeyId(n)],done=!!progress?.completed,spec=journeySpec(n),add=<T extends Phaser.GameObjects.GameObject>(o:T)=>{row.add(o);return o;};
+  const isSlice=!!slot;
+  const chunkFirst=isSlice&&slot.index===0;
+  const chunkLast=isSlice&&slot.index===slot.count-1;
   if(n>1)add(imageContain(this.add.image(540,TREE_STEP/2+12,'tree-post-long'),90,TREE_STEP+58));else{add(imageContain(this.add.image(540,116,'tree-post-short'),90,250));add(imageContain(this.add.image(540,218,'tree-base'),390,176));}
-  const supportY=84,beamMid=(540+x)/2,beamWidth=Math.abs(540-x)+178;add(imageContain(this.add.image(beamMid,supportY,'tree-hammock-bar'),beamWidth,62));add(imageContain(this.add.image(540,supportY,'tree-junction-t'),84,84));add(imageContain(this.add.image(x,supportY,'tree-junction-round'),66,66));add(imageContain(this.add.image(x,supportY+14,x<540?'tree-support-cream':'tree-support-peach'),382,82));
-  const side=x<540?790:290,sideBeamMid=(540+side)/2,sideBeamWidth=Math.abs(side-540)+64;
+  const supportY=isSlice?72:84,beamMid=(540+x)/2,beamWidth=Math.abs(540-x)+(isSlice?118:178);
+  add(imageContain(this.add.image(beamMid,supportY,'tree-hammock-bar'),beamWidth,isSlice?50:62));add(imageContain(this.add.image(540,supportY,'tree-junction-t'),isSlice?74:84,isSlice?74:84));add(imageContain(this.add.image(x,supportY,'tree-junction-round'),isSlice?58:66,isSlice?58:66));add(imageContain(this.add.image(x,supportY+14,x<540?'tree-support-cream':'tree-support-peach'),isSlice?318:382,isSlice?70:82));
+  if(isSlice&&chunkFirst){
+   const silhouette=slot.chunk.silhouette;
+   if(silhouette==='wide'||silhouette==='split')add(imageContain(this.add.image(540,132,'tree-hammock-bar'),520,52).setAlpha(.88));
+   if(silhouette==='split'){add(imageContain(this.add.image(365,134,'tree-support-cream'),260,62).setAlpha(.9));add(imageContain(this.add.image(715,134,'tree-support-peach'),260,62).setAlpha(.9));}
+   const decoX=slot.chunk.silhouette==='left'?720:slot.chunk.silhouette==='right'?360:slot.chunk.variant===1?350:730;
+   slot.chunk.decor.slice(0,2).forEach((key,i)=>{const dims=key.includes('hammock')?[230,125]:key==='tree-yarn'?[52,52]:[76,96];add(imageContain(this.add.image(decoX+(i?100:0),148+i*12,key),dims[0]!,dims[1]!).setAlpha(.74));});
+  }
+  const side=isSlice&&slot.chunk.habitatSide?(slot.chunk.habitatSide==='left'?290:790):(x<540?790:290),sideBeamMid=(540+side)/2,sideBeamWidth=Math.abs(side-540)+64;
   const attachSide=(key:string,y:number,w:number,h:number,alpha=1)=>{add(imageContain(this.add.image(sideBeamMid,y,'tree-hammock-bar'),sideBeamWidth,46).setAlpha(alpha));add(imageContain(this.add.image(540,y,'tree-junction-t'),72,72).setAlpha(alpha));add(imageContain(this.add.image(side,y,'tree-junction-round'),56,56).setAlpha(alpha));return add(imageContain(this.add.image(side,y+12,key),w,h).setAlpha(alpha));};
   if(n%10===0){
-   const unlocked=SaveService.trailCompletedCount()>=n,habitat=habitatStyleForLevel(n);attachSide(habitat.texture,102,habitat.w,habitat.h,unlocked?1:.24);const catId=SaveService.data.refuges[String(n)],cat=catId?catById(catId):undefined;
+   const unlocked=SaveService.trailCompletedCount()>=n,habitat=habitatStyleForLevel(n);attachSide(habitat.texture,112,habitat.w,habitat.h,unlocked?1:.24);const catId=SaveService.data.refuges[String(n)],cat=catId?catById(catId):undefined;
    if(unlocked){
-    if(cat)add(imageContain(this.add.image(side,86+habitat.catY,cat.texture),166,166).setDepth(4));
-    else{add(this.add.image(side,84,'ui-circle').setDisplaySize(68,68).setAlpha(.8));add(label(this,side,84,'+',36,C.ink,18));}
-    const hit=this.add.container(side,102).setDepth(8),selected=catId?Math.max(0,collectionCats.findIndex(c=>c.id===catId)):0;add(hit);press(this,hit,250,188,()=>{if(this.registry.get('mapDragging'))return;this.scene.start('Customize',{tab:3,selected,targetLevel:n});});
-   }else add(imageContain(this.add.image(side,88,'ui-lock'),48,48).setAlpha(.64).setDepth(5));
-  }else if(n%3===0){
+    if(cat)add(imageContain(this.add.image(side,96+habitat.catY,cat.texture),166,166).setDepth(4));
+    else{add(this.add.image(side,94,'ui-circle').setDisplaySize(68,68).setAlpha(.8));add(label(this,side,94,'+',36,C.ink,18));}
+    const hit=this.add.container(side,112).setDepth(8),selected=catId?Math.max(0,collectionCats.findIndex(c=>c.id===catId)):0;add(hit);press(this,hit,250,188,()=>{if(this.registry.get('mapDragging'))return;this.scene.start('Customize',{tab:3,selected,targetLevel:n});});
+   }else add(imageContain(this.add.image(side,98,'ui-lock'),48,48).setAlpha(.64).setDepth(5));
+  }else if(!isSlice&&n%3===0){
    const decoX=x<540?610:470,key=n%9===0?'tree-hanging-plant':n%6===0?'tree-plant':'tree-yarn',w=key==='tree-yarn'?48:68,h=key==='tree-yarn'?48:86;add(imageContain(this.add.image(decoX,104,key),w,h).setAlpha(.62));
   }
   const badgeKey=spec.timed?'badge-timed':spec.difficulty==='easy'?'badge-easy':spec.difficulty==='medium'?'badge-medium':spec.difficulty==='hard'?'badge-hard':'badge-extreme',badge=this.add.container(x,-38),skin=imageContain(this.add.image(0,0,badgeKey),220,92),number=label(this,0,-2,String(n),35,'#ffffff',0);badge.add([skin,number]);
   if(n===this.current&&!done){const ring=imageContain(this.add.image(0,0,'badge-current'),246,104).setAlpha(.92);badge.addAt(ring,0);if(!SaveService.data.settings.reducedMotion)this.tweens.add({targets:ring,alpha:.6,duration:900,yoyo:true,repeat:-1,ease:'Sine.InOut'});}press(this,badge,248,110,()=>{if(this.input.activePointer.y>165&&this.input.activePointer.y<1645)this.events.emit('play-level',n);});add(badge);
   if(done){const stars=progress.bestErrors===0?3:progress.bestErrors===1?2:1;add(imageContain(this.add.image(x,25,`stars-${stars}`),164,60));}
+  if(isSlice&&chunkLast&&slot.chunk.silhouette==='vertical'&&n!==1)add(imageContain(this.add.image(540,162,'tree-plant'),70,90).setAlpha(.5));
   return row;
  }
 }
