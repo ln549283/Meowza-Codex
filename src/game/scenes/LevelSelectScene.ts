@@ -32,33 +32,54 @@ export class LevelSelectScene extends Phaser.Scene {
   const slot=n<=TREE_SLICE_MAX?chunkSlot(n):undefined;
   const fallbackX=[365,690,405,675,370,700,410,670][(n-1)%8]!;
   const row=this.add.container(0,0).setDepth(10),x=slot?.x??fallbackX,progress=SaveService.data.progress[journeyId(n)],done=!!progress?.completed,spec=journeySpec(n),add=<T extends Phaser.GameObjects.GameObject>(o:T)=>{row.add(o);return o;};
-  const isSlice=!!slot,chunkFirst=isSlice&&slot.index===0,chunkLast=isSlice&&slot.index===slot.count-1;
-  if(n>1)add(imageContain(this.add.image(540,TREE_STEP/2+12,'tree-post-long'),90,TREE_STEP+58));else{add(imageContain(this.add.image(540,116,'tree-post-short'),90,250));add(imageContain(this.add.image(540,218,'tree-base'),390,176));}
-  const supportY=isSlice?82:84,beamMid=(540+x)/2,beamWidth=Math.abs(540-x)+(isSlice?126:178);
-  add(imageContain(this.add.image(beamMid,supportY,'tree-hammock-bar'),beamWidth,isSlice?52:62));add(imageContain(this.add.image(540,supportY,'tree-junction-t'),isSlice?76:84,isSlice?76:84));add(imageContain(this.add.image(x,supportY,'tree-junction-round'),isSlice?60:66,isSlice?60:66));add(imageContain(this.add.image(x,supportY+14,x<540?'tree-support-cream':'tree-support-peach'),isSlice?326:382,isSlice?72:82));
-  if(isSlice&&chunkFirst){
-   const silhouette=slot.chunk.silhouette;
-   if(silhouette==='wide'||silhouette==='split')add(imageContain(this.add.image(540,144,'tree-hammock-bar'),520,50).setAlpha(.86));
-   if(silhouette==='split'){add(imageContain(this.add.image(350,146,'tree-support-cream'),245,58).setAlpha(.82));add(imageContain(this.add.image(730,146,'tree-support-peach'),245,58).setAlpha(.82));}
-   const decoX=silhouette==='left'?735:silhouette==='right'?345:slot.chunk.variant===1?360:720;
-   slot.chunk.decor.slice(0,1).forEach((key,i)=>{const dims=key.includes('hammock')?[220,120]:key==='tree-yarn'?[50,50]:[72,90];add(imageContain(this.add.image(decoX+(i?96:0),156,key),dims[0]!,dims[1]!).setAlpha(.66));});
+  const isSlice=!!slot,chunkFirst=isSlice&&slot.index===0;
+  const silhouette=slot?.chunk.silhouette;
+  if(n>1){
+   const postScale=isSlice&&silhouette!=='vertical'?.78:1;
+   add(imageContain(this.add.image(540,TREE_STEP/2+12,'tree-post-long'),90*postScale,(TREE_STEP+58)*postScale));
+  }else{add(imageContain(this.add.image(540,116,'tree-post-short'),90,250));add(imageContain(this.add.image(540,218,'tree-base'),390,176));}
+
+  const supportY=isSlice?86:84;
+  const branchReach=Math.abs(540-x)+(isSlice?90:178);
+  const branchH=isSlice?46:62;
+  add(imageContain(this.add.image((540+x)/2,supportY,'tree-hammock-bar'),branchReach,branchH));
+  add(imageContain(this.add.image(540,supportY,'tree-junction-t'),isSlice?70:84,isSlice?70:84));
+  add(imageContain(this.add.image(x,supportY,'tree-junction-round'),isSlice?56:66,isSlice?56:66));
+  add(imageContain(this.add.image(x,supportY+14,x<540?'tree-support-cream':'tree-support-peach'),isSlice?300:382,isSlice?66:82));
+
+  if(isSlice&&chunkFirst&&slot){
+   const c=slot.chunk.silhouette;
+   if(c==='split'){
+    add(imageContain(this.add.image(540,154,'tree-hammock-bar'),500,46).setAlpha(.82));
+    add(imageContain(this.add.image(332,154,'tree-support-cream'),220,54).setAlpha(.78));
+    add(imageContain(this.add.image(748,154,'tree-support-peach'),220,54).setAlpha(.78));
+   }else if(c==='wide'){
+    add(imageContain(this.add.image(540,150,'tree-hammock-bar'),460,46).setAlpha(.8));
+   }
+   const deco=slot.chunk.decor[0];
+   if(deco){
+    const dx=c==='left'?760:c==='right'?320:c==='split'?820:slot.chunk.variant===1?330:750;
+    const dims=deco.includes('hammock')?[205,110]:deco==='tree-yarn'?[46,46]:[66,82];
+    add(imageContain(this.add.image(dx,160,deco),dims[0],dims[1]).setAlpha(.58));
+   }
   }
-  const side=isSlice&&slot.chunk.habitatSide?(slot.chunk.habitatSide==='left'?285:795):(x<540?795:285),sideBeamMid=(540+side)/2,sideBeamWidth=Math.abs(side-540)+58;
+
+  const side=isSlice&&slot?.chunk.habitatSide?(slot.chunk.habitatSide==='left'?285:795):(x<540?795:285),sideBeamMid=(540+side)/2,sideBeamWidth=Math.abs(side-540)+58;
   const attachSide=(key:string,y:number,w:number,h:number,alpha=1)=>{add(imageContain(this.add.image(sideBeamMid,y,'tree-hammock-bar'),sideBeamWidth,44).setAlpha(alpha));add(imageContain(this.add.image(540,y,'tree-junction-t'),70,70).setAlpha(alpha));add(imageContain(this.add.image(side,y,'tree-junction-round'),54,54).setAlpha(alpha));return add(imageContain(this.add.image(side,y+12,key),w,h).setAlpha(alpha));};
   if(n%10===0){
-   const unlocked=SaveService.trailCompletedCount()>=n,habitat=habitatStyleForLevel(n);attachSide(habitat.texture,118,habitat.w*.92,habitat.h*.92,unlocked?1:.24);const catId=SaveService.data.refuges[String(n)],cat=catId?catById(catId):undefined;
+   const unlocked=SaveService.trailCompletedCount()>=n,habitat=habitatStyleForLevel(n);attachSide(habitat.texture,118,habitat.w*.88,habitat.h*.88,unlocked?1:.24);const catId=SaveService.data.refuges[String(n)],cat=catId?catById(catId):undefined;
    if(unlocked){
-    if(cat)add(imageContain(this.add.image(side,102+habitat.catY,cat.texture),154,154).setDepth(4));
-    else{add(this.add.image(side,100,'ui-circle').setDisplaySize(62,62).setAlpha(.8));add(label(this,side,100,'+',32,C.ink,18));}
-    const hit=this.add.container(side,118).setDepth(8),selected=catId?Math.max(0,collectionCats.findIndex(c=>c.id===catId)):0;add(hit);press(this,hit,230,174,()=>{if(this.registry.get('mapDragging'))return;this.scene.start('Customize',{tab:3,selected,targetLevel:n});});
-   }else add(imageContain(this.add.image(side,104,'ui-lock'),44,44).setAlpha(.64).setDepth(5));
+    if(cat)add(imageContain(this.add.image(side,102+habitat.catY,cat.texture),148,148).setDepth(4));
+    else{add(this.add.image(side,100,'ui-circle').setDisplaySize(60,60).setAlpha(.8));add(label(this,side,100,'+',30,C.ink,18));}
+    const hit=this.add.container(side,118).setDepth(8),selected=catId?Math.max(0,collectionCats.findIndex(c=>c.id===catId)):0;add(hit);press(this,hit,220,166,()=>{if(this.registry.get('mapDragging'))return;this.scene.start('Customize',{tab:3,selected,targetLevel:n});});
+   }else add(imageContain(this.add.image(side,104,'ui-lock'),42,42).setAlpha(.64).setDepth(5));
   }else if(!isSlice&&n%3===0){
    const decoX=x<540?610:470,key=n%9===0?'tree-hanging-plant':n%6===0?'tree-plant':'tree-yarn',w=key==='tree-yarn'?48:68,h=key==='tree-yarn'?48:86;add(imageContain(this.add.image(decoX,104,key),w,h).setAlpha(.62));
   }
-  const badgeKey=spec.timed?'badge-timed':spec.difficulty==='easy'?'badge-easy':spec.difficulty==='medium'?'badge-medium':spec.difficulty==='hard'?'badge-hard':'badge-extreme',badge=this.add.container(x,-42),skin=imageContain(this.add.image(0,0,badgeKey),210,88),number=label(this,0,-2,String(n),34,'#ffffff',0);badge.add([skin,number]);
-  if(n===this.current&&!done){const ring=imageContain(this.add.image(0,0,'badge-current'),236,100).setAlpha(.92);badge.addAt(ring,0);if(!SaveService.data.settings.reducedMotion)this.tweens.add({targets:ring,alpha:.6,duration:900,yoyo:true,repeat:-1,ease:'Sine.InOut'});}press(this,badge,238,106,()=>{if(this.input.activePointer.y>165&&this.input.activePointer.y<1645)this.events.emit('play-level',n);});add(badge);
-  if(done){const stars=progress.bestErrors===0?3:progress.bestErrors===1?2:1;add(imageContain(this.add.image(x,18,`stars-${stars}`),156,56));}
-  if(isSlice&&chunkLast&&slot.chunk.silhouette==='vertical'&&n!==1)add(imageContain(this.add.image(540,164,'tree-plant'),66,84).setAlpha(.42));
+
+  const badgeKey=spec.timed?'badge-timed':spec.difficulty==='easy'?'badge-easy':spec.difficulty==='medium'?'badge-medium':spec.difficulty==='hard'?'badge-hard':'badge-extreme',badge=this.add.container(x,-42),skin=imageContain(this.add.image(0,0,badgeKey),206,86),number=label(this,0,-2,String(n),33,'#ffffff',0);badge.add([skin,number]);
+  if(n===this.current&&!done){const ring=imageContain(this.add.image(0,0,'badge-current'),232,98).setAlpha(.92);badge.addAt(ring,0);if(!SaveService.data.settings.reducedMotion)this.tweens.add({targets:ring,alpha:.6,duration:900,yoyo:true,repeat:-1,ease:'Sine.InOut'});}press(this,badge,234,104,()=>{if(this.input.activePointer.y>165&&this.input.activePointer.y<1645)this.events.emit('play-level',n);});add(badge);
+  if(done){const stars=progress.bestErrors===0?3:progress.bestErrors===1?2:1;add(imageContain(this.add.image(x,16,`stars-${stars}`),150,54));}
   return row;
  }
 }
