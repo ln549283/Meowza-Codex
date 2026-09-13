@@ -33,7 +33,6 @@ export class LevelSelectScene extends Phaser.Scene {
   const fallbackX=[365,690,405,675,370,700,410,670][(n-1)%8]!;
   const row=this.add.container(0,0).setDepth(10),x=slot?.x??fallbackX,progress=SaveService.data.progress[journeyId(n)],done=!!progress?.completed,spec=journeySpec(n),add=<T extends Phaser.GameObjects.GameObject>(o:T)=>{row.add(o);return o;};
   const isSlice=!!slot,chunkFirst=isSlice&&slot.index===0;
-  const silhouette=slot?.chunk.silhouette;
 
   const addPost=(px:number,py:number,w:number,h:number,key='tree-post-long',alpha=1)=>add(imageContain(this.add.image(px,py,key),w,h).setAlpha(alpha));
   const addBeam=(x1:number,x2:number,y:number,h=42,alpha=1)=>add(imageContain(this.add.image((x1+x2)/2,y,'tree-hammock-bar'),Math.abs(x2-x1)+52,h).setAlpha(alpha));
@@ -63,7 +62,6 @@ export class LevelSelectScene extends Phaser.Scene {
     addPlatform(330,136,true,224,.88);addPlatform(750,136,false,224,.88);
    }
   }else if(isSlice){
-   // Les lignes secondaires du chunk n'ajoutent plus un poteau complet : juste un raccord léger.
    addBeam(540,x,92,40,.9);
   }
 
@@ -80,7 +78,6 @@ export class LevelSelectScene extends Phaser.Scene {
     const dx=c==='left'?770:c==='right'?310:c==='split'?840:slot.chunk.variant===1?310:770;
     const dy=isHammock?214:174;
     const dims:[number,number]=isHammock?[150,76]:deco==='tree-yarn'?[40,40]:[56,70];
-    // Décor placé hors de la zone plaque/étoiles, jamais devant le niveau.
     add(imageContain(this.add.image(dx,dy,deco),dims[0],dims[1]).setAlpha(isHammock?.56:.48));
    }
   }
