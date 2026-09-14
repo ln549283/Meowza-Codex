@@ -22,8 +22,8 @@ import { SaveService } from './services/SaveService';
 
 function start(){
  void Promise.all([document.fonts.load('700 32px Nunito'),document.fonts.load('800 32px Nunito'),document.fonts.load('900 32px Nunito')]).catch(()=>undefined);
- // ENVELOP keeps the authored 1080x1920 stage while filling tall PWA screens instead of letterboxing them.
- const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#fff6ee',transparent:false,antialias:true,pixelArt:false,roundPixels:true,scale:{mode:Phaser.Scale.ENVELOP,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[BootScene,PreloadScene,HomeScene,LevelSelectScene,CustomizeScene,GameScene,RulesScene,SettingsScene,VictoryScene,LostScene,ShopScene,MissionsScene,ArchiveScene,HintScene],fps:{target:30,limit:30},render:{powerPreference:'low-power'}});
+ // Preserve every authored control and platform on tall phones and desktop previews.
+ const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#fff6ee',transparent:false,antialias:true,pixelArt:false,roundPixels:true,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[BootScene,PreloadScene,HomeScene,LevelSelectScene,CustomizeScene,GameScene,RulesScene,SettingsScene,VictoryScene,LostScene,ShopScene,MissionsScene,ArchiveScene,HintScene],fps:{target:30,limit:30},render:{powerPreference:'low-power'}});
  const visibility=(active:boolean)=>{if(active){game.loop.wake();AudioService.resume();}else{game.loop.sleep();AudioService.suspend();void SaveService.persist();}};
  document.addEventListener('visibilitychange',()=>visibility(!document.hidden));
  void App.addListener('appStateChange',({isActive})=>visibility(isActive));

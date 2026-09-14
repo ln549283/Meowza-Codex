@@ -1,9 +1,7 @@
-export const TREE_STEP=238;
-export const treeY=(level:number,offset:number)=>1080-(level-1)*TREE_STEP+offset;
-export const treeLimit=(current:number)=>Math.max(0,(current-1)*TREE_STEP+120);
-export const treeFocus=(current:number)=>Math.max(0,(current-1)*TREE_STEP);
+import {CHUNKS,chunkForIndex,treeAnchor,visibleChunks} from './treeChunks';
+export const treeY=(level:number,offset:number)=>1040+treeAnchor(level).y+offset;
+export const treeFocus=(current:number)=>Math.max(0,-treeAnchor(current).y);
+export const treeLimit=(current:number)=>treeFocus(current)+180;
 export function visibleTreeLevels(current:number,offset:number){
- const first=Math.max(1,Math.ceil((1080+offset-2120)/TREE_STEP)+1);
- const last=Math.min(current,Math.floor((1080+offset+300)/TREE_STEP)+1);
- return Array.from({length:Math.max(0,last-first+1)},(_,i)=>first+i);
+ return visibleChunks(offset,current).flatMap(i=>{const c=chunkForIndex(i);return CHUNKS[c.kind].slots.map((_,j)=>c.first+j);}).filter(n=>n<=current&&treeY(n,offset)>-150&&treeY(n,offset)<1950);
 }
