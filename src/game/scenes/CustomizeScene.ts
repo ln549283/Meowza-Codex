@@ -1,71 +1,70 @@
 import Phaser from 'phaser';
-import { cosmetics,type Slot } from '../../core/cosmetics';
-import { collectionCats,habitatMilestones,habitatLevel,habitatStyleForLevel } from '../../core/cats';
+import { cosmetics,cosmeticPrice,type Slot } from '../../core/cosmetics';
+import { collectionCats } from '../../core/cats';
 import { SaveService } from '../../services/SaveService';
-import { backgroundTextureForId,imageContain,label,press } from '../ui';
+import { backgroundTextureForId,backButton,button,imageContain,label,panel,press } from '../ui';
+import { treeTexture } from '../treeStyle';
 import { C } from '../theme';
 
-type TabKey=Slot|'cats';
-const tabs:{key:TabKey;label:string}[]=[
- {key:'background',label:'Fonds'},
- {key:'cushion',label:'Coussins'},
- {key:'wood',label:'Structure'},
- {key:'cats',label:'Chats'}
-];
-
-export class CustomizeScene extends Phaser.Scene{
- private tab=0;private selected=0;private targetLevel:number|undefined;
- constructor(){super('Customize');}
- init(data:{tab?:number;selected?:number;targetLevel?:number}={}){this.tab=Phaser.Math.Clamp(data.tab??0,0,tabs.length-1);this.selected=Math.max(0,data.selected??0);this.targetLevel=data.targetLevel;}
+const tabs=[{key:'background',label:'Fonds'},{key:'cushion',label:'Coussins'},{key:'wood',label:'Structure'},{key:'cats',label:'Chats'}] as const;
+/** The same catalogue and previews drive both discovery and purchases. */
+export class CatalogScene extends Phaser.Scene {
+ private tab=0;private selected=0;private target=10;
+ constructor(private shop=false){super(shop?'Shop':'Customize');}
+ init(data:{tab?:number;selected?:number;targetLevel?:number}={}){this.tab=Phaser.Math.Clamp(typeof data.tab==='number'?data.tab:0,0,this.shop?2:3);this.selected=data.selected??0;this.target=data.targetLevel??10;}
+ private restart(){this.scene.restart({tab:this.tab,selected:this.selected,targetLevel:this.target});}
  create(){
-  this.cameras.main.setBackgroundColor(0xfff7ef);
-  const back=this.add.container(72,86).setDepth(20),backSkin=this.add.image(0,0,'button-square').setDisplaySize(96,96),backIcon=imageContain(this.add.image(0,0,'ui-back'),46,46);back.add([backSkin,backIcon]);press(this,back,100,100,()=>this.scene.start('LevelSelect'));
-  label(this,540,76,'Ma collection',58,C.ink,24);label(this,540,140,'Personnalise ton arbre',28,'#78647d',20);
-
-  const tabY=252,tabH=112,tabW=270;
-  tabs.forEach((tab,i)=>{const active=i===this.tab,c=this.add.container(i*tabW+tabW/2,tabY),skin=this.add.image(0,0,active?'button-primary':'button-secondary').setDisplaySize(tabW+4,tabH),txt=label(this,0,0,tab.label,29,active?'#ffffff':C.ink,20);c.add([skin,txt]);if(!active)c.setAlpha(.9);press(this,c,tabW,tabH,()=>this.scene.restart({tab:i,selected:0,targetLevel:i===3?this.targetLevel:undefined}));});
-
-  const key=tabs[this.tab]!.key,gridTop=338,gridX=20,cell=(1080-gridX*2)/4;
-  const regular=key==='cats'?[]:cosmetics.filter(item=>item.slot===key),count=key==='cats'?collectionCats.length:regular.length,totalSlots=Math.ceil(count/4)*4;
-  this.selected=Math.min(this.selected,Math.max(0,count-1));
-  for(let i=0;i<totalSlots;i++){
-   const col=i%4,row=Math.floor(i/4),x=gridX+cell/2+col*cell,y=gridTop+cell/2+row*cell,isActual=i<count;
-   if(!isActual)continue;
-   const owned=key==='cats'?SaveService.data.ownedCats.includes(collectionCats[i]!.id):SaveService.data.ownedCosmetics.includes(regular[i]!.id),selected=owned&&i===this.selected;
-   const equipped=key==='cats'?false:owned&&SaveService.data.equipped[key]===regular[i]!.id;
-   this.add.image(x,y,owned?'button-square':'tile-lilac').setDisplaySize(cell+2,cell+2).setAlpha(owned?1:.26).setDepth(-1);
-   if(owned){
-    if(key==='cats')imageContain(this.add.image(x,y,collectionCats[i]!.texture),cell*.78,cell*.78);
-    else if(key==='background'){const item=regular[i]!;imageContain(this.add.image(x,y,backgroundTextureForId(item.id)),cell*.84,cell*.84);}
-    else if(key==='cushion'){const item=regular[i]!;imageContain(this.add.image(x,y,'tree-flower-cushion'),cell*.73,cell*.6).setTint(item.color);}
-    else if(key==='wood'){const item=regular[i]!,texture=item.id==='birch'?'tree-cubby-cream':item.id==='walnut'?'tree-cubby':'tree-cubby-wood';imageContain(this.add.image(x,y,texture),cell*.72,cell*.72);}
-    if(equipped||selected)imageContain(this.add.image(x+cell*.34,y-cell*.34,'ui-check'),48,48).setDepth(5);
-    const hit=this.add.container(x,y).setDepth(8);press(this,hit,cell,cell,()=>this.scene.restart({tab:this.tab,selected:i,targetLevel:this.targetLevel}));
-   }else{
-    imageContain(this.add.image(x,y-4,'ui-lock'),27,27).setAlpha(.3).setDepth(2);label(this,x,y+32,'???',18,'#9c90a3',15).setAlpha(.62).setDepth(3);
+  this.cameras.main.setBackgroundColor(0xfff7ef);backButton(this,()=>this.scene.start('LevelSelect'));
+  label(this,560,90,this.shop?'La petite boutique':'Ma collection',54);label(this,540,162,this.shop?'Des décors à garder, un arbre à ton image':'Des trouvailles et des compagnons pour ton arbre',25,'#78647d');
+  const available=tabs.slice(0,this.shop?3:4),width=960/available.length;
+  available.forEach((tab,i)=>{const c=this.add.container(60+width*(i+.5),280),active=i===this.tab;c.add([this.add.image(0,0,active?'button-primary':'button-secondary').setDisplaySize(width-12,96),label(this,0,0,tab.label,27,active?'#21475a':C.ink)]);press(this,c,width-12,96,()=>{this.tab=i;this.selected=0;this.restart();});});
+  const key=tabs[this.tab]!.key,isCats=key==='cats',items=isCats?collectionCats:cosmetics.filter(c=>c.slot===key);
+  this.selected=Phaser.Math.Clamp(this.selected,0,items.length-1);
+  const ownedCount=items.filter(c=>(isCats?SaveService.data.ownedCats:SaveService.data.ownedCosmetics).includes(c.id)).length;
+  label(this,110,390,`${ownedCount} / ${items.length} découverts`,26,'#78647d').setOrigin(0,.5);
+  imageContain(this.add.image(805,390,'hub-kibble'),44,44);label(this,900,390,String(SaveService.data.kibble),30);
+  const thumbnail=(id:string,x:number,y:number,w:number,h:number)=>{
+   if(isCats){const cat=collectionCats.find(c=>c.id===id)!;return imageContain(this.add.image(x,y,cat.texture),w,h);}
+   const item=cosmetics.find(c=>c.id===id)!;
+   if(item.slot==='background')return imageContain(this.add.image(x,y,backgroundTextureForId(id)),w,h);
+   const texture=treeTexture(this,'b',item.slot==='wood'?id:SaveService.data.equipped.wood,item.slot==='cushion'?id:SaveService.data.equipped.cushion,true);
+   return imageContain(this.add.image(x,y,texture),w,h);
+  };
+  items.forEach((item,i)=>{
+   const x=210+(i%3)*330,y=675+Math.floor(i/3)*400,owned=(isCats?SaveService.data.ownedCats:SaveService.data.ownedCosmetics).includes(item.id),selected=i===this.selected;
+   panel(this,x,y,306,368);if(selected)this.add.graphics().lineStyle(4,0xb68c52).strokeRoundedRect(x-143,y-169,286,338,28);
+   thumbnail(item.id,x,y-52,245,220).setAlpha(owned?1:.7);
+   label(this,x,y+83,item.name,24).setWordWrapWidth(265);
+   label(this,x,y+128,owned?'Découvert':isCats?`Niveau ${(i+1)*10}`:`${cosmeticPrice(item.id)} croquettes`,21,'#78647d');
+   const hit=this.add.container(x,y);press(this,hit,300,358,()=>{this.selected=i;this.restart();});
+  });
+  const item=items[this.selected]!,owned=(isCats?SaveService.data.ownedCats:SaveService.data.ownedCosmetics).includes(item.id);
+  if(isCats){
+   panel(this,540,1475,970,390);thumbnail(item.id,225,1450,215,255);
+   label(this,410,1355,item.name,35).setOrigin(0,.5);
+   const levels=Array.from({length:Math.floor(SaveService.trailCompletedCount()/10)},(_,i)=>(i+1)*10);
+   if(!levels.includes(this.target))this.target=levels[0]??10;
+   const assigned=Object.entries(SaveService.data.refuges).find(([,id])=>id===item.id);
+   label(this,410,1415,owned?(assigned?`Installé au niveau ${assigned[0]}`:'Prêt à rejoindre ton arbre'):`Se découvre au niveau ${(this.selected+1)*10}`,24,'#78647d').setOrigin(0,.5).setWordWrapWidth(540);
+   if(owned&&levels.length){
+    const place=button(this,650,1500,500,`Support ${this.target}  ›`,()=>{this.target=levels[(levels.indexOf(this.target)+1)%levels.length]!;this.restart();},C.orange);place.setScale(.9);
+    button(this,650,1600,500,assigned?.[0]===String(this.target)?'Retirer':'Installer ici',()=>{SaveService.assignCat(this.target,assigned?.[0]===String(this.target)?null:item.id);this.scene.start('LevelSelect');}).setScale(.9);
    }
-  }
-
-  const detailY=1698,detail=this.add.image(540,detailY,'puzzle-panel').setDisplaySize(1030,180).setAlpha(.98);detail.setDepth(-1);
-  if(key==='cats'){
-   const cat=collectionCats[this.selected],owned=cat&&SaveService.data.ownedCats.includes(cat.id),assigned=cat?Object.entries(SaveService.data.refuges).find(([,id])=>id===cat.id):undefined,completed=SaveService.trailCompletedCount(),supports=habitatMilestones(completed),levels=Array.from({length:supports},(_,i)=>habitatLevel(i)),target=this.targetLevel&&levels.includes(this.targetLevel)?this.targetLevel:undefined,freeLevel=levels.find(level=>!SaveService.data.refuges[String(level)]),placementLevel=target??freeLevel;
-   if(cat&&owned){
-    imageContain(this.add.image(150,detailY,cat.texture),118,118);label(this,280,detailY-25,cat.name,31,C.ink,20).setOrigin(0,.5);
-    if(target){const style=habitatStyleForLevel(target);label(this,280,detailY+14,`${style.name} · niveau ${target}`,21,'#78647d',17).setOrigin(0,.5);}
-    else label(this,280,detailY+16,assigned?`Installé au niveau ${assigned[0]}`:supports?`${supports} place${supports>1?'s':''} disponible${supports>1?'s':''}`:'Premier support au niveau 10',21,'#78647d',17).setOrigin(0,.5);
-    const sameTarget=!!target&&assigned?.[0]===String(target),canPlace=!!placementLevel,action=this.add.container(855,detailY),skin=this.add.image(0,0,sameTarget?'button-disabled':canPlace?'button-primary':'button-disabled').setDisplaySize(270,86),txt=label(this,0,0,sameTarget?'Retirer':target?'Installer ici':assigned?'Déplacer':'Placer',24,sameTarget||!canPlace?C.ink:'#ffffff',18);action.add([skin,txt]);
-    if(sameTarget)press(this,action,270,86,()=>{SaveService.assignCat(target!,null);this.scene.start('LevelSelect');});
-    else if(canPlace)press(this,action,270,86,()=>{SaveService.assignCat(placementLevel!,cat.id);this.scene.start('LevelSelect');});
-   }else{
-    label(this,540,detailY-14,'Les compagnons restent secrets jusqu’à leur découverte.',23,'#78647d',18).setWordWrapWidth(760);label(this,540,detailY+24,target?`Le support du niveau ${target} attend un chat débloqué.`:'Une nouvelle place pour chat se débloque tous les 10 niveaux.',18,'#95869e',16).setWordWrapWidth(820);
-   }
+   label(this,540,1760,'Moka et Nimbus t’accompagnent dans les grilles.\nCes compagnons habitent les supports de ton arbre.',24,'#78647d');
   }else{
-   const item=regular[this.selected],owned=item&&SaveService.data.ownedCosmetics.includes(item.id);
-   if(item&&owned){
-    if(key==='background')imageContain(this.add.image(145,detailY,backgroundTextureForId(item.id)),112,112);else if(key==='cushion')imageContain(this.add.image(145,detailY,'tree-flower-cushion'),120,102).setTint(item.color);else{const texture=item.id==='birch'?'tree-cubby-cream':item.id==='walnut'?'tree-cubby':'tree-cubby-wood';imageContain(this.add.image(145,detailY,texture),112,112);}
-    label(this,265,detailY-24,item.name,29,C.ink,20).setOrigin(0,.5);label(this,265,detailY+18,SaveService.data.equipped[key]===item.id?'Sélection actuelle':'Débloqué',20,'#78647d',17).setOrigin(0,.5);
-    const equipped=SaveService.data.equipped[key]===item.id,action=this.add.container(855,detailY),skin=this.add.image(0,0,equipped?'button-disabled':'button-primary').setDisplaySize(270,86),txt=label(this,0,0,equipped?'Équipé':'Équiper',25,equipped?C.ink:'#ffffff',18);action.add([skin,txt]);if(!equipped)press(this,action,270,86,()=>{SaveService.data.equipped[key]=item.id;void SaveService.persist().then(()=>this.scene.start('LevelSelect'));});
-   }else label(this,540,detailY,'Cet objet reste caché jusqu’à sa découverte.',23,'#78647d',18);
+   const cosmetic=cosmetics.find(c=>c.id===item.id)!;
+   panel(this,540,1295,970,670);thumbnail(item.id,255,1270,305,470);
+   label(this,480,1080,item.name,36).setOrigin(0,.5).setWordWrapWidth(490);
+   label(this,480,1165,key==='background'?'Une nouvelle ambiance pour le jeu.':key==='wood'?'Une nouvelle teinte de bois\npour toutes les plateformes.':'Une nouvelle palette textile\npour les coussins et les hamacs.',25,'#78647d').setOrigin(0,.5).setWordWrapWidth(480);
+   const equipped=SaveService.data.equipped[cosmetic.slot]===item.id,price=cosmeticPrice(item.id),afford=SaveService.data.kibble>=price;
+   label(this,480,1300,equipped?'Actuellement équipé':owned?'Prêt à équiper':`À débloquer · ${price} croquettes`,26).setOrigin(0,.5);
+   if(!equipped)button(this,700,1430,450,owned?'Équiper':afford?'Adopter ce décor':'Croquettes insuffisantes',()=>{
+    if(!owned&&!SaveService.buyCosmetic(item.id))return;
+    SaveService.data.equipped[cosmetic.slot as Slot]=item.id;void SaveService.persist();this.restart();
+   },owned||afford?C.teal:C.orange);
+   label(this,540,1760,this.shop?'Gagne des croquettes en résolvant les grilles.':'Un décor se découvre aussi à chaque palier de 10 niveaux.',25,'#78647d');
   }
  }
 }
+export class CustomizeScene extends CatalogScene {constructor(){super(false);}}
+export class ShopScene extends CatalogScene {constructor(){super(true);}}

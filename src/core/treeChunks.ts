@@ -22,13 +22,13 @@ export function treeAnchor(level:number){
  return {x:CHUNK_X+slot.x*CHUNK_SCALE,y:chunk.top+slot.y*CHUNK_SCALE,chunk:index};
 }
 /** O(1) window lookup; never iterates over completed levels. */
-export function visibleChunks(offset:number,current:number){
+export function visibleChunks(offset:number,current:number,height=1920){
  const focusIndex=treeAnchor(current).chunk;
  const approximate=Math.max(0,Math.floor((offset+BASE_TOP)/PAIR_HEIGHT)*2);
  const indices:number[]=[];
  for(let i=Math.max(0,approximate-4);i<=Math.min(focusIndex+2,approximate+8);i++){
   const c=chunkForIndex(i),top=1040+c.top+offset;
-  if(top<2020&&top+c.height>-250)indices.push(i);
+  if(top<height+100&&top+c.height>-250)indices.push(i);
  }
  return indices;
 }

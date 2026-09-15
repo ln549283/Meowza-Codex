@@ -1,4 +1,4 @@
-import { cosmetics,starterCosmetics,unlockAt } from '../core/cosmetics';
+import { cosmetics,starterCosmetics,unlockAt,cosmeticPrice } from '../core/cosmetics';
 import { collectionCats,habitatMilestones } from '../core/cats';
 import { journeyId,journeySpec,nextSummit } from '../core/journey';
 import { STARTING_KIBBLE,rewardFor,hintCost,MAX_HINTS_PER_ATTEMPT } from '../core/economy';
@@ -52,13 +52,28 @@ export class SaveServiceImpl {
   saveFailed=false;
 
   async load(){try{const{value}=await this.storage.get({key:this.key});if(value){const parsed=JSON.parse(value) as Partial<SaveData>&{progress?:Record<string,Partial<LevelProgress>&{stars?:number}>};const rawProgress=parsed.progress&&typeof parsed.progress==='object'?parsed.progress:{};const progress:Record<string,LevelProgress>={};for(const[id,p]of Object.entries(rawProgress))progress[id]={completed:!!p.completed,bestErrors:Number.isFinite(p.bestErrors)?Number(p.bestErrors):0,bestHints:Number.isFinite(p.bestHints)?Number(p.bestHints):0};const rawAnalytics=parsed.analytics&&typeof parsed.analytics==='object'?parsed.analytics:{};const analytics:Record<string,LevelAnalytics>={};for(const[id,a]of Object.entries(rawAnalytics))analytics[id]={...emptyAnalytics(),...a};this.data={...defaults(),...parsed,saveVersion:4,logicVersion:parsed.logicVersion??1,progress,analytics,settings:{...defaults().settings,...parsed.settings},stats:{...defaults().stats,...parsed.stats},missions:{...missionDefaults(),...parsed.missions,globalClaimed:{...parsed.missions?.globalClaimed}}};}}catch{this.data=defaults();}
+   this.restoreCollection();
    this.data.equipped={...defaults().equipped,...this.data.equipped};
    this.data.ownedCats=(this.data.ownedCats??[]).filter(id=>collectionCats.some(cat=>cat.id===id));
    const cleared=this.trailCompletedCount(),supportCount=habitatMilestones(cleared);for(const[key,cat]of Object.entries(this.data.refuges)){const level=Number(key);if(!Number.isFinite(level)||level%10!==0||level/10>supportCount||!this.data.ownedCats.includes(cat))delete this.data.refuges[key];}
    for(const slot of ['background','cushion','wood'] as const)if(!cosmetics.some(c=>c.id===this.data.equipped[slot]&&c.slot===slot))this.data.equipped[slot]=defaults().equipped[slot];
    const owned=this.data.ownedCosmetics;const expected=Math.min(6,Math.floor(cleared/10));
    for(let i=owned.length-starterCosmetics.length;i<expected;i++){const id=unlockAt((i+1)*10,owned,this.data.cosmeticSeed^Math.imul((i+1)*10,2654435761));if(id)owned.push(id);}
-   this.ensureDailyMissions();
+   this.ensureDailyMissions();await this.persist();
+  }
+
+  private restoreCollection(){
+   const retired=['forest','blossom','autumn','winter','beach','garden','sunset','rain','moon-garden'];
+   const removed=this.data.ownedCosmetics.filter(id=>retired.includes(id));
+   this.data.kibble+=new Set(removed).size*180;
+   this.data.ownedCosmetics=[...new Set([...starterCosmetics,...this.data.ownedCosmetics.filter(id=>cosmetics.some(c=>c.id===id))])];
+   const count=Math.min(collectionCats.length,Math.floor(this.trailCompletedCount()/10));
+   this.data.ownedCats=[...new Set([...(this.data.ownedCats??[]).filter(id=>collectionCats.some(c=>c.id===id)),...collectionCats.slice(0,count).map(c=>c.id)])];
+  }
+  buyCosmetic(id:string){
+   const item=cosmetics.find(c=>c.id===id),price=cosmeticPrice(id);
+   if(!item||price<=0||this.data.ownedCosmetics.includes(id)||this.data.kibble<price)return false;
+   this.data.kibble-=price;this.data.ownedCosmetics.push(id);void this.persist();return true;
   }
 
   persist(){const value=JSON.stringify(this.data);this.pending=this.pending.then(()=>this.storage.set({key:this.key,value})).then(()=>{this.saveFailed=false;}).catch(()=>{this.saveFailed=true;});return this.pending;}
@@ -130,7 +145,7 @@ export class SaveServiceImpl {
    while(added<safeCount){const id=journeyId(n);if(!this.data.progress[id]?.completed){this.data.progress[id]={completed:true,bestErrors:0,bestHints:0};added++;}n++;}
    this.data.stats.levelsCompleted+=added;const after=this.trailCompletedCount();
    for(let cleared=before+1;cleared<=after;cleared++){if(cleared%10!==0)continue;const unlock=unlockAt(cleared,this.data.ownedCosmetics,this.data.cosmeticSeed^Math.imul(cleared,2654435761));if(unlock&&!this.data.ownedCosmetics.includes(unlock))this.data.ownedCosmetics.push(unlock);}
-   this.data.session=null;this.data.attemptPurchases=0;this.data.purchasedHints={};await this.persist();return added;
+   this.restoreCollection();this.data.session=null;this.data.attemptPurchases=0;this.data.purchasedHints={};await this.persist();return added;
   }
 
   restartAttempt(){this.data.session=null;this.data.attemptPurchases=0;this.data.purchasedHints={};void this.persist();}
@@ -158,7 +173,7 @@ export class SaveServiceImpl {
    const cleared=this.trailCompletedCount();
    const unlock=id.startsWith('trail-')?unlockAt(cleared,this.data.ownedCosmetics,this.data.cosmeticSeed^Math.imul(cleared,2654435761)):null;
    if(unlock){this.data.ownedCosmetics.push(unlock);this.data.lastUnlock=unlock;}}
-   this.data.stats.totalErrors+=errors;this.data.stats.totalHints+=hints;this.data.session=null;this.data.attemptPurchases=0;this.data.purchasedHints={};await this.persist();}
+   this.restoreCollection();this.data.stats.totalErrors+=errors;this.data.stats.totalHints+=hints;this.data.session=null;this.data.attemptPurchases=0;this.data.purchasedHints={};await this.persist();}
 }
 
 export const SaveService=new SaveServiceImpl();

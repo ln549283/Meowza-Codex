@@ -5,16 +5,6 @@ export const collectionCats=[
  {id:'opale',name:'Opale',texture:'collection-opale'},
  {id:'orion',name:'Orion',texture:'collection-orion'},
  {id:'perle',name:'Perle',texture:'collection-perle'},
- {id:'luna',name:'Luna',texture:'collection-luna'},
- {id:'caramel',name:'Caramel',texture:'collection-caramel'},
- {id:'neige',name:'Neige',texture:'collection-neige'},
- {id:'coco',name:'Coco',texture:'collection-coco'},
- {id:'shadow',name:'Shadow',texture:'collection-shadow'},
- {id:'lili',name:'Lili',texture:'collection-lili'},
- {id:'miel',name:'Miel',texture:'collection-miel'},
- {id:'saphir',name:'Saphir',texture:'collection-saphir'},
- {id:'mousse',name:'Mousse',texture:'collection-mousse'},
- {id:'pivoine',name:'Pivoine',texture:'collection-pivoine'},
 ] as const;
 
 export type CollectionCatId=(typeof collectionCats)[number]['id'];

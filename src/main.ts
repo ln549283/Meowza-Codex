@@ -7,6 +7,7 @@ import '@fontsource/nunito/latin-700.css';
 import '@fontsource/nunito/latin-800.css';
 import '@fontsource/nunito/latin-900.css';
 import './style.css';
+import { ResponsivePlugin } from './game/ResponsivePlugin';
 import { W,H } from './game/theme';
 import { BootScene } from './game/scenes/BootScene';
 import { PreloadScene } from './game/scenes/PreloadScene';
@@ -23,7 +24,7 @@ import { SaveService } from './services/SaveService';
 function start(){
  void Promise.all([document.fonts.load('700 32px Nunito'),document.fonts.load('800 32px Nunito'),document.fonts.load('900 32px Nunito')]).catch(()=>undefined);
  // Preserve every authored control and platform on tall phones and desktop previews.
- const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#fff6ee',transparent:false,antialias:true,pixelArt:false,roundPixels:true,scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[BootScene,PreloadScene,HomeScene,LevelSelectScene,CustomizeScene,GameScene,RulesScene,SettingsScene,VictoryScene,LostScene,ShopScene,MissionsScene,ArchiveScene,HintScene],fps:{target:30,limit:30},render:{powerPreference:'low-power'}});
+ const game=new Phaser.Game({type:Phaser.AUTO,parent:'game',width:W,height:H,backgroundColor:'#fff6ee',transparent:false,antialias:true,pixelArt:false,roundPixels:true,scale:{mode:Phaser.Scale.EXPAND,autoCenter:Phaser.Scale.CENTER_BOTH},plugins:{scene:[{key:'Responsive',plugin:ResponsivePlugin,mapping:'responsive'}]},scene:[BootScene,PreloadScene,HomeScene,LevelSelectScene,CustomizeScene,GameScene,RulesScene,SettingsScene,VictoryScene,LostScene,ShopScene,MissionsScene,ArchiveScene,HintScene],fps:{target:30,limit:30},render:{powerPreference:'low-power'}});
  const visibility=(active:boolean)=>{if(active){game.loop.wake();AudioService.resume();}else{game.loop.sleep();AudioService.suspend();void SaveService.persist();}};
  document.addEventListener('visibilitychange',()=>visibility(!document.hidden));
  void App.addListener('appStateChange',({isActive})=>visibility(isActive));

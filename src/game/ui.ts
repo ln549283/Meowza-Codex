@@ -22,7 +22,13 @@ export function cozyBackground(scene:Phaser.Scene){
 export function title(scene:Phaser.Scene,text:string,y:number,size=64){return label(scene,540,y,text,size);}
 export function panel(scene:Phaser.Scene,x:number,y:number,w:number,h:number,_fill=C.panel,alpha=.98){return scene.add.image(x,y,'puzzle-panel').setDisplaySize(w,h).setAlpha(alpha);}
 
-export function press(scene:Phaser.Scene,c:Phaser.GameObjects.Container,w:number,h:number,onClick:()=>void){c.setSize(w,h).setInteractive({useHandCursor:true});c.on('pointerdown',()=>{c.setScale(.97);c.setAlpha(.94);});c.on('pointerout',()=>{c.setScale(1);c.setAlpha(1);});c.on('pointerup',(p:Phaser.Input.Pointer)=>{c.setScale(1);c.setAlpha(1);if(p.getDistance()>32||scene.registry.get('mapDragging'))return;AudioService.play('button');onClick();});return c;}
+export function press(scene:Phaser.Scene,c:Phaser.GameObjects.Container,w:number,h:number,onClick:()=>void){
+ c.setSize(w,h).setInteractive({useHandCursor:true});let sx=1,sy=1,alpha=1,pointer=-1;
+ const restore=()=>{if(pointer===-1)return;c.setScale(sx,sy).setAlpha(alpha);};
+ c.on('pointerdown',(p:Phaser.Input.Pointer)=>{sx=c.scaleX;sy=c.scaleY;alpha=c.alpha;pointer=p.id;if(!SaveService.data.settings.reducedMotion)c.setScale(sx*.97,sy*.97);c.setAlpha(alpha*.94);});
+ c.on('pointerout',()=>{restore();pointer=-1;});
+ c.on('pointerup',(p:Phaser.Input.Pointer)=>{const valid=pointer===p.id;restore();pointer=-1;if(!valid||p.getDistance()>32||scene.registry.get('mapDragging'))return;AudioService.play('button');onClick();});return c;
+}
 
 export function button(scene:Phaser.Scene,x:number,y:number,w:number,text:string,onClick:()=>void,color=C.teal){const primary=color===C.teal||color===C.pink;const c=scene.add.container(x,y),skin=scene.add.image(0,0,primary?'button-primary':'button-secondary').setDisplaySize(w,116);c.add([skin,label(scene,0,-1,text,32,primary?'#ffffff':C.ink)]);return press(scene,c,w,116,onClick);}
 export function roundButton(scene:Phaser.Scene,x:number,y:number,text:string,onClick:()=>void,_color=0xfff9f2){const c=scene.add.container(x,y),skin=scene.add.image(0,0,'button-square').setDisplaySize(116,116);c.add([skin,label(scene,0,-3,text,42)]);return press(scene,c,116,116,onClick);}
@@ -32,6 +38,6 @@ export function imageContain(image:Phaser.GameObjects.Image,maxW:number,maxH:num
 export function imageCover(image:Phaser.GameObjects.Image,w:number,h:number){return image.setScale(Math.max(w/image.width,h/image.height));}
 export function fadeIn(scene:Phaser.Scene){if(!SaveService.data.settings.reducedMotion)scene.cameras.main.fadeIn(220,255,246,238);}
 export function float(scene:Phaser.Scene,target:Phaser.GameObjects.Image|Phaser.GameObjects.Container,amount=12){if(!SaveService.data.settings.reducedMotion)scene.tweens.add({targets:target,y:`-=${amount}`,duration:1500,yoyo:true,repeat:0,ease:'Sine.InOut'});}
-export function sparkles(scene:Phaser.Scene,x:number,y:number,count=12){if(SaveService.data.settings.reducedMotion)return;for(let i=0;i<count;i++){const a=i/count*Math.PI*2;const p=scene.add.image(x,y,'ui-confetti').setDisplaySize(34,34).setDepth(150).setAngle(i*37);scene.tweens.add({targets:p,x:x+Math.cos(a)*190,y:y+Math.sin(a)*190,alpha:0,scale:.4,angle:p.angle+100,duration:700,onComplete:()=>p.destroy()});}}
+export function sparkles(scene:Phaser.Scene,x:number,y:number,count=12){if(SaveService.data.settings.reducedMotion)return;for(let i=0;i<count;i++){const a=i/count*Math.PI*2;const p=scene.add.image(x,y,'ui-confetti').setDisplaySize(34,34).setDepth(150).setAngle(i*37);scene.tweens.add({targets:p,x:x+Math.cos(a)*190,y:y+Math.sin(a)*190,alpha:0,scaleX:p.scaleX*.6,scaleY:p.scaleY*.6,angle:p.angle+100,duration:700,onComplete:()=>p.destroy()});}}
 export function cloud(scene:Phaser.Scene,x:number,y:number,w:number){return imageContain(scene.add.image(x,y,'tree-cloud'),w,Math.max(150,w*.52));}
 export function relationIcon(scene:Phaser.Scene,x:number,y:number,size:number,same:boolean){return imageContain(scene.add.image(x,y,same?'ui-relation-heart':'ui-relation-claws'),size,size);}

@@ -3,15 +3,6 @@ export const cosmetics=[
  {id:'cream',slot:'background',name:'Matin vanille',color:0xf8eedf},
  {id:'mint',slot:'background',name:'Jardin de menthe',color:0xe1eee5},
  {id:'night',slot:'background',name:'Soir lavande',color:0xe4dff2},
- {id:'forest',slot:'background',name:'Forêt verte',color:0xd8ead8},
- {id:'blossom',slot:'background',name:'Fleurs de cerisier',color:0xf6dce8},
- {id:'autumn',slot:'background',name:'Automne doré',color:0xf2c58f},
- {id:'winter',slot:'background',name:'Ciel d’hiver',color:0xdceef5},
- {id:'beach',slot:'background',name:'Plage tranquille',color:0xd8eef0},
- {id:'garden',slot:'background',name:'Jardin fleuri',color:0xefe8d7},
- {id:'sunset',slot:'background',name:'Coucher pêche',color:0xf3c5ac},
- {id:'rain',slot:'background',name:'Pluie douce',color:0xcdd9e8},
- {id:'moon-garden',slot:'background',name:'Jardin de lune',color:0x8d86aa},
  {id:'peach',slot:'cushion',name:'Coussin abricot',color:0xf0a079},
  {id:'rose',slot:'cushion',name:'Coussin framboise',color:0xe681a0},
  {id:'teal',slot:'cushion',name:'Coussin lagon',color:0x56b5b1},
@@ -21,3 +12,5 @@ export const cosmetics=[
 ] as const;
 export const starterCosmetics=['cream','peach','honey'];
 export function unlockAt(completed:number,owned:string[],seed:number){if(completed===0||completed%10)return null;const pool=cosmetics.filter(c=>!owned.includes(c.id));return pool.length?pool[(seed>>>0)%pool.length]!.id:null;}
+
+export const cosmeticPrice=(id:string)=>({mint:180,night:220,rose:120,teal:160,walnut:240,birch:240}[id]??0);
