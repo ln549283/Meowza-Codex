@@ -1,6 +1,6 @@
 import { cosmetics,starterCosmetics,unlockAt } from '../core/cosmetics';
 import { collectionCats,habitatMilestones } from '../core/cats';
-import { journeyId,nextSummit } from '../core/journey';
+import { journeyId,journeySpec,nextSummit } from '../core/journey';
 import { STARTING_KIBBLE,rewardFor,hintCost,MAX_HINTS_PER_ATTEMPT } from '../core/economy';
 import type { HumanStep } from '../core/humanSolver';
 import type { Difficulty } from '../core/model';
@@ -13,7 +13,7 @@ export interface LevelProgress { completed:boolean; bestErrors:number; bestHints
 export interface Session { id:string; grid:Grid; errors:number; hints:number; remaining?:number|undefined; started?:boolean|undefined; failed?:boolean; hintPositions?:string[] }
 export interface LevelAnalytics { attempts:number;wins:number;abandons:number;failuresErrors:number;failuresTime:number;placements:number;wrongPlacements:number;hintsBought:number }
 export type DailyMissionMetric='complete'|'max_one_error'|'no_hint'|'medium_plus'|'perfect'|'perfect_streak'|'clean'|'error_budget'|'timed'|'hard_plus'|'extreme_no_hint'|'hard_extreme_perfect'|'timed_perfect';
-export interface DailyMission { id:string;family:'engagement'|'mastery'|'challenge';metric:DailyMissionMetric;title:string;subtitle:string;target:number;progress:number;claimed:boolean;reward:number }
+export interface DailyMission { id:string;family:'engagement'|'mastery'|'challenge';metric:DailyMissionMetric;title:string;subtitle:string;target:number;progress:number;claimed:boolean;reward:number; errorWindow?:number[] }
 export interface DailyMissionState { date:string;missions:DailyMission[];perfectStreak:number }
 export interface MissionState { daily:DailyMissionState|null;globalClaimed:Record<string,number>;diamonds:number }
 export interface SaveData { saveVersion:4; tutorialCompleted:boolean; settings:Settings; progress:Record<string,LevelProgress>; stats:{levelsCompleted:number;totalHints:number;totalErrors:number}; analytics:Record<string,LevelAnalytics>; session:Session|null; journeyLevels:Record<string,Level>; refuges:Record<string,string>; kibble:number; purchasedHints:Record<string,HumanStep[]>; attemptPurchases:number; lastReward:number; logicVersion:number; ownedCosmetics:string[]; ownedCats:string[]; equipped:{background:string;cushion:string;wood:string}; cosmeticSeed:number; failures:Record<string,number>; lastUnlock:string|null; missions:MissionState }
@@ -35,7 +35,7 @@ const pools:{family:DailyMission['family'];items:Omit<DailyMission,'family'|'pro
   {id:'streak2',metric:'perfect_streak',title:'Série parfaite',subtitle:'Réussis 2 parfaits d’affilée',target:2},
   {id:'solo2',metric:'clean',title:'Tout seul !',subtitle:'2 niveaux sans erreur ni indice',target:2},
   {id:'nohelp4',metric:'no_hint',title:'Sans coup de patte',subtitle:'Termine 4 niveaux sans indice',target:4},
-  {id:'precision5',metric:'error_budget',title:'Précision féline',subtitle:'5 niveaux avec 2 erreurs max. au total',target:5},
+  {id:'precision5',metric:'error_budget',title:'Précision féline',subtitle:'5 victoires de suite avec 2 erreurs max.',target:5},
  ]},
  {family:'challenge',items:[
   {id:'claw1',metric:'timed',title:'Coup de griffe',subtitle:'Réussis 1 Coup de griffe',target:1},
@@ -69,15 +69,59 @@ export class SaveServiceImpl {
   trackAttemptStart(id:string){this.analyticsFor(id).attempts++;}
   trackPlacement(id:string,correct:boolean){const a=this.analyticsFor(id);a.placements++;if(!correct)a.wrongPlacements++;}
   trackHint(id:string){this.analyticsFor(id).hintsBought++;}
-  trackAbandon(id:string){this.analyticsFor(id).abandons++;}
-  trackFailure(id:string,reason:'errors'|'time'){const a=this.analyticsFor(id);if(reason==='time')a.failuresTime++;else a.failuresErrors++;}
+  trackAbandon(id:string){this.analyticsFor(id).abandons++;this.breakDailyStreak();}
+  trackFailure(id:string,reason:'errors'|'time'){const a=this.analyticsFor(id);if(reason==='time')a.failuresTime++;else a.failuresErrors++;this.breakDailyStreak();}
   trackWin(id:string){this.analyticsFor(id).wins++;}
 
-  ensureDailyMissions(){const date=localDate();if(this.data.missions.daily?.date===date)return this.data.missions.daily;const seed=hash(`${date}:${this.data.cosmeticSeed}`);const unlocked=Object.values(this.data.journeyLevels);const hasTimed=unlocked.some(l=>l.timed);const hasExtreme=unlocked.some(l=>l.difficulty==='extreme');const hasHard=unlocked.some(l=>l.difficulty==='hard'||l.difficulty==='extreme');const missions:DailyMission[]=pools.map((pool,i)=>{let choices=pool.items;if(pool.family==='challenge')choices=choices.filter(m=>(!m.metric.startsWith('timed')||hasTimed)&&(!m.metric.startsWith('extreme')||hasExtreme)&&(!['hard_plus','hard_extreme_perfect'].includes(m.metric)||hasHard));if(!choices.length)choices=pools[0]!.items;const base=choices[(seed+i*2654435761)%choices.length]!;return {...base,family:pool.family,progress:0,claimed:false,reward:1};});this.data.missions.daily={date,missions,perfectStreak:0};void this.persist();return this.data.missions.daily;}
-  claimDaily(id:string){const daily=this.ensureDailyMissions(),m=daily.missions.find(x=>x.id===id);if(!m||m.claimed||m.progress<m.target)return false;m.claimed=true;this.data.missions.diamonds++;void this.persist();return true;}
+  ensureDailyMissions(){
+   const date=localDate(),existing=this.data.missions.daily;
+   if(existing?.date===date){
+    let changed=false;
+    for(const m of existing.missions){
+     // The former progress counter did not record errors: do not invent them.
+     if(m.metric==='error_budget'&&!Array.isArray(m.errorWindow)&&!m.claimed&&m.progress<m.target){m.progress=0;m.errorWindow=[];changed=true;}
+    }
+    if(changed)void this.persist();
+    return existing;
+   }
+   const seed=hash(`${date}:${this.data.cosmeticSeed}`);
+   // A prefetched grid is not necessarily playable. Include the actual next
+   // summit even before its worker has produced a cached grid.
+   const playable=Object.values(this.data.journeyLevels).filter(l=>this.isUnlocked(l.id));
+   const available=[...playable,journeySpec(nextSummit(this.data.progress))];
+   const hasMedium=available.some(l=>l.difficulty!=='easy');
+   const hasTimed=available.some(l=>l.timed),hasExtreme=available.some(l=>l.difficulty==='extreme'),hasHard=available.some(l=>l.difficulty==='hard'||l.difficulty==='extreme');
+   const eligible=(m:typeof pools[number]['items'][number])=>
+    (m.metric!=='medium_plus'||hasMedium)&&
+    (!m.metric.startsWith('timed')||hasTimed)&&
+    (!m.metric.startsWith('extreme')||hasExtreme)&&
+    (!['hard_plus','hard_extreme_perfect'].includes(m.metric)||hasHard);
+   const selected=new Set<string>();
+   const missions:DailyMission[]=pools.map((pool,i)=>{
+    let choices=pool.items.filter(eligible);
+    if(!choices.length)choices=pools[0]!.items.filter(eligible);
+    choices=choices.filter(m=>!selected.has(m.id));
+    const base=choices[(seed+i*2654435761)%choices.length]!;
+    selected.add(base.id);
+    return {...base,family:pool.family,progress:0,claimed:false,reward:1,...(base.metric==='error_budget'?{errorWindow:[]}: {})};
+   });
+   this.data.missions.daily={date,missions,perfectStreak:0};void this.persist();return this.data.missions.daily;
+  }
+  private breakDailyStreak(){
+   const daily=this.ensureDailyMissions();daily.perfectStreak=0;
+   for(const m of daily.missions)if(!m.claimed&&m.progress<m.target){if(m.metric==='error_budget'){m.errorWindow=[];m.progress=0;}else if(m.metric==='perfect_streak')m.progress=0;}
+   void this.persist();
+  }
+  claimDaily(id:string){const daily=this.ensureDailyMissions(),m=daily.missions.find(x=>x.id===id);if(!m||m.claimed||m.progress<m.target)return false;m.claimed=true;this.data.missions.diamonds+=m.reward;void this.persist();return true;}
   claimGlobal(id:string,threshold:number,kibble:number,diamonds=0){const claimed=this.data.missions.globalClaimed[id]??0;if(threshold<=claimed)return false;this.data.missions.globalClaimed[id]=threshold;this.data.kibble+=kibble;this.data.missions.diamonds+=diamonds;void this.persist();return true;}
   assignCat(level:number,catId:string|null){if(level%10!==0||level>this.trailCompletedCount())return false;if(catId===null){delete this.data.refuges[String(level)];void this.persist();return true;}if(!this.data.ownedCats.includes(catId))return false;for(const[key,id]of Object.entries(this.data.refuges))if(id===catId&&key!==String(level))delete this.data.refuges[key];this.data.refuges[String(level)]=catId;void this.persist();return true;}
-  private updateDailyOnWin(level:Level,errors:number,hints:number){const d=this.ensureDailyMissions();d.perfectStreak=errors===0?d.perfectStreak+1:0;for(const m of d.missions){if(m.progress>=m.target)continue;let ok=false;switch(m.metric){case'complete':ok=true;break;case'max_one_error':ok=errors<=1;break;case'no_hint':ok=hints===0;break;case'medium_plus':ok=level.difficulty!=='easy';break;case'perfect':ok=errors===0;break;case'perfect_streak':m.progress=Math.max(m.progress,Math.min(m.target,d.perfectStreak));continue;case'clean':ok=errors===0&&hints===0;break;case'error_budget':if(errors<=2-m.progress){ok=true;}break;case'timed':ok=!!level.timed;break;case'hard_plus':ok=level.difficulty==='hard'||level.difficulty==='extreme';break;case'extreme_no_hint':ok=level.difficulty==='extreme'&&hints===0;break;case'hard_extreme_perfect':ok=(level.difficulty==='hard'||level.difficulty==='extreme')&&errors===0;break;case'timed_perfect':ok=!!level.timed&&errors===0;break;}if(ok)m.progress=Math.min(m.target,m.progress+1);}}
+  private updateDailyOnWin(level:Level,errors:number,hints:number){const d=this.ensureDailyMissions();d.perfectStreak=errors===0?d.perfectStreak+1:0;for(const m of d.missions){if(m.progress>=m.target)continue;let ok=false;switch(m.metric){case'complete':ok=true;break;case'max_one_error':ok=errors<=1;break;case'no_hint':ok=hints===0;break;case'medium_plus':ok=level.difficulty!=='easy';break;case'perfect':ok=errors===0;break;case'perfect_streak':m.progress=Math.min(m.target,d.perfectStreak);continue;case'clean':ok=errors===0&&hints===0;break;case'error_budget':{
+    // Keep the longest trailing run of wins within the two-error budget.
+    // This also lets the player recover naturally after exceeding the budget.
+    const window=[...(m.errorWindow??[]),errors].slice(-m.target);
+    while(window.reduce((sum,value)=>sum+value,0)>2)window.shift();
+    m.errorWindow=window;m.progress=window.length;continue;
+   }case'timed':ok=!!level.timed;break;case'hard_plus':ok=level.difficulty==='hard'||level.difficulty==='extreme';break;case'extreme_no_hint':ok=level.difficulty==='extreme'&&hints===0;break;case'hard_extreme_perfect':ok=(level.difficulty==='hard'||level.difficulty==='extreme')&&errors===0;break;case'timed_perfect':ok=!!level.timed&&errors===0;break;}if(ok)m.progress=Math.min(m.target,m.progress+1);}}
 
   addTestKibble(amount=1000){this.data.kibble+=Math.max(0,Math.floor(amount));void this.persist();}
   addTestDiamonds(amount=500){this.data.missions.diamonds+=Math.max(0,Math.floor(amount));void this.persist();}
@@ -102,7 +146,15 @@ export class SaveServiceImpl {
 
   remember(id:string,grid:Grid,errors:number,hints:number,remaining?:number,started?:boolean,failed=false,hintPositions?:string[]){const used=hintPositions??(this.data.session?.id===id?this.data.session.hintPositions:[])??[];this.data.session={id,grid:cloneGrid(grid),errors,hints,remaining,started,failed,hintPositions:used};void this.persist();}
 
-  async complete(id:string,errors:number,hints:number){const old=this.data.progress[id];this.data.progress[id]={completed:true,bestErrors:old?.completed?Math.min(errors,old.bestErrors):errors,bestHints:old?.completed?Math.min(hints,old.bestHints):hints};this.data.lastReward=0;this.data.lastUnlock=null;if(!old?.completed){this.data.stats.levelsCompleted++;const level=this.data.journeyLevels[id];const difficulty=level?.difficulty??id.split('-')[0] as Difficulty;this.data.lastReward=level?.timed?18:rewardFor(difficulty)||5;this.data.kibble+=this.data.lastReward;this.updateDailyOnWin(level??{id,difficulty,size:4,initial:[],solution:[],constraints:[]},errors,hints);
+  async complete(id:string,errors:number,hints:number){
+   const trail=/^trail-([1-9]\d*)$/.exec(id);
+   const spec=trail?journeySpec(Number(trail[1])):undefined;
+   const difficulty=this.data.journeyLevels[id]?.difficulty??spec?.difficulty??id.split('-')[0] as Difficulty;
+   const level=this.data.journeyLevels[id]??{id,difficulty,size:spec?.size??4,initial:[],solution:[],constraints:[],...(spec?.timed?{timed:true}:{})};
+   // Daily goals count wins, including replays. First-clear currency and
+   // cosmetic unlocks remain strictly inside the first-completion branch.
+   this.updateDailyOnWin(level??{id,difficulty,size:4,initial:[],solution:[],constraints:[]},errors,hints);
+   const old=this.data.progress[id];this.data.progress[id]={completed:true,bestErrors:old?.completed?Math.min(errors,old.bestErrors):errors,bestHints:old?.completed?Math.min(hints,old.bestHints):hints};this.data.lastReward=0;this.data.lastUnlock=null;if(!old?.completed){this.data.stats.levelsCompleted++;this.data.lastReward=level?.timed?18:rewardFor(difficulty)||5;this.data.kibble+=this.data.lastReward;
    const cleared=this.trailCompletedCount();
    const unlock=id.startsWith('trail-')?unlockAt(cleared,this.data.ownedCosmetics,this.data.cosmeticSeed^Math.imul(cleared,2654435761)):null;
    if(unlock){this.data.ownedCosmetics.push(unlock);this.data.lastUnlock=unlock;}}
