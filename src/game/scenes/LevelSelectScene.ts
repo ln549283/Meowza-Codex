@@ -51,7 +51,7 @@ export class LevelSelectScene extends Phaser.Scene {
   const navY=height-120,navWidth=984,left=48,itemW=246;
   this.add.graphics().fillStyle(0xfffaf3,.99).fillRoundedRect(left,height-220,navWidth,190,36).lineStyle(2,0xe1d1c0).strokeRoundedRect(left,height-220,navWidth,190,36).setDepth(102);
   const nav=[{key:'hub-decorate',text:'Collection',go:()=>this.scene.start('Customize')},{key:'hub-missions',text:'Missions',go:()=>this.scene.start('Missions')},{key:'hub-daily',text:'Défi du jour',go:()=>this.scene.start('Missions',{tab:'daily'})},{key:'hub-shop',text:'Boutique',go:()=>this.scene.start('Shop')}];
-  nav.forEach((item,i)=>{const c=this.add.container(left+(i+.5)*itemW,navY).setDepth(104);c.add([imageContain(this.add.image(0,-24,item.key),74,74),label(this,0,39,item.text,24,C.ink,0)]);this.tap(c,itemW,164,item.go);});
+  nav.forEach((item,i)=>{const c=this.add.container(left+(i+.5)*itemW,navY).setDepth(104);c.add([imageContain(this.add.image(0,-24,item.key),74,74),label(this,0,39,item.text,30,C.ink,0)]);this.tap(c,itemW,164,item.go);});
   let previous=0,previousTime=0;
   this.input.on('pointerdown',(p:Phaser.Input.Pointer)=>{this.registry.set('mapDragging',false);this.velocity=0;previous=p.y;previousTime=p.event.timeStamp;this.dragging=p.y>TOP&&p.y<BOTTOM;});
   this.input.on('pointermove',(p:Phaser.Input.Pointer)=>{if(!p.isDown||!this.dragging)return;if(p.getDistance()>18)this.registry.set('mapDragging',true);const dy=p.y-previous;this.velocity=Phaser.Math.Clamp(dy/Math.max(16,p.event.timeStamp-previousTime),-2.5,2.5);this.offset=Phaser.Math.Clamp(this.offset+dy,0,treeLimit(this.current));previous=p.y;previousTime=p.event.timeStamp;this.refreshRows();});
@@ -67,7 +67,8 @@ export class LevelSelectScene extends Phaser.Scene {
  }
  update(_time:number,delta:number){if(this.dragging||Math.abs(this.velocity)<.02)return;const dt=Math.min(delta,50);this.offset=Phaser.Math.Clamp(this.offset+this.velocity*dt,0,treeLimit(this.current));this.velocity*=Math.pow(.90,dt/16.67);if(this.offset===0||this.offset===treeLimit(this.current))this.velocity=0;this.refreshRows();}
  private refreshRows(){
-  const visible=visibleChunks(this.offset,this.current,this.scale.height);
+  const displayOffset=this.offset+Math.max(0,this.scale.height-1920)*.7;
+  const visible=visibleChunks(displayOffset,this.current,this.scale.height);
   for(const [i,c]of this.chunks)if(!visible.includes(i)){c.destroy();this.chunks.delete(i);}
   for(const i of visible){let c=this.chunks.get(i);const chunk=chunkForIndex(i);if(!c){
    c=this.add.container(CHUNK_X,0);c.add(this.add.image(0,0,treeTexture(this,chunk.kind,SaveService.data.equipped.wood,SaveService.data.equipped.cushion)).setOrigin(0).setScale(CHUNK_SCALE));
@@ -86,11 +87,11 @@ export class LevelSelectScene extends Phaser.Scene {
     const anchor=treeAnchor(n);c.add(imageContain(this.add.image((anchor.x-CHUNK_X),(anchor.y-chunk.top)-90,cat.texture),160,190));
    }
    this.world.addAt(c,0);this.chunks.set(i,c);
-  }c.y=1040+chunk.top+this.offset;}
-  const levels=visibleTreeLevels(this.current,this.offset,this.scale.height);
+  }c.y=1040+chunk.top+displayOffset;}
+  const levels=visibleTreeLevels(this.current,displayOffset,this.scale.height);
   for(const [n,row]of this.rows)if(!levels.includes(n)){row.destroy();this.rows.delete(n);}
-  for(const n of levels){let row=this.rows.get(n);if(!row){row=this.makeRow(n);this.world.add(row);this.rows.set(n,row);}row.y=treeY(n,this.offset)+80;if(row.input)row.input.enabled=row.y>TOP+50&&row.y<this.bottom-50;}
-  if(this.locate)this.locate.setVisible(treeY(this.current,this.offset)<TOP+70||treeY(this.current,this.offset)>this.bottom-140);
+  for(const n of levels){let row=this.rows.get(n);if(!row){row=this.makeRow(n);this.world.add(row);this.rows.set(n,row);}row.y=treeY(n,displayOffset)+80;if(row.input)row.input.enabled=row.y>TOP+50&&row.y<this.bottom-50;}
+  if(this.locate)this.locate.setVisible(treeY(this.current,displayOffset)<TOP+70||treeY(this.current,displayOffset)>this.bottom-140);
  }
  private makeRow(n:number){
   const anchor=treeAnchor(n),row=this.add.container(anchor.x,0),progress=SaveService.data.progress[journeyId(n)],done=!!progress?.completed,spec=journeySpec(n);

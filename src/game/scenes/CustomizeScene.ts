@@ -15,7 +15,7 @@ export class CatalogScene extends Phaser.Scene {
  private restart(){this.scene.restart({tab:this.tab,selected:this.selected,targetLevel:this.target});}
  create(){
   this.cameras.main.setBackgroundColor(0xfff7ef);backButton(this,()=>this.scene.start('LevelSelect'));
-  label(this,560,90,this.shop?'La petite boutique':'Ma collection',54);label(this,540,162,this.shop?'Des décors à garder, un arbre à ton image':'Des trouvailles et des compagnons pour ton arbre',25,'#78647d');
+  label(this,560,90,this.shop?'La petite boutique':'Ma collection',54);label(this,540,162,this.shop?'Des décors à garder, un arbre à ton image':'Des trouvailles et des compagnons pour ton arbre',28,'#78647d');
   const available=tabs.slice(0,this.shop?3:4),width=960/available.length;
   available.forEach((tab,i)=>{const c=this.add.container(60+width*(i+.5),280),active=i===this.tab;c.add([this.add.image(0,0,active?'button-primary':'button-secondary').setDisplaySize(width-12,96),label(this,0,0,tab.label,27,active?'#21475a':C.ink)]);press(this,c,width-12,96,()=>{this.tab=i;this.selected=0;this.restart();});});
   const key=tabs[this.tab]!.key,isCats=key==='cats',items=isCats?collectionCats:cosmetics.filter(c=>c.slot===key);
@@ -34,8 +34,8 @@ export class CatalogScene extends Phaser.Scene {
    const x=210+(i%3)*330,y=675+Math.floor(i/3)*400,owned=(isCats?SaveService.data.ownedCats:SaveService.data.ownedCosmetics).includes(item.id),selected=i===this.selected;
    panel(this,x,y,306,368);if(selected)this.add.graphics().lineStyle(4,0xb68c52).strokeRoundedRect(x-143,y-169,286,338,28);
    thumbnail(item.id,x,y-52,245,220).setAlpha(owned?1:.7);
-   label(this,x,y+83,item.name,24).setWordWrapWidth(265);
-   label(this,x,y+128,owned?'Découvert':isCats?`Niveau ${(i+1)*10}`:`${cosmeticPrice(item.id)} croquettes`,21,'#78647d');
+   label(this,x,y+83,item.name,30).setWordWrapWidth(265);
+   label(this,x,y+128,owned?'Découvert':isCats?`Niveau ${(i+1)*10}`:`${cosmeticPrice(item.id)} croquettes`,26,'#78647d');
    const hit=this.add.container(x,y);press(this,hit,300,358,()=>{this.selected=i;this.restart();});
   });
   const item=items[this.selected]!,owned=(isCats?SaveService.data.ownedCats:SaveService.data.ownedCosmetics).includes(item.id);
@@ -55,14 +55,14 @@ export class CatalogScene extends Phaser.Scene {
    const cosmetic=cosmetics.find(c=>c.id===item.id)!;
    panel(this,540,1295,970,670);thumbnail(item.id,255,1270,305,470);
    label(this,480,1080,item.name,36).setOrigin(0,.5).setWordWrapWidth(490);
-   label(this,480,1165,key==='background'?'Une nouvelle ambiance pour le jeu.':key==='wood'?'Une nouvelle teinte de bois\npour toutes les plateformes.':'Une nouvelle palette textile\npour les coussins et les hamacs.',25,'#78647d').setOrigin(0,.5).setWordWrapWidth(480);
+   label(this,480,1165,key==='background'?'Une nouvelle ambiance pour le jeu.':key==='wood'?'Une nouvelle teinte de bois\npour toutes les plateformes.':'Une nouvelle palette textile\npour les coussins et les hamacs.',28,'#78647d').setOrigin(0,.5).setWordWrapWidth(480);
    const equipped=SaveService.data.equipped[cosmetic.slot]===item.id,price=cosmeticPrice(item.id),afford=SaveService.data.kibble>=price;
    label(this,480,1300,equipped?'Actuellement équipé':owned?'Prêt à équiper':`À débloquer · ${price} croquettes`,26).setOrigin(0,.5);
    if(!equipped)button(this,700,1430,450,owned?'Équiper':afford?'Adopter ce décor':'Croquettes insuffisantes',()=>{
     if(!owned&&!SaveService.buyCosmetic(item.id))return;
     SaveService.data.equipped[cosmetic.slot as Slot]=item.id;void SaveService.persist();this.restart();
    },owned||afford?C.teal:C.orange);
-   label(this,540,1760,this.shop?'Gagne des croquettes en résolvant les grilles.':'Un décor se découvre aussi à chaque palier de 10 niveaux.',25,'#78647d');
+   label(this,540,1760,this.shop?'Gagne des croquettes en résolvant les grilles.':'Un décor se découvre aussi à chaque palier de 10 niveaux.',28,'#78647d');
   }
  }
 }
