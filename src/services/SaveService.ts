@@ -109,13 +109,13 @@ export class SaveServiceImpl {
   }
   private breakDailyStreak(){
    const daily=this.ensureDailyMissions();daily.perfectStreak=0;
-   for(const m of daily.missions)if(m.metric==='error_budget'&&!m.claimed&&m.progress<m.target){m.errorWindow=[];m.progress=0;}
+   for(const m of daily.missions)if(!m.claimed&&m.progress<m.target){if(m.metric==='error_budget'){m.errorWindow=[];m.progress=0;}else if(m.metric==='perfect_streak')m.progress=0;}
    void this.persist();
   }
   claimDaily(id:string){const daily=this.ensureDailyMissions(),m=daily.missions.find(x=>x.id===id);if(!m||m.claimed||m.progress<m.target)return false;m.claimed=true;this.data.missions.diamonds+=m.reward;void this.persist();return true;}
   claimGlobal(id:string,threshold:number,kibble:number,diamonds=0){const claimed=this.data.missions.globalClaimed[id]??0;if(threshold<=claimed)return false;this.data.missions.globalClaimed[id]=threshold;this.data.kibble+=kibble;this.data.missions.diamonds+=diamonds;void this.persist();return true;}
   assignCat(level:number,catId:string|null){if(level%10!==0||level>this.trailCompletedCount())return false;if(catId===null){delete this.data.refuges[String(level)];void this.persist();return true;}if(!this.data.ownedCats.includes(catId))return false;for(const[key,id]of Object.entries(this.data.refuges))if(id===catId&&key!==String(level))delete this.data.refuges[key];this.data.refuges[String(level)]=catId;void this.persist();return true;}
-  private updateDailyOnWin(level:Level,errors:number,hints:number){const d=this.ensureDailyMissions();d.perfectStreak=errors===0?d.perfectStreak+1:0;for(const m of d.missions){if(m.progress>=m.target)continue;let ok=false;switch(m.metric){case'complete':ok=true;break;case'max_one_error':ok=errors<=1;break;case'no_hint':ok=hints===0;break;case'medium_plus':ok=level.difficulty!=='easy';break;case'perfect':ok=errors===0;break;case'perfect_streak':m.progress=Math.max(m.progress,Math.min(m.target,d.perfectStreak));continue;case'clean':ok=errors===0&&hints===0;break;case'error_budget':{
+  private updateDailyOnWin(level:Level,errors:number,hints:number){const d=this.ensureDailyMissions();d.perfectStreak=errors===0?d.perfectStreak+1:0;for(const m of d.missions){if(m.progress>=m.target)continue;let ok=false;switch(m.metric){case'complete':ok=true;break;case'max_one_error':ok=errors<=1;break;case'no_hint':ok=hints===0;break;case'medium_plus':ok=level.difficulty!=='easy';break;case'perfect':ok=errors===0;break;case'perfect_streak':m.progress=Math.min(m.target,d.perfectStreak);continue;case'clean':ok=errors===0&&hints===0;break;case'error_budget':{
     // Keep the longest trailing run of wins within the two-error budget.
     // This also lets the player recover naturally after exceeding the budget.
     const window=[...(m.errorWindow??[]),errors].slice(-m.target);
@@ -148,8 +148,9 @@ export class SaveServiceImpl {
 
   async complete(id:string,errors:number,hints:number){
    const trail=/^trail-([1-9]\d*)$/.exec(id);
-   const level=this.data.journeyLevels[id];
-   const difficulty=level?.difficulty??(trail?journeySpec(Number(trail[1])).difficulty:id.split('-')[0] as Difficulty);
+   const spec=trail?journeySpec(Number(trail[1])):undefined;
+   const difficulty=this.data.journeyLevels[id]?.difficulty??spec?.difficulty??id.split('-')[0] as Difficulty;
+   const level=this.data.journeyLevels[id]??{id,difficulty,size:spec?.size??4,initial:[],solution:[],constraints:[],...(spec?.timed?{timed:true}:{})};
    // Daily goals count wins, including replays. First-clear currency and
    // cosmetic unlocks remain strictly inside the first-completion branch.
    this.updateDailyOnWin(level??{id,difficulty,size:4,initial:[],solution:[],constraints:[]},errors,hints);

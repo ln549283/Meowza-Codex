@@ -67,3 +67,10 @@ La recette visuelle mobile et la publication stores ne sont pas couvertes par ce
 3. Sur une nouvelle série, faire parfait → défaite → parfait : la série parfaite reste à 1/2.
 4. Fermer et rouvrir après trois victoires avec erreurs [1,0,1] : précision 3/5 et budget 2/2.
 5. Nouveau compte : aucune mission exigeant une difficulté supérieure au niveau accessible.
+
+## Revue complémentaire — 15 septembre 2026
+
+- La progression affichée d'une série parfaite partielle retombe immédiatement à zéro après une défaite, un abandon ou une victoire imparfaite. Les séries terminées restent acquises.
+- Un sommet chronométré sans grille en cache conserve son statut chronométré et sa récompense de 18 croquettes.
+- La vue quotidienne affiche le montant stocké dans la mission.
+- Trois tests de régression supplémentaires couvrent ces cas : 55 tests au total.

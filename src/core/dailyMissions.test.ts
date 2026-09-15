@@ -157,3 +157,24 @@ test('uncached trail ids derive their real difficulty instead of the word trail'
  await s.complete('trail-1',0,0);assert.equal(m.progress,0);
  await s.complete('trail-6',0,0);assert.equal(m.progress,1);
 });
+
+test('partial perfect streak display resets immediately on failure and imperfect wins',async()=>{
+ for(const outcome of ['errors','abandon','imperfect'] as const){
+  const {service:s}=memory(),m=install(s,'perfect_streak',2);
+  await wins(s,[0]);assert.equal(m.progress,1);
+  if(outcome==='errors')s.trackFailure('easy-01','errors');
+  else if(outcome==='abandon')s.trackAbandon('easy-01');
+  else await wins(s,[1]);
+  assert.equal(m.progress,0);
+ }
+});
+test('uncached timed summit retains timed missions and first-win reward',async()=>{
+ const {service:s}=memory(),m=install(s,'timed',1);
+ await s.complete('trail-33',0,0);
+ assert.equal(m.progress,1);assert.equal(s.data.lastReward,18);
+});
+test('completed perfect streak remains claimable after a failure',async()=>{
+ const {service:s}=memory(),m=install(s,'perfect_streak',2);
+ await wins(s,[0,0]);s.trackFailure('easy-01','errors');
+ assert.equal(m.progress,2);assert.equal(s.claimDaily(m.id),true);
+});
