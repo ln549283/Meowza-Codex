@@ -1,0 +1,382 @@
+{
+  "catalogue": [
+    {
+      "id": "noisette",
+      "name": "Noisette",
+      "subject": "cinnamon brown and cream bicolor, relaxed loaf, curled striped tail",
+      "tier": "standard"
+    },
+    {
+      "id": "domino",
+      "name": "Domino",
+      "subject": "black and ivory tuxedo cat, white moustache and paws, lying with paws neatly crossed",
+      "tier": "standard"
+    },
+    {
+      "id": "astre",
+      "name": "Astre",
+      "subject": "warm ivory longhair cat, honey ear tips, curled sleeping ball with tail hugging body",
+      "tier": "standard"
+    },
+    {
+      "id": "opale",
+      "name": "Opale",
+      "subject": "pale silver lilac point cat, small folded ears, resting sphinx pose, sleepy half-closed simple eyes",
+      "tier": "standard"
+    },
+    {
+      "id": "orion",
+      "name": "Orion",
+      "subject": "charcoal grey tabby with silver stripes, stocky loaf pose, closed smiling eyes",
+      "tier": "standard"
+    },
+    {
+      "id": "perle",
+      "name": "Perle",
+      "subject": "pure white fluffy cat, pink inner ears, lying on its side with tucked paws",
+      "tier": "standard"
+    },
+    {
+      "id": "biscotte",
+      "name": "Biscotte",
+      "subject": "golden beige ticked tabby, cream chin, low seated pose with short front paws",
+      "tier": "standard"
+    },
+    {
+      "id": "cannelle",
+      "name": "Cannelle",
+      "subject": "reddish cinnamon tabby with darker fine stripes, curled sleeping pose",
+      "tier": "standard"
+    },
+    {
+      "id": "truffe",
+      "name": "Truffe",
+      "subject": "solid chocolate brown round cat with tiny cream chin, tucked loaf",
+      "tier": "standard"
+    },
+    {
+      "id": "sesame",
+      "name": "Sésame",
+      "subject": "blue grey cat with cream chest and spotted nose, paws stretched gently forward",
+      "tier": "standard"
+    },
+    {
+      "id": "praline",
+      "name": "Praline",
+      "subject": "cream calico with caramel and chocolate patches, resting on belly facing slightly left",
+      "tier": "standard"
+    },
+    {
+      "id": "chataigne",
+      "name": "Châtaigne",
+      "subject": "chestnut brown longhair with ivory neck ruff, tail wrapped around low seated body",
+      "tier": "standard"
+    },
+    {
+      "id": "muscade",
+      "name": "Muscade",
+      "subject": "muted tortoiseshell with apricot face blaze, curled sleeping pose",
+      "tier": "standard"
+    },
+    {
+      "id": "pistache",
+      "name": "Pistache",
+      "subject": "silver tabby with pale green simple half closed eyes, low loaf and striped tail",
+      "tier": "standard"
+    },
+    {
+      "id": "vanille",
+      "name": "Vanille",
+      "subject": "cream shorthaired cat with pale peach ears, tiny content smile, relaxed sphinx pose",
+      "tier": "standard"
+    },
+    {
+      "id": "reglisse",
+      "name": "Réglisse",
+      "subject": "soft black cat with subtle charcoal highlights, small white chest star marking, sleepy loaf",
+      "tier": "standard"
+    },
+    {
+      "id": "plume",
+      "name": "Plume",
+      "subject": "white and dove grey fluffy bicolor, lying with chin resting on front paws",
+      "tier": "standard"
+    },
+    {
+      "id": "nuage",
+      "name": "Nuage",
+      "subject": "pale blue grey plush British shorthair, very round cheeks, curled sleeping ball",
+      "tier": "standard"
+    },
+    {
+      "id": "brume",
+      "name": "Brume",
+      "subject": "silver shaded longhair, dark ear tips and muted grey back, compact seated pose",
+      "tier": "standard"
+    },
+    {
+      "id": "galet",
+      "name": "Galet",
+      "subject": "grey and white tabby with broad white nose stripe, paws crossed in front",
+      "tier": "standard"
+    },
+    {
+      "id": "moka_creme",
+      "name": "Cappuccino",
+      "subject": "coffee brown point Siamese cream cat, dark ears paws and tail, relaxed loaf",
+      "tier": "standard"
+    },
+    {
+      "id": "flocon",
+      "name": "Flocon",
+      "subject": "warm white fluffy cat with silver tail tip, asleep facing right, tail around paws",
+      "tier": "standard"
+    },
+    {
+      "id": "roux",
+      "name": "Roussi",
+      "subject": "copper red tabby with ivory socks, one ear slightly folded, low seated pose",
+      "tier": "standard"
+    },
+    {
+      "id": "pepite",
+      "name": "Pépite",
+      "subject": "golden spotted Bengal style coat, creamy belly, peaceful lying pose",
+      "tier": "standard"
+    },
+    {
+      "id": "tache",
+      "name": "Tache",
+      "subject": "mostly white cat with one black eye patch and black tail, lying chin on paws",
+      "tier": "standard"
+    },
+    {
+      "id": "chaussette",
+      "name": "Chaussette",
+      "subject": "slate grey shorthaired cat with four white socks, tucked loaf, eyes closed",
+      "tier": "standard"
+    },
+    {
+      "id": "mimine",
+      "name": "Mimine",
+      "subject": "dilute calico in pale grey peach and cream, round head, softly curled pose",
+      "tier": "standard"
+    },
+    {
+      "id": "pamplemousse",
+      "name": "Pomelo",
+      "subject": "pale ginger tabby, broad ivory muzzle, low relaxed seated pose",
+      "tier": "standard"
+    },
+    {
+      "id": "coco",
+      "name": "Coco",
+      "subject": "ivory cat with chocolate ears and a single brown back patch, sphinx pose",
+      "tier": "standard"
+    },
+    {
+      "id": "olive",
+      "name": "Olive",
+      "subject": "brown mackerel tabby, dark forehead M stripe, petite compact loaf",
+      "tier": "standard"
+    },
+    {
+      "id": "pollen",
+      "name": "Pollen",
+      "subject": "golden cream longhaired cat, amber nose, sleeping ball pose",
+      "tier": "standard"
+    },
+    {
+      "id": "sable",
+      "name": "Sable",
+      "subject": "sand beige cat with dark brown ear rims, slim closed eyes, lying paws crossed",
+      "tier": "standard"
+    },
+    {
+      "id": "fauve",
+      "name": "Fauve",
+      "subject": "russet red longhair, creamy cheek ruff, wide fluffy tail, compact seated pose",
+      "tier": "standard"
+    },
+    {
+      "id": "lune",
+      "name": "Lune",
+      "subject": "charcoal cat with white crescent face marking, lying comfortably facing left",
+      "tier": "standard"
+    },
+    {
+      "id": "pirouette",
+      "name": "Pirouette",
+      "subject": "black and white harlequin cat, one black ear and tiny nose spot, playful curled body",
+      "tier": "standard"
+    },
+    {
+      "id": "bulle",
+      "name": "Bulle",
+      "subject": "cream and blue grey bicolor, round cheeks and short ears, relaxed belly side pose",
+      "tier": "standard"
+    },
+    {
+      "id": "tigre",
+      "name": "Tigrou",
+      "subject": "warm brown classic tabby with broad swirl markings, sleeping sphinx pose",
+      "tier": "standard"
+    },
+    {
+      "id": "fleur",
+      "name": "Fleur",
+      "subject": "peach cream and white calico, petite rounded ears, paws tucked below chest",
+      "tier": "standard"
+    },
+    {
+      "id": "cerise",
+      "name": "Cerise",
+      "subject": "muted red and ivory bicolor, pink nose, head tilted gently in low seated pose",
+      "tier": "standard"
+    },
+    {
+      "id": "marbre",
+      "name": "Marbre",
+      "subject": "silver black marble tabby, fluffy tail curled in front, content loaf",
+      "tier": "standard"
+    },
+    {
+      "id": "sakura",
+      "name": "Sakura",
+      "subject": "premium ivory cat wearing a tiny pink cherry blossom beside one ear, blush pink silk collar, sleeping loaf",
+      "tier": "premium"
+    },
+    {
+      "id": "cosmos",
+      "name": "Cosmos",
+      "subject": "premium midnight blue cat with subtle golden star markings on fur, small crescent moon pendant, curled pose",
+      "tier": "premium"
+    },
+    {
+      "id": "bambou",
+      "name": "Bambou",
+      "subject": "premium panda patterned round cat wearing a small jade bamboo leaf collar, low seated pose",
+      "tier": "premium"
+    },
+    {
+      "id": "macaron",
+      "name": "Macaron",
+      "subject": "premium lavender cream longhair with a small mint patisserie bow tie, resting paws crossed",
+      "tier": "premium"
+    },
+    {
+      "id": "miel_royal",
+      "name": "Miel royal",
+      "subject": "premium golden longhair with a tiny elegant honey gold crown and cream neck ribbon, relaxed loaf",
+      "tier": "premium"
+    },
+    {
+      "id": "lotus",
+      "name": "Lotus",
+      "subject": "premium pearl grey cat with a small lotus flower ornament and jade bead necklace, asleep with tail wrapped",
+      "tier": "premium"
+    },
+    {
+      "id": "pirate",
+      "name": "Capitaine",
+      "subject": "premium charcoal tuxedo cat wearing a small soft tricorn and red neckerchief, BOTH eyes naturally closed, no eyepatch, loaf",
+      "tier": "premium"
+    },
+    {
+      "id": "sorbet",
+      "name": "Sorbet",
+      "subject": "premium cream peach cat with pastel strawberry bib and tiny berry ornament beside ear, lying on side",
+      "tier": "premium"
+    },
+    {
+      "id": "aurore",
+      "name": "Aurore",
+      "subject": "premium pale lilac silver cat with subtle pastel mint ear tips, tiny star pendant, fluffy curled pose",
+      "tier": "premium"
+    },
+    {
+      "id": "sultan",
+      "name": "Sultan",
+      "subject": "premium warm sand longhair cat with turquoise embroidered collar and tiny gold bell, low seated pose",
+      "tier": "premium"
+    }
+  ],
+  "generated": [
+    {
+      "id": "noisette",
+      "name": "Noisette",
+      "path": "public/assets/collection/cats-v2/noisette.png",
+      "subject": "cinnamon brown and cream bicolor, relaxed loaf, curled striped tail",
+      "tier": "standard"
+    },
+    {
+      "id": "domino",
+      "name": "Domino",
+      "path": "public/assets/collection/cats-v2/domino.png",
+      "subject": "black and ivory tuxedo cat, white moustache and paws, lying with paws neatly crossed",
+      "tier": "standard"
+    },
+    {
+      "id": "astre",
+      "name": "Astre",
+      "path": "public/assets/collection/cats-v2/astre.png",
+      "subject": "warm ivory longhair cat, honey ear tips, curled sleeping ball with tail hugging body",
+      "tier": "standard"
+    },
+    {
+      "id": "opale",
+      "name": "Opale",
+      "path": "public/assets/collection/cats-v2/opale.png",
+      "subject": "pale silver lilac point cat, small folded ears, resting sphinx pose, sleepy half-closed simple eyes",
+      "tier": "standard"
+    },
+    {
+      "id": "orion",
+      "name": "Orion",
+      "path": "public/assets/collection/cats-v2/orion.png",
+      "prompt": "One standalone transparent PNG sprite, 1024 square. Meowza collectible cat: charcoal grey tabby with silver stripes, stocky loaf pose, closed smiling eyes. Match reference's soft round shelf cats, short rounded paws, simple closed crescent eyes, warm fine outlines, restrained hand-painted cream highlights. Full body, squat rounded silhouette, front three-quarter view, centered with 12% empty transparent margin. Cat only: no cushion, floor, shadow, glow, halo, text or scenery. Actual alpha transparency outside cat. No large shiny anime eyes, no plastic 3D. Distinct clear coat pattern readable when small.",
+      "subject": "charcoal grey tabby with silver stripes, stocky loaf pose, closed smiling eyes",
+      "tier": "standard"
+    },
+    {
+      "id": "biscotte",
+      "name": "Biscotte",
+      "path": "public/assets/collection/cats-v2/biscotte.png",
+      "prompt": "One standalone transparent PNG sprite, 1024 square. Meowza collectible cat: golden beige ticked tabby, cream chin, low seated pose with short front paws. Match reference's soft round shelf cats, short rounded paws, simple closed crescent eyes, warm fine outlines, restrained hand-painted cream highlights. Full body, squat rounded silhouette, front three-quarter view, centered with 12% empty transparent margin. Cat only: no cushion, floor, shadow, glow, halo, text or scenery. Actual alpha transparency outside cat. No large shiny anime eyes, no plastic 3D. Distinct clear coat pattern readable when small.",
+      "subject": "golden beige ticked tabby, cream chin, low seated pose with short front paws",
+      "tier": "standard"
+    },
+    {
+      "id": "perle",
+      "name": "Perle",
+      "path": "public/assets/collection/cats-v2/perle.png",
+      "prompt": "One standalone transparent PNG sprite, 1024 square. Meowza collectible cat: pure white fluffy cat, pink inner ears, lying on its side with tucked paws. Match reference's soft round shelf cats, short rounded paws, simple closed crescent eyes, warm fine outlines, restrained hand-painted cream highlights. Full body, squat rounded silhouette, front three-quarter view, centered with 12% empty transparent margin. Cat only: no cushion, floor, shadow, glow, halo, text or scenery. Actual alpha transparency outside cat. No large shiny anime eyes, no plastic 3D. Distinct clear coat pattern readable when small.",
+      "subject": "pure white fluffy cat, pink inner ears, lying on its side with tucked paws",
+      "tier": "standard"
+    },
+    {
+      "id": "cannelle",
+      "name": "Cannelle",
+      "path": "public/assets/collection/cats-v2/cannelle.png",
+      "prompt": "One standalone transparent PNG sprite, 1024 square. Meowza collectible cat: reddish cinnamon tabby with darker fine stripes, curled sleeping pose. Match reference's soft round shelf cats, short rounded paws, simple closed crescent eyes, warm fine outlines, restrained hand-painted cream highlights. Full body, squat rounded silhouette, front three-quarter view, centered with 12% empty transparent margin. Cat only: no cushion, floor, shadow, glow, halo, text or scenery. Actual alpha transparency outside cat. No large shiny anime eyes, no plastic 3D. Distinct clear coat pattern readable when small.",
+      "subject": "reddish cinnamon tabby with darker fine stripes, curled sleeping pose",
+      "tier": "standard"
+    },
+    {
+      "id": "truffe",
+      "name": "Truffe",
+      "path": "public/assets/collection/cats-v2/truffe.png",
+      "prompt": "One standalone transparent PNG sprite, 1024 square. Meowza collectible cat: solid chocolate brown round cat with tiny cream chin, tucked loaf. Match reference's soft round shelf cats, short rounded paws, simple closed crescent eyes, warm fine outlines, restrained hand-painted cream highlights. Full body, squat rounded silhouette, front three-quarter view, centered with 12% empty transparent margin. Cat only: no cushion, floor, shadow, glow, halo, text or scenery. Actual alpha transparency outside cat. No large shiny anime eyes, no plastic 3D. Distinct clear coat pattern readable when small.",
+      "subject": "solid chocolate brown round cat with tiny cream chin, tucked loaf",
+      "tier": "standard"
+    },
+    {
+      "id": "sesame",
+      "name": "Sésame",
+      "path": "public/assets/collection/cats-v2/sesame.png",
+      "prompt": "One standalone transparent PNG sprite, 1024 square. Meowza collectible cat: blue grey cat with cream chest and spotted nose, paws stretched gently forward. Match reference's soft round shelf cats, short rounded paws, simple closed crescent eyes, warm fine outlines, restrained hand-painted cream highlights. Full body, squat rounded silhouette, front three-quarter view, centered with 12% empty transparent margin. Cat only: no cushion, floor, shadow, glow, halo, text or scenery. Actual alpha transparency outside cat. No large shiny anime eyes, no plastic 3D. Distinct clear coat pattern readable when small.",
+      "subject": "blue grey cat with cream chest and spotted nose, paws stretched gently forward",
+      "tier": "standard"
+    }
+  ]
+}
