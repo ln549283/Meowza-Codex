@@ -1,1 +1,37 @@
-<!doctype html><html lang="fr"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/><meta name="theme-color" content="#fff6ec"/><title>Meowza</title></head><body><div id="game" role="application" aria-label="Meowza, puzzle félin. Placez autant de chats gris que roux sans aligner trois chats identiques."></div><noscript>JavaScript est nécessaire pour jouer à Meowza.</noscript><script type="module" src="/src/main.ts"></script></body></html>
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#fff6ee" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Meowza" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./assets/branding/app_icon.svg" type="image/svg+xml" />
+  <title>Meowza</title>
+  <style>
+    #startup{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;background:#fff6ee;color:#51425f;text-align:center;font-family:system-ui,sans-serif;transition:opacity .2s ease}#startup.ready{opacity:0;pointer-events:none}
+    #startup p{font-size:17px;line-height:1.5;max-width:340px}#startup button{padding:14px 24px;border:0;border-radius:20px;background:#9972ac;color:white;font-size:17px;margin-top:16px}
+  </style>
+</head>
+<body>
+  <div id="startup" role="status" aria-live="polite"><img src="./assets/branding/logo.png" alt="Meowza" width="340" style="width:min(85vw,420px);height:auto" /><p id="startup-status">Les chats arrivent…<br>Chargement du jeu.</p><button id="startup-retry" type="button" hidden>Réessayer</button></div>
+  <div id="game" role="application" aria-label="Meowza, puzzle félin. Placez autant de chats gris que roux sans aligner trois chats identiques."></div>
+  <noscript>JavaScript est nécessaire pour jouer à Meowza.</noscript>
+  <script>
+    (()=>{
+      const retry=document.getElementById('startup-retry');const startup=document.getElementById('startup');
+      const show=(message)=>{const status=document.getElementById('startup-status');if(status){status.textContent=message;retry.hidden=false;}};
+      retry.addEventListener('click',()=>location.reload());
+      window.addEventListener('error',()=>show('Le jeu n’a pas pu démarrer. Vérifie ta connexion, puis réessaie.'));
+      window.addEventListener('meowza-ready',()=>{startup?.classList.add('ready');setTimeout(()=>startup?.remove(),220);},{once:true});
+      setTimeout(()=>{if(document.body.contains(startup))show('Le chargement prend plus de temps que prévu. Tu peux patienter ou réessayer.');},30000);
+      if('serviceWorker' in navigator){window.addEventListener('load',async()=>{try{for(const registration of await navigator.serviceWorker.getRegistrations())await registration.unregister();}catch{}});}
+      if('caches' in window){window.addEventListener('load',async()=>{try{for(const key of await caches.keys())if(key.startsWith('meowza-pwa-'))await caches.delete(key);}catch{}});}
+    })();
+  </script>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

@@ -1,7 +1,29 @@
 import Phaser from 'phaser';
 import { SaveService } from '../../services/SaveService';
-import { button,cozyBackground,fadeIn,imageContain,imageCover,roundButton } from '../ui';
+import { fadeIn,label,press } from '../ui';
+
 export class HomeScene extends Phaser.Scene {
-  constructor(){super('Home');}
-  create(){fadeIn(this);cozyBackground(this);const art=imageCover(this.add.image(540,910,'home'),760,980);art.setAlpha(.95);const veil=this.add.graphics();veil.fillStyle(0xfff7ed,.18).fillRoundedRect(150,360,780,1120,75).lineStyle(7,0xffffff,.75).strokeRoundedRect(150,360,780,1120,75);imageContain(this.add.image(540,330,'logo'),700,300);const grey=imageContain(this.add.image(365,1020,'grey-cat'),275,330),orange=imageContain(this.add.image(700,1020,'orange-cat'),275,330);this.tweens.add({targets:grey,y:'-=14',duration:1700,yoyo:true,repeat:-1,ease:'Sine.InOut'});this.tweens.add({targets:orange,y:'-=14',duration:1700,yoyo:true,repeat:-1,ease:'Sine.InOut',delay:240});this.add.text(365,1210,'Nimbus',{fontFamily:'Arial Rounded MT Bold',fontSize:'28px',fontStyle:'bold',color:'#536875',stroke:'#fff',strokeThickness:5}).setOrigin(.5);this.add.text(700,1210,'Moka',{fontFamily:'Arial Rounded MT Bold',fontSize:'28px',fontStyle:'bold',color:'#c56b36',stroke:'#fff',strokeThickness:5}).setOrigin(.5);button(this,540,1400,560,'🐾  Jouer',()=>{if(!SaveService.data.tutorialCompleted)this.scene.start('Rules',{first:true});else this.scene.start('LevelSelect');});roundButton(this,390,1545,'⚙',()=>this.scene.start('Settings'));roundButton(this,690,1545,'?',()=>this.scene.start('Rules'),0x94d7dc);this.add.text(540,1660,'Paramètres                 Règles',{fontFamily:'Arial Rounded MT Bold',fontSize:'25px',color:'#705a61'}).setOrigin(.5);}
+ constructor(){super('Home');}
+ create(){
+  fadeIn(this);
+  // The welcome artwork already contains the logo and both cats: never overlay them here.
+  this.add.image(540,960,'home-background').setDisplaySize(1080,1920);
+
+  const cta=this.add.container(540,1510).setDepth(20);
+  const skin=this.add.image(0,0,'button-primary').setDisplaySize(760,132);
+  const text=label(this,0,-2,'Continuer',39,'#21475a');
+  cta.add([skin,text]);
+  press(this,cta,780,142,()=>{
+   if(!SaveService.data.tutorialCompleted){this.scene.start('Rules',{first:true});return;}
+   this.scene.start('LevelSelect');
+  });
+
+  const settings=this.add.container(540,1695).setDepth(20);
+  const settingsSkin=this.add.image(0,0,'button-square').setDisplaySize(100,100);
+  const settingsIcon=this.add.image(0,0,'hub-settings').setDisplaySize(54,54);
+  settings.add([settingsSkin,settingsIcon]);
+  press(this,settings,110,110,()=>this.scene.start('Settings'));
+
+  document.getElementById('startup')?.remove();
+ }
 }

@@ -1,3 +1,33 @@
-import Phaser from 'phaser';import levelsData from '../../data/levels.json';import type {Level} from '../../core/model';import { SaveService } from '../../services/SaveService';import { GameRegistry } from '../registry';import { button,fadeIn,imageContain,panel,title } from '../ui';import { C } from '../theme';
-const levels=levelsData as unknown as Level[];
-export class VictoryScene extends Phaser.Scene{constructor(){super('Victory')}create(){const result=GameRegistry.result;if(!result){this.scene.start('Home');return;}fadeIn(this);this.cameras.main.setBackgroundColor(C.cream);panel(this,540,950,900,1500);const fx=imageContain(this.add.image(540,330,'celebration'),840,300);this.tweens.add({targets:fx,alpha:{from:.5,to:1},scaleX:'*=1.04',scaleY:'*=1.04',duration:800,yoyo:true,repeat:-1});title(this,'Parfait !',330,86);const grey=imageContain(this.add.image(390,650,'grey-cat'),260,300),orange=imageContain(this.add.image(690,650,'orange-cat'),260,300);this.tweens.add({targets:[grey,orange],angle:{from:-2,to:2},duration:700,yoyo:true,repeat:-1});this.add.text(540,885,`Niveau ${Number(result.level.id.split('-')[1])}`,{fontFamily:'Arial Rounded MT Bold',fontSize:'38px',fontStyle:'bold',color:C.ink}).setOrigin(.5);this.add.text(540,1020,'★'.repeat(result.stars)+'☆'.repeat(3-result.stars),{fontSize:'100px',color:'#ffb52b',stroke:'#d97a21',strokeThickness:4}).setOrigin(.5);this.add.text(540,1130,result.stars===3?'Sans faute, quelle patte !':result.stars===2?'Très joli équilibre !':'Victoire avec persévérance !',{fontSize:'29px',color:'#735d66'}).setOrigin(.5);void SaveService.complete(result.level.id,result.stars,result.errors,result.hints);const current=levels.findIndex(l=>l.id===result.level.id),next=levels[current+1];button(this,540,1320,560,'Niveau suivant',()=>{if(next){GameRegistry.selected=next;this.scene.start('Game');}else this.scene.start('LevelSelect');});button(this,350,1460,320,'↻ Rejouer',()=>this.scene.start('Game'),C.red);button(this,730,1460,300,'Menu',()=>this.scene.start('Home'),0xd99c6d);}}
+import { cosmetics } from '../../core/cosmetics';
+import { loadSummit } from '../../services/JourneyService';
+import { nextSummit } from '../../core/journey';
+import Phaser from 'phaser';
+import { GameRegistry } from '../registry';
+import { SaveService } from '../../services/SaveService';
+import { playFx } from '../motion';
+import { button,cozyBackground,fadeIn,imageContain,label,panel,title } from '../ui';
+import { C } from '../theme';
+
+export class VictoryScene extends Phaser.Scene {
+ constructor(){super('Victory');}
+ create(){
+  const result=GameRegistry.result;if(!result){this.scene.start('Home');return;}
+  fadeIn(this);cozyBackground(this);
+  panel(this,540,980,900,1210);
+  title(this,'Bien joué !',385,66);
+  label(this,540,455,`Niveau ${Number(result.level.id.split('-')[1])} terminé`,31);
+
+  imageContain(this.add.image(540,825,'duo-victory'),650,430).setDepth(30);
+  playFx(this,'etincelles',540,770,340,40);
+
+  label(this,540,1050,result.errors===0?'Parfait · aucune erreur':result.errors===1?'Très joli parcours · 1 erreur':'Sommet réussi !',38);
+  label(this,540,1145,`Erreurs : ${result.errors} · Indices : ${result.hints}`,27);
+  const reward=SaveService.data.lastUnlock?`Nouveau décor : ${cosmetics.find(c=>c.id===SaveService.data.lastUnlock)?.name}`:SaveService.saveFailed?'Sauvegarde indisponible. Réessaie avant de quitter.':`+${SaveService.data.lastReward} croquettes`;
+  label(this,540,1245,reward,29);
+  if(SaveService.data.lastUnlock)playFx(this,'objet_debloque',540,1280,180,45);
+
+  button(this,540,1465,680,SaveService.saveFailed?'Réessayer la sauvegarde':'Niveau suivant',async()=>{if(SaveService.saveFailed){void SaveService.persist().then(()=>this.scene.restart());return;}const n=result.level.id.startsWith('trail-')?Number(result.level.id.split('-')[1])+1:nextSummit(SaveService.data.progress);try{GameRegistry.selected=await loadSummit(n);if(this.scene.isActive()){SaveService.restartAttempt();this.scene.start('Game');}}catch{this.scene.start('LevelSelect');}},C.teal);
+  button(this,540,1615,680,'Rejouer ce niveau',()=>{SaveService.restartAttempt();this.scene.start('Game');},C.orange);
+  button(this,540,1760,680,'Retour à l’arbre',()=>this.scene.start('LevelSelect'),C.orange);
+ }
+}

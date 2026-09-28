@@ -1,1 +1,36 @@
-{"name":"meowza","version":"1.0.0","private":true,"type":"module","scripts":{"dev":"vite","build":"npm run typecheck && vite build","typecheck":"tsc --noEmit","test":"node --import tsx --test src/core/core.test.ts","generate-levels":"node --import tsx scripts/generate-levels.ts","validate-levels":"node --import tsx scripts/validate-levels.ts","cap:sync":"npm run build && cap sync","android":"cap open android"},"dependencies":{"@capacitor/core":"^7.4.3","@capacitor/haptics":"^7.0.2","@capacitor/preferences":"^7.0.2","phaser":"^3.90.0"},"devDependencies":{"@capacitor/android":"^7.4.3","@capacitor/cli":"^7.4.3","@types/node":"^24.3.0","tsx":"^4.20.5","typescript":"^5.9.2","vite":"^7.1.4"}}
+{
+  "name": "meowza",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run typecheck && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test src/core/*.test.ts",
+    "generate-levels": "node --import tsx scripts/generate-levels.ts",
+    "validate-levels": "node --import tsx scripts/validate-levels.ts",
+    "cap:sync": "npm run build && cap sync",
+    "android": "cap open android",
+    "extend-levels": "node --import tsx scripts/extend-levels.ts",
+    "ios": "cap open ios",
+    "check": "npm run typecheck && npm test && npm run validate-levels && npm run build"
+  },
+  "dependencies": {
+    "@capacitor/app": "^7.1.2",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/haptics": "^7.0.2",
+    "@capacitor/ios": "^7.6.9",
+    "@capacitor/preferences": "^7.0.2",
+    "@fontsource/nunito": "^5.3.0",
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/cli": "^7.4.3",
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.4"
+  }
+}

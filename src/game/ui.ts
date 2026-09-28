@@ -1,43 +1,43 @@
 import Phaser from 'phaser';
-import { C } from './theme';
+import { cosmetics } from '../core/cosmetics';
+import { C,FONT } from './theme';
 import { AudioService } from '../services/AudioService';
+import { SaveService } from '../services/SaveService';
+
+export function label(scene:Phaser.Scene,x:number,y:number,text:string,size=32,color=C.ink,minimum=22){return scene.add.text(x,y,text,{fontFamily:FONT,fontSize:`${Math.max(minimum,size)}px`,fontStyle:'900',color,align:'center',wordWrap:{width:980},lineSpacing:5,stroke:'#fff7ee',strokeThickness:size>=42?2:0}).setOrigin(.5);}
+
+export function backgroundTextureForId(id:string){
+ const map:Record<string,string>={cream:'room-background',mint:'background-serre',night:'background-night',forest:'background-forest',blossom:'background-blossom',autumn:'background-autumn',winter:'background-winter',beach:'background-beach',garden:'background-garden',sunset:'background-sunset',rain:'background-rain','moon-garden':'background-moon-garden'};
+ return map[id]??'room-background';
+}
+export function equippedBackgroundKey(){const theme=cosmetics.find(c=>c.id===SaveService.data.equipped.background);return backgroundTextureForId(theme?.id??'cream');}
 
 export function cozyBackground(scene:Phaser.Scene){
-  scene.cameras.main.setBackgroundColor(C.cream);
-  const bands=[0xfff8ee,0xfff2e5,0xffeadc,0xffe2d3];
-  bands.forEach((color,i)=>scene.add.ellipse(540,300+i*520,1500,950,color,.48));
-  scene.add.image(100,1680,'plant').setScale(1.8).setAlpha(.62);
-  scene.add.image(980,1760,'pillow').setScale(1.5).setAngle(12).setAlpha(.65);
+ scene.cameras.main.setBackgroundColor(C.cream);
+ const key=equippedBackgroundKey();
+ if(scene.textures.exists(key))scene.add.image(540,960,key).setDisplaySize(1080,1920).setDepth(-50);
+ if(scene.scene.key==='Game'||scene.scene.key==='Hint'||scene.scene.key==='Rules')scene.add.rectangle(540,960,1080,1920,0xfff8ef,.42).setDepth(-49);
 }
-export function title(scene:Phaser.Scene,text:string,y:number,size=64){
-  return scene.add.text(540,y,text,{fontFamily:'Arial Rounded MT Bold, sans-serif',fontSize:`${size}px`,fontStyle:'bold',color:C.ink,align:'center',stroke:'#fff8ef',strokeThickness:9,shadow:{offsetY:5,color:'#d59f8b',blur:3,fill:true}}).setOrigin(.5);
+
+export function title(scene:Phaser.Scene,text:string,y:number,size=64){return label(scene,540,y,text,size);}
+export function panel(scene:Phaser.Scene,x:number,y:number,w:number,h:number,_fill=C.panel,alpha=.98){return scene.add.image(x,y,'puzzle-panel').setDisplaySize(w,h).setAlpha(alpha);}
+
+export function press(scene:Phaser.Scene,c:Phaser.GameObjects.Container,w:number,h:number,onClick:()=>void){
+ c.setSize(w,h).setInteractive({useHandCursor:true});let sx=1,sy=1,alpha=1,pointer=-1;
+ const restore=()=>{if(pointer===-1)return;c.setScale(sx,sy).setAlpha(alpha);};
+ c.on('pointerdown',(p:Phaser.Input.Pointer)=>{sx=c.scaleX;sy=c.scaleY;alpha=c.alpha;pointer=p.id;if(!SaveService.data.settings.reducedMotion)c.setScale(sx*.97,sy*.97);c.setAlpha(alpha*.94);});
+ c.on('pointerout',()=>{restore();pointer=-1;});
+ c.on('pointerup',(p:Phaser.Input.Pointer)=>{const valid=pointer===p.id;restore();pointer=-1;if(!valid||p.getDistance()>32||scene.registry.get('mapDragging'))return;AudioService.play('button');onClick();});return c;
 }
-export function panel(scene:Phaser.Scene,x:number,y:number,w:number,h:number,fill=C.panel,alpha=.97){
-  const g=scene.add.graphics();
-  g.fillStyle(0x734b51,.12).fillRoundedRect(x-w/2+8,y-h/2+14,w,h,48);
-  g.fillStyle(fill,alpha).lineStyle(5,0xf0c9a4,1).fillRoundedRect(x-w/2,y-h/2,w,h,48).strokeRoundedRect(x-w/2,y-h/2,w,h,48);
-  g.lineStyle(3,0xffffff,.72).strokeRoundedRect(x-w/2+10,y-h/2+10,w-20,h-20,39);
-  return g;
-}
-export function button(scene:Phaser.Scene,x:number,y:number,w:number,label:string,onClick:()=>void,color=C.teal){
-  const c=scene.add.container(x,y),g=scene.add.graphics();
-  g.fillStyle(0x563845,.18).fillRoundedRect(-w/2+5,-43+12,w,86,32);
-  g.fillStyle(color,1).lineStyle(4,0xffffff,.55).fillRoundedRect(-w/2,-43,w,86,32).strokeRoundedRect(-w/2,-43,w,86,32);
-  g.fillStyle(0xffffff,.16).fillRoundedRect(-w/2+12,-34,w-24,28,18);
-  const t=scene.add.text(0,-2,label,{fontFamily:'Arial Rounded MT Bold, sans-serif',fontSize:'32px',fontStyle:'bold',color:'#ffffff',shadow:{offsetY:3,color:'#4a2d38',blur:1,fill:true}}).setOrigin(.5);
-  c.add([g,t]).setSize(w,92).setInteractive({useHandCursor:true}).on('pointerdown',()=>{AudioService.play('button');scene.tweens.add({targets:c,scale:.94,duration:70,yoyo:true,ease:'Sine.Out'});onClick();});return c;
-}
-export function roundButton(scene:Phaser.Scene,x:number,y:number,label:string,onClick:()=>void,color=0xffd9bb){
-  const c=scene.add.container(x,y),g=scene.add.graphics();g.fillStyle(0x563845,.15).fillCircle(4,7,49);g.fillStyle(color).lineStyle(4,0xffffff,.8).fillCircle(0,0,47).strokeCircle(0,0,47);
-  c.add([g,scene.add.text(0,-2,label,{fontFamily:'Arial Rounded MT Bold',fontSize:'42px',fontStyle:'bold',color:C.ink}).setOrigin(.5)]).setSize(100,100).setInteractive({useHandCursor:true}).on('pointerdown',()=>{AudioService.play('button');scene.tweens.add({targets:c,scale:.9,duration:70,yoyo:true});onClick();});return c;
-}
-export function catBadge(scene:Phaser.Scene,x:number,y:number,w:number,label:string,color:number){
-  const c=scene.add.container(x,y),g=scene.add.graphics();g.fillStyle(color).fillTriangle(-w/2+28,-30,-w/2+58,-77,-w/2+84,-27).fillTriangle(w/2-84,-27,w/2-58,-77,w/2-28,-30);g.fillStyle(0x000000,.14).fillRoundedRect(-w/2+5,-29,w,68,30);g.fillStyle(color).lineStyle(4,0xffffff,.55).fillRoundedRect(-w/2,-36,w,68,30).strokeRoundedRect(-w/2,-36,w,68,30);c.add([g,scene.add.text(0,-3,label,{fontFamily:'Arial Rounded MT Bold',fontSize:'31px',fontStyle:'bold',color:'#fff'}).setOrigin(.5)]);return c;
-}
-export function levelTile(scene:Phaser.Scene,x:number,y:number,n:number,color:number,locked:boolean,stars:number,onClick:()=>void){
-  const c=scene.add.container(x,y),g=scene.add.graphics(),s=112;g.fillStyle(0x5a3b43,.13).fillRoundedRect(-s/2+4,-s/2+8,s,s,25);g.fillStyle(locked?0xc9bcb5:color).lineStyle(4,0xffffff,.55).fillRoundedRect(-s/2,-s/2,s,s,25).strokeRoundedRect(-s/2,-s/2,s,s,25);g.fillStyle(0xffffff,.15).fillRoundedRect(-s/2+9,-s/2+8,s-18,32,16);const label=scene.add.text(0,-7,locked?'🔒':String(n),{fontFamily:'Arial Rounded MT Bold',fontSize:locked?'33px':'40px',fontStyle:'bold',color:'#fff',shadow:{offsetY:3,color:'#6d3b43',fill:true}}).setOrigin(.5);const starText=scene.add.text(0,39,stars?'★'.repeat(stars):'· · ·',{fontSize:stars?'20px':'18px',color:stars?'#ffe273':'#ffffff',stroke:'#a8683a',strokeThickness:2}).setOrigin(.5);c.add([g,label,starText]);if(!locked)c.setSize(s,s).setInteractive({useHandCursor:true}).on('pointerdown',()=>{AudioService.play('button');scene.tweens.add({targets:c,scale:.9,duration:70,yoyo:true});onClick();});return c;
-}
-export function backButton(scene:Phaser.Scene,onClick:()=>void){return roundButton(scene,88,105,'‹',onClick);}
-export function imageContain(image:Phaser.GameObjects.Image,maxW:number,maxH:number){const scale=Math.min(maxW/image.width,maxH/image.height);return image.setScale(scale);}
-export function imageCover(image:Phaser.GameObjects.Image,w:number,h:number){const scale=Math.max(w/image.width,h/image.height);return image.setScale(scale);}
-export function fadeIn(scene:Phaser.Scene){scene.cameras.main.fadeIn(220,255,246,236);}
+
+export function button(scene:Phaser.Scene,x:number,y:number,w:number,text:string,onClick:()=>void,color=C.teal){const primary=color===C.teal||color===C.pink;const c=scene.add.container(x,y),skin=scene.add.image(0,0,primary?'button-primary':'button-secondary').setDisplaySize(w,116);c.add([skin,label(scene,0,-1,text,32,primary?'#ffffff':C.ink)]);return press(scene,c,w,116,onClick);}
+export function roundButton(scene:Phaser.Scene,x:number,y:number,text:string,onClick:()=>void,_color=0xfff9f2){const c=scene.add.container(x,y),skin=scene.add.image(0,0,'button-square').setDisplaySize(116,116);c.add([skin,label(scene,0,-3,text,42)]);return press(scene,c,116,116,onClick);}
+export function backButton(scene:Phaser.Scene,onClick:()=>void){const c=scene.add.container(82,94).setDepth(120),skin=scene.add.image(0,0,'button-square').setDisplaySize(104,104),icon=imageContain(scene.add.image(0,0,'ui-back'),50,50);c.add([skin,icon]);return press(scene,c,110,110,onClick);}
+export function catBadge(scene:Phaser.Scene,x:number,y:number,w:number,text:string,color:number){const c=scene.add.container(x,y);const g=scene.add.graphics().fillStyle(color,.14).fillRoundedRect(-w/2,-28,w,56,28);c.add([g,label(scene,0,0,text,29)]);return c;}
+export function imageContain(image:Phaser.GameObjects.Image,maxW:number,maxH:number){return image.setScale(Math.min(maxW/image.width,maxH/image.height));}
+export function imageCover(image:Phaser.GameObjects.Image,w:number,h:number){return image.setScale(Math.max(w/image.width,h/image.height));}
+export function fadeIn(scene:Phaser.Scene){if(!SaveService.data.settings.reducedMotion)scene.cameras.main.fadeIn(220,255,246,238);}
+export function float(scene:Phaser.Scene,target:Phaser.GameObjects.Image|Phaser.GameObjects.Container,amount=12){if(!SaveService.data.settings.reducedMotion)scene.tweens.add({targets:target,y:`-=${amount}`,duration:1500,yoyo:true,repeat:0,ease:'Sine.InOut'});}
+export function sparkles(scene:Phaser.Scene,x:number,y:number,count=12){if(SaveService.data.settings.reducedMotion)return;for(let i=0;i<count;i++){const a=i/count*Math.PI*2;const p=scene.add.image(x,y,'ui-confetti').setDisplaySize(34,34).setDepth(150).setAngle(i*37);scene.tweens.add({targets:p,x:x+Math.cos(a)*190,y:y+Math.sin(a)*190,alpha:0,scaleX:p.scaleX*.6,scaleY:p.scaleY*.6,angle:p.angle+100,duration:700,onComplete:()=>p.destroy()});}}
+export function cloud(scene:Phaser.Scene,x:number,y:number,w:number){return imageContain(scene.add.image(x,y,'tree-cloud'),w,Math.max(150,w*.52));}
+export function relationIcon(scene:Phaser.Scene,x:number,y:number,size:number,same:boolean){return imageContain(scene.add.image(x,y,same?'ui-relation-heart':'ui-relation-claws'),size,size);}
